@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ƯCLN và Euclid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 2.2 */
+.tsel{ display:flex; gap:5px; flex-wrap:wrap; }
+.tb{ font:inherit; font-weight:800; font-size:15px; width:38px; height:38px; border-radius:10px; border:2px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; }
+.tb.on{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.tb.ok{ background:var(--src-soft); border-color:var(--src); }
+.tb.no{ background:var(--surface-2); color:var(--muted); }
+.floor{ margin-top:14px; display:flex; justify-content:center; }
+.floor svg{ max-width:100%; height:auto; overflow:visible; }
+.floor .tile{ fill:var(--src-soft); stroke:var(--src); stroke-width:1.5; }
+.floor .tile.big{ fill:var(--done-soft); stroke:var(--done); }
+.floor .left{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5; stroke-dasharray:4 3; }
+.floor .edge{ fill:none; stroke:var(--ink); stroke-width:2.5; }
+.floor text{ fill:var(--muted); font-size:12px; font-weight:700; font-family:inherit; }
+.found{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:12px; font-weight:700; }
+.chip{ display:inline-grid; place-items:center; min-width:34px; height:30px; padding:0 8px; border-radius:999px; font-weight:800; font-size:15px; background:var(--surface); border:2px solid var(--line); animation:pop .35s both; }
+.chip.s{ background:var(--src-soft); border-color:var(--src); }
+.chip.b{ background:var(--done-soft); border-color:var(--done); }
+.cut{ display:flex; justify-content:center; }
+.cut svg{ max-width:100%; height:auto; overflow:visible; }
+.cut .sq{ fill:var(--done-soft); stroke:var(--done); stroke-width:2; }
+.cut .sq.cur{ fill:var(--accent); stroke:var(--accent); }
+.cut .sq.fin{ fill:var(--path-soft); stroke:var(--path); }
+.cut .rest{ fill:var(--src-soft); stroke:var(--src); stroke-width:2.5; stroke-dasharray:6 4; }
+.cut text{ font-size:13px; font-weight:800; font-family:inherit; fill:var(--ink); }
+.cut text.on{ fill:var(--accent-ink); }
+.steps{ margin-top:12px; }
+.steps table{ font-size:14px; min-width:0; }
+.steps th, .steps td{ padding:6px 12px; text-align:center; }
+.steps td.on{ background:var(--accent-soft); font-weight:800; }
+.steps tr.fin td{ background:var(--path-soft); font-weight:800; }
+.big-in{ display:grid; gap:8px; grid-template-columns:1fr 1fr; }
+.big-in label{ display:flex; flex-direction:column; gap:4px; font-size:13.5px; font-weight:600; color:var(--muted); }
+.big-in input{ font:inherit; font-family:var(--mono); font-size:14px; padding:8px 10px; border-radius:10px; border:2px solid var(--line); background:var(--surface); color:var(--ink); min-width:0; }
+.chain{ font-family:var(--mono); font-size:13px; color:var(--muted); margin-top:10px; overflow-wrap:anywhere; line-height:1.6; }
+.bus{ margin-top:10px; }
+.bus svg{ width:100%; height:auto; overflow:visible; }
+.bus .trk{ stroke:var(--line); stroke-width:4; stroke-linecap:round; }
+.bus .tick{ stroke:var(--line); stroke-width:1; }
+.bus .da{ fill:var(--src); } .bus .db{ fill:var(--done); }
+.bus .meet{ fill:none; stroke:var(--accent); stroke-width:3; }
+.bus .ml{ stroke:var(--accent); stroke-width:2; stroke-dasharray:3 3; }
+.bus text{ font-size:11px; font-weight:700; fill:var(--muted); font-family:inherit; }
+.bus text.m{ fill:var(--accent); font-size:12px; }
+.bus text.lab{ fill:var(--ink); font-size:13px; }
+.ctrl2{ display:grid; gap:6px 14px; grid-template-columns:1fr; font-weight:600; }
+@media (min-width:560px){ .ctrl2{ grid-template-columns:1fr 1fr; } }
+.ctrl2 label{ display:flex; align-items:center; gap:10px; }
+.ctrl2 input{ flex:1; }
+.fr{ display:grid; gap:6px; margin-top:12px; }
+.fr .r{ display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:12px; border:2px solid var(--line); background:var(--surface); font-weight:600; font-size:15px; animation:pop .35s both; }
+.fr .r .f{ display:inline-flex; flex-direction:column; align-items:center; font-weight:800; font-size:16px; line-height:1.05; min-width:38px; }
+.fr .r .f i{ display:block; width:100%; height:2px; background:currentColor; margin:2px 0; }
+.fr .r.no{ opacity:.55; }
+.fr .r.no .f{ text-decoration:line-through; }
+.fr .r.ok{ border-color:var(--path); background:var(--path-soft); }
+.fr .r .g{ margin-left:auto; font-size:13.5px; color:var(--muted); }
+.outline{ font-family:var(--mono); font-weight:600; margin-top:10px; font-size:15px; }
+@media (max-width:520px){ .tb{ width:34px; height:34px; font-size:14px; } .big-in{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Số học</span>
+  <h1>Ước chung lớn nhất và thuật toán Euclid</h1>
+  <p class="slogan">Cắt hình vuông to nhất, lặp lại, đến khi vừa khít.</p>
+  <p class="lead">Thuật toán hơn 2000 năm tuổi, chỉ 3 dòng code, tìm ƯCLN của hai số cỡ 10¹⁸ trong chưa tới 100 bước. Kèm theo là BCNN và một đề thật của Sư phạm.</p>
+  <div class="notebook" aria-label="Dãy số của thuật toán Euclid với 21 và 15">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Bắt đầu từ 21 và 15, mỗi số tiếp theo là số dư khi chia hai số đứng trước. Số cuối cùng khác 0 (ô hồng) là ước chung lớn nhất: <b>3</b>.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#lat-gach">1. Lát gạch</a>
+    <a href="#euclid">2. Cắt hình vuông</a>
+    <a href="#nhanh">3. Nhanh cỡ nào?</a>
+    <a href="#bcnn">4. BCNN</a>
+    <a href="#de-that">5. Đề thật Sư phạm</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="lat-gach">
+  <h2><span class="num">1</span>Lát gạch vuông to nhất</h2>
+  <p>Một nền nhà hình chữ nhật <b>18 × 12</b> (đơn vị dm). Cần lát bằng gạch <b>vuông</b> cùng cỡ, <b>không cắt viên nào</b>, phủ kín nền. Gạch cạnh bao nhiêu thì lát được? Cạnh to nhất là bao nhiêu?</p>
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: chọn cạnh viên gạch</h3>
+    <div class="tsel" id="tsel"></div>
+    <div class="floor" id="floor"></div>
+    <div class="found" id="tfound"></div>
+    <div class="explain" id="tmsg"></div>
+  </div>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🤝</div>
+      <h4>Ước chung</h4>
+      <p>Cạnh gạch phải là ước của 18 <b>và</b> ước của 12, gọi là <b>ước chung</b>.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🏆</div>
+      <h4>Ước chung lớn nhất</h4>
+      <p>Viên gạch to nhất có cạnh là <b>ƯCLN(18, 12) = 6</b>. Trong Python và tiếng Anh gọi là <code>gcd</code>.</p>
+    </div>
+  </div>
+  <div class="remember">Ghi nhớ: mọi ước chung của a và b đều là ước của ƯCLN(a, b). Ở đây các ước chung 1, 2, 3, 6 đều là ước của 6.</div>
+</section>
+
+<!-- 2 -->
+<section id="euclid">
+  <h2><span class="num">2</span>Thuật toán Euclid: cắt hình vuông</h2>
+  <p>Thử từng số từ nhỏ đến lớn thì quá chậm khi a, b cỡ 10¹⁸. Euclid có một nhận xét tuyệt vời: <b>cắt đi một hình vuông cạnh b</b> khỏi hình chữ nhật a × b, viên gạch to nhất lát được phần còn lại <b>vẫn đúng là</b> viên gạch to nhất lát được hình ban đầu (vì nó lát vừa hình vuông vừa cắt).</p>
+  <p>Vậy cứ cắt hình vuông to nhất có thể, lặp lại. Cắt nhiều hình vuông cùng cỡ một lúc chính là phép <b>chia lấy dư</b>: còn lại <code>a % b</code>. Khi cắt vừa khít, cạnh hình vuông cuối là ƯCLN.</p>
+
+  <div class="sim" id="simEu">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="euRandom">🎲 Số khác</button>
+      <button class="btn" id="euReset">21 và 15</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="cut" id="euCut"></div>
+          <div class="steps tbl-wrap" id="euTbl"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Hình vuông vừa cắt</span><span><i class="lg-done"></i>Đã cắt trước đó</span><span><i class="lg-src"></i>Phần còn lại</span><span><i class="lg-path"></i>Hình vuông cuối = ƯCLN</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Nhớ đúng 3 dòng:</b> <code>while b: a, b = b, a % b</code> rồi in <code>a</code>. Nếu lỡ a &lt; b thì vòng đầu tiên tự đổi chỗ hai số, vẫn đúng. Python có sẵn <code>math.gcd(a, b)</code>, nhưng hãy hiểu nó để dùng cho các biến thể.</div>
+</section>
+
+<!-- 3 -->
+<section id="nhanh">
+  <h2><span class="num">3</span>Nhanh cỡ nào?</h2>
+  <p>Gõ hai số bất kỳ, kể cả cỡ 10¹⁸, để xem Euclid cần bao nhiêu bước:</p>
+  <div class="panel">
+    <div class="big-in">
+      <label>a <input id="ba" inputmode="numeric" value="1000000000000000000"></label>
+      <label>b <input id="bb" inputmode="numeric" value="987654321123456789"></label>
+    </div>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Thử từng số đến min(a, b)</div><div class="v" id="slowOps"></div><div class="t" id="slowT"></div></div>
+      <div class="stat good"><div class="k">Euclid</div><div class="v" id="fastOps"></div><div class="t" id="fastT"></div></div>
+    </div>
+    <div class="chain" id="chain"></div>
+  </div>
+  <p>Cứ sau hai bước, số nhỏ hơn giảm ít nhất một nửa. Vì vậy với số cỡ 10¹⁸, Euclid không bao giờ cần quá khoảng 90 bước.</p>
+</section>
+
+<!-- 4 -->
+<section id="bcnn">
+  <h2><span class="num">4</span>Bội chung nhỏ nhất: hai xe buýt</h2>
+  <p>Xe buýt A cứ <b>a</b> phút có một chuyến, xe B cứ <b>b</b> phút. Lúc 0 phút cả hai cùng xuất bến. Lần tiếp theo hai xe <b>cùng xuất bến</b> là phút thứ mấy? Đó là <b>bội chung nhỏ nhất</b> BCNN(a, b), tiếng Anh là <code>lcm</code>.</p>
+  <div class="panel">
+    <div class="ctrl2">
+      <label>a = <b id="aV"></b><input type="range" id="aS" min="2" max="12" value="4" aria-label="Chọn a"></label>
+      <label>b = <b id="bV"></b><input type="range" id="bS" min="2" max="12" value="6" aria-label="Chọn b"></label>
+    </div>
+    <div class="bus" id="bus"></div>
+    <p class="outline" id="busOut"></p>
+  </div>
+  <p>Công thức: <b>BCNN(a, b) = a × b / ƯCLN(a, b)</b>. Trong code nên viết <code>a // gcd(a, b) * b</code>: chia trước rồi nhân để số trung gian không quá lớn (quan trọng khi viết C++).</p>
+</section>
+
+<!-- 5 -->
+<section id="de-that">
+  <h2><span class="num">5</span>Đề thật: Phân số tối giản (Sư phạm 2026)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Cho n (2 ≤ n ≤ 10¹⁸, tối đa 100 bộ test). Tìm phân số <b>tối giản</b> a/b <b>lớn nhất</b> với 1 ≤ a ≤ b và a + b = n. Ví dụ n = 5 cho 2/3; n = 6 cho 1/5. <b>50% số điểm: n lẻ.</b></p>
+  </div>
+  <p>Hai ý dẫn tới lời giải:</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>a càng lớn càng tốt</h4>
+      <p>Tổng a + b cố định, a ≤ b, nên a càng gần n / 2 thì phân số càng lớn. Thử a từ <code>n // 2</code> đi xuống.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Tối giản ⇔ ƯCLN = 1</h4>
+      <p>Một số chia hết cả a và b thì chia hết tổng n, và ngược lại. Nên ƯCLN(a, b) = ƯCLN(a, n).</p>
+    </div>
+  </div>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">n = <b id="fnV"></b>
+      <input type="range" id="fnS" min="2" max="40" value="12" aria-label="Chọn n">
+    </label>
+    <div class="fr" id="fr"></div>
+  </div>
+  <div class="code" id="codeFrac"></div>
+  <div class="tip"><b>Có chạy kịp với n = 10¹⁸ không?</b> Vòng <code>while</code> lùi <b>nhiều nhất 2 lần</b>. n lẻ: a = n // 2 và b = a + 1 là hai số liên tiếp, luôn tối giản (đó là 50% điểm “dễ”). n chẵn: lùi 1 hoặc 2 bước là gặp hai số lẻ hơn kém nhau 2 hoặc 4, cũng tối giản. Thử bằng máy với mọi n đến 10⁶ đều đúng như vậy.</div>
+  <p><a href="../luyen-de/index.html#bai=csp-2026-phan-so-toi-gian">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Việc</th><th>Code</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>ƯCLN</td><td><code>while b: a, b = b, a % b</code></td><td>hoặc <code>math.gcd</code>; khoảng 90 bước với 10¹⁸</td></tr>
+        <tr><td>BCNN</td><td><code>a // gcd(a, b) * b</code></td><td>chia trước, nhân sau</td></tr>
+        <tr><td>Rút gọn a/b</td><td><code>g = gcd(a, b); a//g, b//g</code></td><td>tối giản ⇔ gcd = 1</td></tr>
+        <tr><td>ƯCLN nhiều số</td><td><code>g = 0; for x in a: g = gcd(g, x)</code></td><td>gcd(0, x) = x</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Dùng <code>/</code> thay vì <code>//</code></b>: <code>/</code> cho số thực, sai với số lớn. Số học luôn dùng <code>//</code> và <code>%</code>.</li>
+    <li><b>Tính <code>a * b // g</code> trong C++</b>: a × b có thể tràn số trước khi chia. Python không tràn nhưng vẫn nên quen viết <code>a // g * b</code>.</li>
+    <li><b>Thử từng số để tìm ƯCLN</b> khi số lớn: dùng Euclid.</li>
+    <li><b>Quên trường hợp số 0</b>: gcd(a, 0) = a; vòng <code>while b</code> đã xử lý đúng.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Rút gọn phân số <span class="level lv1">Dễ</span></h4>
+    <p>Cho a/b (có thể âm). In phân số tối giản, mẫu dương. Ví dụ 12/−18 → −2/3.</p>
+    <details><summary>Gợi ý</summary><p>Lấy gcd của trị tuyệt đối. Nếu mẫu âm thì đổi dấu cả tử và mẫu.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Ba đèn nháy <span class="level lv1">Dễ</span></h4>
+    <p>Ba đèn nháy sau a, b, c giây. Cả ba vừa cùng nháy. Sau bao lâu chúng lại cùng nháy?</p>
+    <details><summary>Gợi ý</summary><p>BCNN của ba số = BCNN(BCNN(a, b), c).</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Chia đội đều nhất <span class="level lv2">Vừa</span></h4>
+    <p>Có x bạn nam và y bạn nữ. Chia thành nhiều nhóm nhất sao cho các nhóm có số nam bằng nhau và số nữ bằng nhau, không ai bị thừa.</p>
+    <details><summary>Gợi ý</summary><p>Số nhóm phải là ước chung của x và y. Nhiều nhóm nhất là ước chung nào?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Tổng lớn nhất <span class="level lv2">Vừa</span></h4>
+    <p>Sư phạm 2024, câu 1. Tìm m (1 ≤ m ≤ n − 1) để ƯCLN(m, n) + m lớn nhất, n ≤ 10¹⁴.</p>
+    <details><summary>Gợi ý</summary><p>Mọi ước chung của m và n cũng chia hết n − m, nên ƯCLN(m, n) ≤ n − m, tức tổng ≤ n. Có m nào đạt đúng n không? Lưu ý: ví dụ của đề (15 → 12) không khớp với câu chữ “chọn m lớn nhất”; đọc ghi chú trong ngân hàng đề.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2024-tong-lon-nhat">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Phân số tối giản <span class="level lv4">Đề thật</span></h4>
+    <p>Sư phạm 2026, bài 1. Làm phần n lẻ trước (một dòng), rồi thêm vòng lùi cho n chẵn.</p>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2026-phan-so-toi-gian">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 2: Số học. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  const gcd = (a, b) => { while (b){ [a, b] = [b, a % b]; } return a; };
+
+  // ---------- Hero ----------
+  (function(){
+    const seq = [21, 15]; while (seq[seq.length - 1]) seq.push(seq[seq.length - 2] % seq[seq.length - 1]);
+    $('#nbRow').innerHTML = seq.map((v, i) => '<div class="nb-cell ' + (i === seq.length - 2 ? 'nb-p last' : v === 0 ? 'nb-a' : 'nb-p') + '" style="animation-delay:' + (i * 0.12) + 's">' + v + '</div>').join('');
+  })();
+
+  // ---------- 1. Lát gạch ----------
+  (function(){
+    const W = 18, H = 12, found = new Set(), tried = new Set();
+    let s = 0;
+    function render(){
+      $('#tsel').innerHTML = Array.from({ length: 12 }, (_, i) => i + 1).map(x =>
+        '<button class="tb' + (x === s ? ' on' : '') + (tried.has(x) ? (W % x || H % x ? ' no' : ' ok') : '') + '" data-s="' + x + '" aria-label="Gạch cạnh ' + x + '">' + x + '</button>').join('');
+      const u = 16, pad = 18;
+      let h = '<svg viewBox="0 0 ' + (W * u + pad + 4) + ' ' + (H * u + pad + 4) + '" width="' + (W * u + pad + 4) + '" aria-hidden="true"><g transform="translate(' + pad + ',2)">';
+      if (s){
+        const nx = Math.floor(W / s), ny = Math.floor(H / s), good = !(W % s) && !(H % s);
+        for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++)
+          h += '<rect class="tile' + (good && s === gcd(W, H) ? ' big' : '') + '" x="' + (x * s * u + 1) + '" y="' + (y * s * u + 1) + '" width="' + (s * u - 2) + '" height="' + (s * u - 2) + '" rx="3"/>';
+        if (W % s) h += '<rect class="left" x="' + (nx * s * u) + '" y="0" width="' + ((W % s) * u) + '" height="' + (H * u) + '"/>';
+        if (H % s) h += '<rect class="left" x="0" y="' + (ny * s * u) + '" width="' + (nx * s * u) + '" height="' + ((H % s) * u) + '"/>';
+      }
+      h += '<rect class="edge" x="0" y="0" width="' + W * u + '" height="' + H * u + '" rx="2"/>';
+      h += '<text x="' + (W * u / 2) + '" y="' + (H * u + 15) + '" text-anchor="middle">18</text><text x="-8" y="' + (H * u / 2 + 4) + '" text-anchor="middle">12</text></g></svg>';
+      $('#floor').innerHTML = h;
+      const list = [...found].sort((a, b) => a - b);
+      $('#tfound').innerHTML = 'Lát được: ' + (list.length ? list.map(x => '<span class="chip ' + (x === 6 ? 'b' : 's') + '">' + x + '</span>').join('') : '<span style="color:var(--muted);font-weight:500">chưa có</span>');
+      $('#tmsg').innerHTML = !s ? 'Chạm vào một số để thử lát gạch có cạnh đó. Phần đỏ là chỗ không lát vừa.'
+        : (W % s || H % s) ? 'Gạch cạnh ' + s + ': ' + (W % s ? 'chiều 18 thừa ' + (W % s) + ' dm (18 % ' + s + ' = ' + (W % s) + ')' : '') + (W % s && H % s ? ', ' : '') + (H % s ? 'chiều 12 thừa ' + (H % s) + ' dm (12 % ' + s + ' = ' + (H % s) + ')' : '') + '. Phải cắt gạch, không được.'
+        : s === 6 ? '🎉 Gạch cạnh <b>6</b>: vừa khít, chỉ cần ' + (W / 6) * (H / 6) + ' viên. Đây là cỡ to nhất vì 6 là <b>ước chung lớn nhất</b> của 18 và 12. Với hai số cỡ 10¹⁸ thì không thể thử từng cỡ như vầy. Xem mục 2.'
+        : 'Gạch cạnh ' + s + ' lát vừa khít (' + (W / s) * (H / s) + ' viên), vì ' + s + ' chia hết cả 18 và 12. Còn cỡ nào to hơn không?';
+    }
+    $('#tsel').addEventListener('click', e => {
+      const b = e.target.closest('.tb'); if (!b) return;
+      s = +b.dataset.s; tried.add(s);
+      if (!(W % s) && !(H % s)) found.add(s);
+      render();
+    });
+    render();
+  })();
+
+  // ---------- 2. Euclid ----------
+  let EA = 21, EB = 15;
+  function buildEu(){
+    const S = [], sq = [], rows = [];
+    let x = 0, y = 0, w = EA, h = EB, a = EA, b = EB;
+    const snap = o => S.push(Object.assign({ sq: sq.map(q => Object.assign({}, q)), rest: { x, y, w, h }, rows: rows.slice(), cur: -1 }, o));
+    snap({ line: 1, msg: 'Hình chữ nhật <b>' + EA + ' × ' + EB + '</b>. Mỗi bước cắt đi các hình vuông to nhất có thể, cạnh bằng cạnh ngắn.' });
+    let step = 0;
+    while (b){
+      const k = Math.floor(a / b), r = a % b;
+      step++;
+      for (let t = 0; t < k; t++){
+        if (w >= h){ sq.push({ x: x + t * h, y, s: h, step }); }
+        else { sq.push({ x, y: y + t * w, s: w, step }); }
+      }
+      if (w >= h){ x += k * h; w -= k * h; } else { y += k * w; h -= k * w; }
+      rows.push([a, b, r]);
+      snap({ line: 3, cur: step, msg: 'Hình ' + a + ' × ' + b + ': cắt được <b>' + k + ' hình vuông cạnh ' + b + '</b> (' + a + ' // ' + b + ' = ' + k + '), còn lại ' + (r ? 'hình ' + b + ' × ' + r : '<b>không còn gì</b>') + '. Trong code: <code>a, b = ' + b + ', ' + a + ' % ' + b + ' = ' + r + '</code>.' + (r ? '' : ' Cắt vừa khít!') });
+      a = b; b = r;
+    }
+    snap({ line: 4, fin: step, msg: '🎉 b = 0 nên dừng. Hình vuông cuối có cạnh <b>' + a + '</b>, đó là <b>ƯCLN(' + EA + ', ' + EB + ') = ' + a + '</b>. Gạch cạnh ' + a + ' lát vừa mọi hình vuông đã cắt, nên lát vừa cả hình ban đầu.' });
+    return S;
+  }
+  function renderEu(s){
+    const u = Math.min(300 / EA, 200 / EB);
+    let h = '<svg viewBox="-2 -2 ' + (EA * u + 4) + ' ' + (EB * u + 4) + '" width="' + (EA * u + 4) + '" aria-hidden="true">';
+    for (const q of s.sq){
+      const cls = s.fin && q.step === s.fin ? ' fin' : q.step === s.cur ? ' cur' : '';
+      h += '<rect class="sq' + cls + '" x="' + q.x * u + '" y="' + q.y * u + '" width="' + q.s * u + '" height="' + q.s * u + '" rx="3"/>';
+      if (q.s * u >= 22) h += '<text class="' + (cls === ' cur' ? 'on' : '') + '" x="' + (q.x + q.s / 2) * u + '" y="' + ((q.y + q.s / 2) * u + 5) + '" text-anchor="middle">' + q.s + '</text>';
+    }
+    const r = s.rest;
+    if (r.w > 0 && r.h > 0) h += '<rect class="rest" x="' + r.x * u + '" y="' + r.y * u + '" width="' + r.w * u + '" height="' + r.h * u + '" rx="3"/>' + (Math.min(r.w, r.h) * u >= 18 ? '<text x="' + (r.x + r.w / 2) * u + '" y="' + ((r.y + r.h / 2) * u + 5) + '" text-anchor="middle">' + Math.max(r.w, r.h) + ' × ' + Math.min(r.w, r.h) + '</text>' : '');
+    h += '</svg>';
+    $('#euCut').innerHTML = h;
+    $('#euTbl').innerHTML = '<table><thead><tr><th>a</th><th>b</th><th>a % b</th></tr></thead><tbody>' +
+      s.rows.map((row, i) => '<tr class="' + (s.fin && i === s.rows.length - 1 ? 'fin' : '') + '">' + row.map((v, j) => '<td class="' + (i === s.cur - 1 ? 'on' : '') + '">' + v + '</td>').join('') + '</tr>').join('') +
+      (s.rows.length ? '' : '<tr><td>' + EA + '</td><td>' + EB + '</td><td>?</td></tr>') + '</tbody></table>';
+  }
+  const simEu = makeSim($('#simEu'), {
+    build: buildEu, render: renderEu,
+    code: () => [
+      'a, b = ' + EA + ', ' + EB,
+      'while b != 0:',
+      '    a, b = b, a % b    # cắt hình vuông, giữ phần dư',
+      'print(a)              # ƯCLN'
+    ]
+  });
+  $('#euRandom').onclick = () => {
+    do { EA = rnd(10, 60); EB = rnd(4, EA - 1); } while (gcd(EA, EB) === EB || EA % EB === 0);
+    simEu.rebuild();
+  };
+  $('#euReset').onclick = () => { EA = 21; EB = 15; simEu.rebuild(); };
+
+  // ---------- 3. Big numbers ----------
+  (function(){
+    const tm = s => s < 1 ? 'chưa tới 1 giây' : s < 120 ? 'khoảng ' + Math.round(s) + ' giây' : s < 86400 * 365 ? 'khoảng ' + fmt(Math.round(s / 3600)) + ' giờ' : 'khoảng ' + fmt(Math.round(s / 86400 / 365)) + ' năm';
+    function update(){
+      let a, b;
+      try { a = BigInt($('#ba').value.trim() || '0'); b = BigInt($('#bb').value.trim() || '0'); } catch (e){ $('#fastOps').textContent = 'Số không hợp lệ'; return; }
+      if (a < 0n) a = -a; if (b < 0n) b = -b;
+      const mn = a < b ? a : b;
+      let x = a, y = b, k = 0; const ch = [x.toString(), y.toString()];
+      while (y){ [x, y] = [y, x % y]; k++; ch.push(y.toString()); }
+      const sup = k => String(k).replace(/\d/g, c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]);
+      $('#slowOps').textContent = (mn < 10n ** 13n ? fmt(Number(mn)) : '≈ 10' + sup(mn.toString().length - 1)) + ' phép';
+      $('#slowT').textContent = tm(Number(mn) / 1e7);
+      $('#fastOps').textContent = k + ' bước';
+      $('#fastT').textContent = 'ƯCLN = ' + x.toString();
+      $('#chain').textContent = 'Dãy số dư: ' + ch.join(' → ');
+    }
+    $('#ba').addEventListener('input', update); $('#bb').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- 4. Xe buýt ----------
+  (function(){
+    function render(){
+      const a = +$('#aS').value, b = +$('#bS').value, L = a / gcd(a, b) * b, T = Math.min(Math.max(L * 2, 24), 144);
+      $('#aV').textContent = a; $('#bV').textContent = b;
+      const W = 320, x0 = 22, sc = (W - x0 - 10) / T, ya = 22, yb = 62;
+      let h = '<svg viewBox="0 0 ' + W + ' 100" aria-hidden="true">';
+      h += '<text class="lab" x="0" y="' + (ya + 4) + '">A</text><text class="lab" x="0" y="' + (yb + 4) + '">B</text>';
+      h += '<line class="trk" x1="' + x0 + '" y1="' + ya + '" x2="' + (W - 6) + '" y2="' + ya + '"/><line class="trk" x1="' + x0 + '" y1="' + yb + '" x2="' + (W - 6) + '" y2="' + yb + '"/>';
+      for (let t = 0; t <= T; t += L){
+        const x = x0 + t * sc;
+        h += '<line class="ml" x1="' + x + '" y1="' + (ya - 12) + '" x2="' + x + '" y2="' + (yb + 12) + '"/><text class="m" x="' + x + '" y="' + (yb + 30) + '" text-anchor="middle">' + t + '</text>';
+      }
+      for (let t = 0; t <= T; t += a) h += '<circle class="da" cx="' + (x0 + t * sc) + '" cy="' + ya + '" r="5"/>';
+      for (let t = 0; t <= T; t += b) h += '<circle class="db" cx="' + (x0 + t * sc) + '" cy="' + yb + '" r="5"/>';
+      for (let t = 0; t <= T; t += L){ const x = x0 + t * sc; h += '<circle class="meet" cx="' + x + '" cy="' + ya + '" r="9"/><circle class="meet" cx="' + x + '" cy="' + yb + '" r="9"/>'; }
+      h += '</svg>';
+      $('#bus').innerHTML = h;
+      $('#busOut').innerHTML = 'Cùng xuất bến mỗi ' + L + ' phút. BCNN(' + a + ', ' + b + ') = ' + a + ' × ' + b + ' / ƯCLN = ' + (a * b) + ' / ' + gcd(a, b) + ' = ' + L;
+    }
+    $('#aS').addEventListener('input', render); $('#bS').addEventListener('input', render);
+    render();
+  })();
+
+  // ---------- 5. Phân số tối giản ----------
+  (function(){
+    function render(){
+      const n = +$('#fnS').value;
+      $('#fnV').textContent = n;
+      let h = '', a = Math.floor(n / 2), t = 0;
+      for (; a >= 1; a--, t++){
+        const g = gcd(a, n), ok = g === 1;
+        h += '<div class="r ' + (ok ? 'ok' : 'no') + '" style="animation-delay:' + (t * 0.08) + 's"><span class="f">' + a + '<i></i>' + (n - a) + '</span><span>a = ' + a + '</span><span class="g">ƯCLN(' + a + ', ' + n + ') = ' + g + (ok ? ' ✓ chọn' : ' ✗') + '</span></div>';
+        if (ok) break;
+      }
+      $('#fr').innerHTML = h;
+    }
+    $('#fnS').addEventListener('input', render);
+    render();
+  })();
+  renderCode($('#codeFrac'), [
+    'from math import gcd',
+    'T = int(input())',
+    'for _ in range(T):',
+    '    n = int(input())',
+    '    a = n // 2',
+    '    while gcd(a, n) != 1:    # chưa tối giản thì lùi',
+    '        a -= 1',
+    '    print(a, n - a)'
+  ]);
+})();
+</script>
+</body>
+</html>

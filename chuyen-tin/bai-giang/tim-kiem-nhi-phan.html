@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tìm kiếm nhị phân</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 1.5 */
+.ruler{ position:relative; height:34px; border-radius:10px; background:var(--surface-2); border:2px solid var(--line); overflow:hidden; margin-top:6px; }
+.ruler .alive{ position:absolute; top:0; bottom:0; background:var(--src-soft); border-left:3px solid var(--src); border-right:3px solid var(--src); transition:left .35s, width .35s; }
+.ruler .tick{ position:absolute; top:3px; bottom:3px; width:3px; margin-left:-1px; background:var(--accent); border-radius:2px; }
+.ruler .tick.win{ background:var(--done); width:6px; margin-left:-3px; }
+.rl-cap{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-top:2px; }
+.guess-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+.guess-row input{ font:inherit; font-size:18px; font-weight:700; width:96px; padding:8px 10px; border-radius:12px; border:2px solid var(--line); background:var(--surface); color:var(--ink); }
+.log{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; min-height:32px; }
+.chip{ display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-weight:700; font-size:14px; background:var(--surface-2); border:2px solid var(--line); animation:pop .3s both; }
+.chip.up{ border-color:var(--src); color:var(--src); }
+.chip.down{ border-color:var(--accent); color:var(--accent); }
+.chip.win{ border-color:var(--done); background:var(--done-soft); color:var(--ink); }
+.halves{ display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin-top:12px; }
+.halves .chip{ font-size:12.5px; padding:3px 8px; font-family:var(--mono); }
+.halves .chip.last{ border-color:var(--done); background:var(--done-soft); }
+.nsel{ display:flex; gap:6px; flex-wrap:wrap; }
+.nsel .btn.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.ptr{ width:44px; flex:none; text-align:center; font:700 12px/1.25 var(--mono); color:var(--accent); min-height:30px; }
+.ptr .m{ color:var(--accent); } .ptr .l, .ptr .h{ color:var(--src); }
+.cellx.f{ background:var(--src-soft); border-color:var(--src); opacity:.75; }
+.cellx.f .sub{ color:var(--src); }
+.cellx.t{ background:var(--done-soft); border-color:var(--done); opacity:.75; }
+.cellx.t .sub{ color:var(--ink); }
+.cellx.ghost{ border-style:dashed; background:transparent; color:var(--muted); }
+.cellx.ok{ box-shadow:inset 0 0 0 3px var(--path); }
+.cellx.path{ background:var(--path-soft); border-color:var(--path); }
+.xsel{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.xsel .btn.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.arr.hist{ position:relative; align-items:flex-end; height:140px; }
+.hbar{ width:44px; flex:none; border-radius:7px 7px 2px 2px; background:var(--surface); border:2px solid var(--line); transition:background .25s, border-color .25s; }
+.hbar.f{ background:var(--src-soft); border-color:var(--src); }
+.hbar.t{ background:var(--done-soft); border-color:var(--done); }
+.hbar.cur{ background:var(--accent); border-color:var(--accent); }
+.xline{ position:absolute; left:0; right:0; border-top:3px dashed var(--accent); z-index:0; pointer-events:none; }
+.xl{ position:absolute; left:0; transform:translateY(50%); font:700 11px var(--mono); color:var(--accent); white-space:nowrap; }
+.need{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.need .chip.yes{ border-color:var(--src); background:var(--src-soft); color:var(--ink); }
+.need .chip.no{ border-color:var(--accent); background:var(--accent-soft); color:var(--ink); }
+@media (max-width:520px){ .ptr, .hbar{ width:36px; } .ptr{ font-size:11px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Mảng một chiều</span>
+  <h1>Tìm kiếm nhị phân</h1>
+  <p class="slogan">Mỗi câu hỏi loại đi một nửa.</p>
+  <p class="lead">Trong một dãy đã sắp xếp, ta không cần dò từng số. Hỏi số ở giữa, bỏ đi nửa chắc chắn sai, và lặp lại. Một triệu số chỉ cần khoảng 20 câu hỏi. Ý tưởng này còn giải được cả những bài “tìm số lớn nhất sao cho…” mà không hề có mảng nào.</p>
+  <div class="notebook" aria-label="Một dãy đã sắp xếp, vùng còn phải tìm thu hẹp dần">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Tìm số 23: hỏi số ở giữa (16), thấy nhỏ hơn 23, bỏ cả nửa trái. Ô hồng là nơi tìm thấy.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#doan-so">1. Trò đoán số</a>
+    <a href="#vi-sao">2. Vì sao nhanh?</a>
+    <a href="#ranh-gioi">3. Tìm ranh giới</a>
+    <a href="#mo-phong">4. Mô phỏng</a>
+    <a href="#can-bang">5. Đề thật: Cân bằng</a>
+    <a href="#theo-dap-an">6. Chia đôi đáp án</a>
+    <a href="#tong-ket">7. Tổng kết</a>
+    <a href="#bai-tap">8. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="doan-so">
+  <h2><span class="num">1</span>Trò đoán số</h2>
+  <p>Máy nghĩ một số từ 1 đến 100. Mỗi lần em đoán, máy chỉ trả lời “lớn hơn”, “nhỏ hơn” hoặc “đúng rồi”. Em cần mấy lần để chắc chắn tìm ra?</p>
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay</h3>
+    <div class="ruler" id="ruler" aria-hidden="true"></div>
+    <div class="rl-cap"><span>1</span><span id="alive"></span><span>100</span></div>
+    <div class="guess-row">
+      <input type="number" id="gIn" min="1" max="100" inputmode="numeric" placeholder="số?" aria-label="Số em đoán">
+      <button class="btn primary" id="gGo">Đoán</button>
+      <button class="btn" id="gHalf">Gợi ý: đoán số ở giữa</button>
+      <button class="btn" id="gNew">Ván mới</button>
+    </div>
+    <div class="log" id="gLog"></div>
+    <div class="explain" id="gMsg"></div>
+  </div>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🐢</div>
+      <h4>Đoán lần lượt 1, 2, 3…</h4>
+      <p>Xui nhất phải đoán 100 lần. Mỗi câu trả lời chỉ loại được đúng một số.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">✂️</div>
+      <h4>Luôn đoán số ở giữa</h4>
+      <p>Mỗi câu trả lời loại được <b>một nửa</b> số còn lại. Tối đa 7 lần là xong.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="vi-sao">
+  <h2><span class="num">2</span>Vì sao nhanh đến thế?</h2>
+  <p>Mỗi lần chia đôi, số khả năng còn lại giảm một nửa. Chọn số lượng n để xem cần chia đôi bao nhiêu lần mới còn 1:</p>
+  <div class="panel">
+    <div class="nsel" id="nSel"></div>
+    <div class="halves" id="halves"></div>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Dò lần lượt</div><div class="v" id="hLin"></div><div class="t">xui nhất</div></div>
+      <div class="stat good"><div class="k">Chia đôi</div><div class="v" id="hBin"></div><div class="t">xui nhất</div></div>
+    </div>
+  </div>
+  <p>Ngay cả với 10¹⁸ (một tỉ tỉ) khả năng, chia đôi chỉ cần khoảng 60 lần. Đây là lý do tìm kiếm nhị phân xuất hiện rất nhiều trong đề thi có số lớn.</p>
+  <div class="remember">Ghi nhớ: chia đôi n khả năng cần khoảng log₂ n lần. n = 1.000 → 10 lần, n = 10⁶ → 20 lần, n = 10⁹ → 30 lần.</div>
+</section>
+
+<!-- 3 -->
+<section id="ranh-gioi">
+  <h2><span class="num">3</span>Ý tưởng chung: tìm ranh giới Sai | Đúng</h2>
+  <p>Trò đoán số chạy được vì các số đã <b>xếp theo thứ tự</b>. Ta sẽ viết một khuôn duy nhất dùng cho mọi bài: đặt một câu hỏi có/không cho mỗi vị trí sao cho câu trả lời có dạng</p>
+  <div class="panel" style="text-align:center;font-family:var(--mono);font-weight:700;font-size:1.1rem;letter-spacing:1px">
+    <span style="color:var(--src)">Sai Sai Sai Sai</span> | <span style="color:var(--done)">Đúng Đúng Đúng</span>
+  </div>
+  <p>rồi đi tìm <b>ô Đúng đầu tiên</b>. Ví dụ, tìm số x trong dãy tăng dần: hỏi “a[i] ≥ x?”. Các số nhỏ hơn x trả lời Sai, từ x trở đi trả lời Đúng.</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Đặt câu hỏi</h4>
+      <p>Chọn câu hỏi có/không sao cho đã Đúng thì các ô sau cũng Đúng.</p>
+      <div class="ex"><code>a[i] >= x</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Khoanh vùng</h4>
+      <p>Ô Đúng đầu tiên chắc chắn nằm trong đoạn từ <code>lo</code> đến <code>hi</code>. Ô <code>hi</code> coi như Đúng.</p>
+      <div class="ex"><code>lo, hi = 0, len(a)</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Hỏi ô giữa</h4>
+      <p>Sai: ranh giới ở bên phải, <code>lo = mid + 1</code>. Đúng: mid có thể là đáp án, <code>hi = mid</code>.</p>
+      <div class="ex"><code>mid = (lo + hi) // 2</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Dừng</h4>
+      <p>Khi <code>lo == hi</code> chỉ còn một chỗ: đó là ô Đúng đầu tiên.</p>
+      <div class="ex">Đáp án là <code>lo</code>.</div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao không nói “tìm x” cho gọn?</b> Vì nhiều bài cần nhiều hơn “có hay không”: x đứng ở đâu, có bao nhiêu số nhỏ hơn x, số đầu tiên lớn hơn 50 là số nào… Khuôn “ô Đúng đầu tiên” trả lời được tất cả, và không bao giờ bị lặp vô hạn.</div>
+</section>
+
+<!-- 4 -->
+<section id="mo-phong">
+  <h2><span class="num">4</span>Mô phỏng: khoanh vùng trên dãy</h2>
+  <p>Hàng chữ nhỏ dưới các ô cho biết <code>lo</code>, <code>mid</code>, <code>hi</code> đang ở đâu. Mỗi lần hỏi, cả một mảng ô được tô màu cùng lúc: <b>xanh ✗</b> là chắc chắn Sai, <b>vàng ✓</b> là chắc chắn Đúng. Ô cuối cùng nét đứt là ô “hết dãy”, coi như Đúng.</p>
+
+  <div class="sim" id="simArr">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <div class="xsel" id="xSel"></div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="arrWrap">
+            <div class="arr" id="arrA"></div>
+            <div class="arr" id="arrP"></div>
+          </div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Ô giữa đang hỏi</span><span><i class="lg-src"></i>Chắc chắn Sai (a[i] &lt; x)</span><span><i class="lg-done"></i>Chắc chắn Đúng (a[i] ≥ x)</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <p>Python có sẵn hàm làm đúng việc này: <code>bisect_left(a, x)</code> trả về ô Đúng đầu tiên của câu hỏi “a[i] ≥ x”. Đi thi cứ dùng, nhưng phải hiểu nó làm gì để tự viết khi câu hỏi không phải so sánh số đơn giản (mục 6).</p>
+</section>
+
+<!-- 5 -->
+<section id="can-bang">
+  <h2><span class="num">5</span>Đề thật: Cân bằng (HSG lớp 9 Hà Nội 2026)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Cho N số nguyên khác nhau và số K. Số v gọi là “cân bằng K” nếu trong dãy có cả <b>v − K</b> và <b>v + K</b>. Đếm số phần tử cân bằng K. N ≤ 10⁵, |aᵢ| ≤ 10⁹; 70% số test có N ≤ 1000.</p>
+  </div>
+  <p>Với mỗi số v, ta cần hỏi hai câu “có số v − K không?” và “có số v + K không?”. Dò cả dãy cho mỗi câu thì tốn N × N bước, chỉ đủ cho 70% số test. <b>Sắp xếp một lần</b>, sau đó mỗi câu hỏi chỉ cần khoảng 17 bước chia đôi.</p>
+
+  <div class="sim" id="simCb">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <div class="xsel" id="cbSel"></div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="cbWrap"><div class="arr" id="cbA"></div></div>
+          <div class="need" id="cbNeed"></div>
+          <div class="info" id="cbInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Số v đang xét</span><span><i class="lg-src"></i>Tìm thấy v − K, v + K</span><span><i class="lg-done"></i>Số cân bằng</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Có cách khác không?</b> Trong Python, bỏ các số vào một tập hợp <code>s = set(a)</code> rồi hỏi <code>v - K in s</code> cũng rất nhanh. Nhưng hãy luyện cách sắp xếp + chia đôi: nó dùng được cả khi đề hỏi “có bao nhiêu số trong khoảng từ L đến R”, điều mà tập hợp không làm được.</div>
+  <p><a href="../luyen-de/index.html#bai=hanoi-hsg9-2026-canbang">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="theo-dap-an">
+  <h2><span class="num">6</span>Chia đôi đáp án: Tổng số chính phương (Khánh Hòa 2024)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Với mỗi số x, chọn được nhiều nhất bao nhiêu số chính phương <b>khác nhau</b> (1, 4, 9, 16, …) có tổng không vượt quá x? Có tới 10⁵ số x, mỗi số <b>đến 10¹⁸</b>.</p>
+  </div>
+  <p>Muốn chọn nhiều số nhất thì chọn các số nhỏ nhất: 1, 4, 9, … Gọi <code>S(k) = 1² + 2² + … + k²</code>. Đáp án là <b>k lớn nhất mà S(k) ≤ x</b>. Ở đây không có mảng nào cả, nhưng câu hỏi “S(k) &gt; x?” vẫn có dạng Sai Sai Sai | Đúng Đúng, vì S(k) càng lúc càng lớn.</p>
+  <p>Mỗi cột dưới đây cao bằng S(k), vạch đỏ là x. Cột nào vượt vạch thì Đúng. Ô Đúng đầu tiên trừ đi 1 chính là đáp án. Kéo x để thử.</p>
+
+  <div class="sim" id="simAns">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>x = <input type="range" id="xAns" min="1" max="384" value="100" aria-label="Chọn x"> <b id="xAnsV">100</b></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="ansWrap">
+            <div class="arr hist" id="ansH"></div>
+            <div class="arr" id="ansA"></div>
+            <div class="arr" id="ansP"></div>
+          </div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>k đang hỏi</span><span><i class="lg-src"></i>S(k) ≤ x: Sai</span><span><i class="lg-done"></i>S(k) &gt; x: Đúng</span><span><i class="lg-path"></i>Đáp án</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Đi thi chọn hi bao nhiêu?</b> Chỉ cần một số chắc chắn Đúng. S(2.000.000) ≈ 2,7 × 10¹⁸ &gt; 10¹⁸, nên <code>hi = 2 * 10**6</code> là đủ. Mỗi x chỉ cần khoảng 21 lần chia đôi. Không dùng căn số thực hay chia số thực với số lớn như vậy: sai số làm lệch kết quả ở sát mốc.</div>
+  <p><a href="../luyen-de/index.html#bai=khanhhoa-2024-bai4">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 7 -->
+<section id="tong-ket">
+  <h2><span class="num">7</span>Tổng kết</h2>
+  <h3>Khi nào nghĩ tới chia đôi?</h3>
+  <ul>
+    <li>Dãy <b>đã sắp xếp</b> (hoặc được phép sắp xếp) và phải hỏi nhiều lần “có số này không”, “có bao nhiêu số nhỏ hơn”.</li>
+    <li>Đề hỏi “<b>lớn nhất</b> sao cho…” hoặc “<b>nhỏ nhất</b> sao cho…”, và kiểm tra một đáp án cụ thể thì dễ.</li>
+    <li>Giới hạn rất lớn (10⁹, 10¹⁸) mà không thể thử hết.</li>
+  </ul>
+  <h3>Khuôn chung</h3>
+  <div class="code" id="codeTpl"></div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Quên sắp xếp</b> trước khi chia đôi trên mảng.</li>
+    <li><b>Câu hỏi không đúng dạng Sai… | Đúng…</b>: nếu đã Đúng rồi lại có lúc Sai thì chia đôi cho kết quả sai.</li>
+    <li><b>Chọn hi chưa chắc Đúng</b>: đáp án bị kẹt ở hi. Hãy tự hỏi “hi chắc chắn Đúng chưa?”.</li>
+    <li><b>Viết <code>lo = mid</code></b> trong khuôn này: khi lo và hi cạnh nhau, vòng lặp chạy mãi.</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="bai-tap">
+  <h2><span class="num">8</span>Bài tập tự luyện</h2>
+  <p>Với mỗi bài, việc đầu tiên là viết ra câu hỏi có/không và kiểm tra nó có dạng Sai… | Đúng… không.</p>
+  <div class="ex-item">
+    <h4>Bài 1. Đếm số trong khoảng <span class="level lv1">Dễ</span></h4>
+    <p>Cho dãy N số và Q câu hỏi, mỗi câu hỏi có bao nhiêu số nằm trong đoạn [L, R]. N, Q ≤ 10⁵.</p>
+    <details><summary>Gợi ý</summary><p>Sắp xếp. Số lượng số nhỏ hơn L là ô Đúng đầu tiên của câu hỏi “a[i] ≥ L”. Còn số lượng số ≤ R?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Căn bậc hai nguyên <span class="level lv1">Dễ</span></h4>
+    <p>Cho x ≤ 10¹⁸, tìm số nguyên k lớn nhất mà k × k ≤ x, không dùng hàm căn.</p>
+    <details><summary>Gợi ý</summary><p>Giống hệt mục 6, chỉ thay S(k) bằng k × k. Chọn hi bằng bao nhiêu thì chắc chắn k × k &gt; x?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Cắt gỗ <span class="level lv2">Vừa</span></h4>
+    <p>Có N khúc gỗ dài khác nhau. Cần cắt ra ít nhất M đoạn dài <b>bằng nhau</b> (phần thừa bỏ đi). Mỗi đoạn dài nhất là bao nhiêu (số nguyên)?</p>
+    <details><summary>Gợi ý</summary><p>Thử một độ dài L: đếm được bao nhiêu đoạn? (tổng các phần nguyên dài // L). L càng lớn thì càng ít đoạn. Câu hỏi “cắt dài L thì <b>không đủ</b> M đoạn?” có dạng Sai… | Đúng….</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Cân bằng <span class="level lv4">Đề thật</span></h4>
+    <p>HSG lớp 9 Hà Nội 2026. Sắp xếp rồi chia đôi tìm v − K và v + K.</p>
+    <details><summary>Gợi ý</summary><p>Mục 5 đã có lời giải. Thử thêm: viết bản dò lần lượt để lấy 70% trước, rồi so kết quả hai bản trên các dãy ngẫu nhiên.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=hanoi-hsg9-2026-canbang">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Tổng số chính phương <span class="level lv4">Đề thật</span></h4>
+    <p>Khánh Hòa 2024, bài 4. Có tới 10⁵ số x, mỗi số đến 10¹⁸.</p>
+    <details><summary>Gợi ý</summary><p>Công thức <code>S(k) = k(k+1)(2k+1) // 6</code>. Cách khác: tính sẵn mảng S cho tới khi vượt 10¹⁸ rồi dùng <code>bisect_right</code>.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khanhhoa-2024-bai4">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 1: Mảng một chiều. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  const ARR = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91];
+
+  // ---------- Hero ----------
+  $('#nbRow').innerHTML = ARR.map((v, i) => '<div class="nb-cell ' + (i === 5 ? 'nb-p last' : i > 5 ? 'nb-p' : 'nb-a') + '" style="animation-delay:' + (i * 0.07) + 's;' + (i < 5 ? 'opacity:.45' : '') + '">' + v + '</div>').join('');
+
+  // ---------- 1. Đoán số ----------
+  (function(){
+    let secret, lo, hi, tries;
+    function start(){ secret = rnd(1, 100); lo = 1; hi = 100; tries = []; $('#gIn').value = ''; render('Máy đã nghĩ xong một số từ 1 đến 100. Gõ số em đoán, hoặc bấm “Gợi ý” để máy đoán số ở giữa vùng còn lại.'); }
+    function render(msg){
+      const done = tries.length && tries[tries.length - 1] === secret;
+      let h = '<div class="alive" style="left:' + (lo - 1) + '%;width:' + (hi - lo + 1) + '%"></div>';
+      tries.forEach(g => { h += '<div class="tick' + (g === secret ? ' win' : '') + '" style="left:' + (g - 0.5) + '%"></div>'; });
+      $('#ruler').innerHTML = h;
+      $('#alive').textContent = done ? 'Tìm ra: ' + secret : 'Còn lại ' + lo + '…' + hi + ' (' + (hi - lo + 1) + ' số)';
+      $('#gLog').innerHTML = tries.map(g => g === secret ? '<span class="chip win">' + g + ' ✓</span>' : g < secret ? '<span class="chip up">' + g + ' ↑ lớn hơn</span>' : '<span class="chip down">' + g + ' ↓ nhỏ hơn</span>').join('');
+      $('#gMsg').innerHTML = msg;
+    }
+    function guess(g){
+      if (!(g >= 1 && g <= 100) || (tries.length && tries[tries.length - 1] === secret)) return;
+      tries.push(g);
+      if (g === secret) render('🎉 Đúng rồi, số <b>' + secret + '</b>! Em đoán ' + tries.length + ' lần. Nếu lần nào cũng đoán số ở giữa, chắc chắn không quá <b>7 lần</b>: 100 → 50 → 25 → 13 → 7 → 4 → 2 → 1.');
+      else {
+        const was = hi - lo + 1;
+        if (g < secret) lo = Math.max(lo, g + 1); else hi = Math.min(hi, g - 1);
+        const now = hi - lo + 1;
+        render('Số cần tìm <b>' + (g < secret ? 'lớn hơn' : 'nhỏ hơn') + ' ' + g + '</b>. Vùng xanh còn ' + now + ' số (trước đó ' + was + ').' + (now > was / 2 + 1 ? ' Lần này chỉ loại được ít số. Đoán số ở giữa vùng xanh thì luôn loại được một nửa.' : ' Loại được khoảng một nửa, tốt lắm!'));
+      }
+    }
+    $('#gGo').onclick = () => guess(+$('#gIn').value);
+    $('#gIn').addEventListener('keydown', e => { if (e.key === 'Enter') guess(+$('#gIn').value); });
+    $('#gHalf').onclick = () => { const m = (lo + hi) >> 1; $('#gIn').value = m; guess(m); };
+    $('#gNew').onclick = start;
+    start();
+  })();
+
+  // ---------- 2. Chia đôi ----------
+  (function(){
+    const NS = [['100', 100n], ['1.000', 1000n], ['1 triệu', 1000000n], ['1 tỉ (10⁹)', 1000000000n], ['10¹⁸', 1000000000000000000n]];
+    let cur = 2;
+    const f = v => v.toLocaleString('vi-VN');
+    function render(){
+      $('#nSel').innerHTML = NS.map((x, i) => '<button class="btn' + (i === cur ? ' on' : '') + '" data-i="' + i + '">n = ' + x[0] + '</button>').join('');
+      let c = NS[cur][1]; const seq = [c];
+      while (c > 1n){ c = (c + 1n) / 2n; seq.push(c); }
+      $('#halves').innerHTML = seq.map((v, i) => '<span class="chip' + (i === seq.length - 1 ? ' last' : '') + '" style="animation-delay:' + Math.min(i * 0.03, 1.2) + 's">' + f(v) + '</span>' + (i < seq.length - 1 ? '<span aria-hidden="true">→</span>' : '')).join('');
+      $('#hLin').textContent = f(NS[cur][1]) + ' lần';
+      $('#hBin').textContent = (seq.length - 1) + ' lần';
+    }
+    $('#nSel').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b){ cur = +b.dataset.i; render(); } });
+    render();
+  })();
+
+  // ---------- Khuôn chung: tìm ô Đúng đầu tiên trong [0, n] (ô n coi như Đúng) ----------
+  function binSteps(n, ok, say, L){
+    const S = [], know = Array(n + 1).fill(null);
+    let lo = 0, hi = n;
+    know[n] = true;
+    const snap = o => S.push(Object.assign({ lo, hi, mid: -1, know: know.slice(), done: false }, o));
+    snap({ line: L.init, msg: say.start(lo, hi) });
+    while (lo < hi){
+      const mid = (lo + hi) >> 1;
+      snap({ mid, line: L.mid, msg: say.ask(mid, lo, hi) });
+      if (!ok(mid)){ for (let t = lo; t <= mid; t++) know[t] = false; lo = mid + 1; snap({ mid, line: L.lo, msg: say.no(mid, lo, hi) }); }
+      else { for (let t = mid; t <= hi; t++) know[t] = true; hi = mid; snap({ mid, line: L.hi, msg: say.yes(mid, lo, hi) }); }
+    }
+    snap({ done: true, line: L.end, msg: say.end(lo) });
+    return S;
+  }
+  function ptrRow(s, n){
+    let h = '<span class="nm"></span>';
+    for (let i = 0; i <= n; i++){
+      const t = [];
+      if (i === s.mid && !s.done) t.push('<span class="m">mid</span>');
+      if (i === s.lo) t.push('<span class="l">lo</span>');
+      if (i === s.hi && !(s.done && s.hi === s.lo)) t.push('<span class="h">hi</span>');
+      h += '<div class="ptr">' + t.join('<br>') + '</div>';
+    }
+    return h;
+  }
+  function cellCls(s, i){
+    if (s.done && i === s.lo) return ' path';
+    if (i === s.mid && !s.done && s.know[i] === null) return ' cur';
+    if (i === s.mid && !s.done) return ' cur';
+    if (s.know[i] === false) return ' f';
+    if (s.know[i] === true) return ' t';
+    return '';
+  }
+  const mark = k => k === false ? '✗' : k === true ? '✓' : '&nbsp;';
+
+  // ---------- 4. Mảng ----------
+  let X = 23;
+  const L4 = { init: 3, mid: 5, lo: 7, hi: 9, end: 11 };
+  function buildArr(){
+    const a = ARR, n = a.length;
+    return binSteps(n, i => i === n || a[i] >= X, {
+      start: (lo, hi) => 'Dãy đã sắp xếp tăng dần. Câu hỏi cho mỗi ô: <b>“a[i] ≥ ' + X + '?”</b>. Ô Đúng đầu tiên nằm đâu đó từ lo = ' + lo + ' đến hi = ' + hi + ' (ô “hết dãy”).',
+      ask: (m, lo, hi) => 'Vùng còn lại từ ' + lo + ' đến ' + hi + '. Hỏi ô giữa <code>mid = (' + lo + ' + ' + hi + ') // 2 = ' + m + '</code>: a[' + m + '] = <b>' + a[m] + '</b>.',
+      no: (m, lo) => a[m] + ' &lt; ' + X + ': <b>Sai</b>. Vì dãy tăng dần, mọi ô từ đầu tới ô ' + m + ' cũng Sai. Bỏ hết, <code>lo = ' + lo + '</code>.',
+      yes: (m) => a[m] + ' ≥ ' + X + ': <b>Đúng</b>. Mọi ô bên phải cũng Đúng, nhưng ô ' + m + ' có thể là ô Đúng đầu tiên nên giữ lại: <code>hi = ' + m + '</code>.',
+      end: lo => 'lo = hi = ' + lo + ': ô Đúng đầu tiên là ô <b>' + lo + '</b>. ' + (lo < n && a[lo] === X ? '🎉 a[' + lo + '] = ' + X + ', tìm thấy ' + X + ' ở vị trí ' + lo + '.' : lo === n ? 'Đó là ô “hết dãy”: mọi số đều nhỏ hơn ' + X + ', không có ' + X + '.' : 'a[' + lo + '] = ' + a[lo] + ' ≠ ' + X + ', vậy <b>không có</b> ' + X + ' trong dãy. Nhưng ta vẫn biết thêm: có đúng ' + lo + ' số nhỏ hơn ' + X + '.')
+    }, L4);
+  }
+  function renderArr(s){
+    const a = ARR, n = a.length;
+    let h = '<span class="nm">a =</span>';
+    for (let i = 0; i <= n; i++)
+      h += i === n
+        ? '<div class="cellx ghost' + cellCls(s, i) + '"><small>[' + i + ']</small><b>hết</b><span class="sub">' + mark(s.know[i]) + '</span></div>'
+        : '<div class="cellx' + cellCls(s, i) + '"><small>[' + i + ']</small><b>' + a[i] + '</b><span class="sub">' + mark(s.know[i]) + '</span></div>';
+    $('#arrA').innerHTML = h;
+    $('#arrP').innerHTML = ptrRow(s, n);
+    follow($('#arrWrap'));
+  }
+  const simArr = makeSim($('#simArr'), {
+    build: buildArr, render: renderArr,
+    code: () => [
+      'a = [' + ARR.join(', ') + ']',
+      'x = ' + X,
+      'lo, hi = 0, len(a)     # ô hi coi như Đúng',
+      'while lo < hi:',
+      '    mid = (lo + hi) // 2',
+      '    if a[mid] < x:      # mid Sai',
+      '        lo = mid + 1',
+      '    else:               # mid Đúng',
+      '        hi = mid',
+      '# lo: ô đầu tiên có a[lo] >= x',
+      'print(lo, lo < len(a) and a[lo] == x)'
+    ]
+  });
+  const XS = [23, 40, 2, 100];
+  function renderXSel(){ $('#xSel').innerHTML = XS.map(v => '<button class="btn' + (v === X ? ' on' : '') + '" data-x="' + v + '">x = ' + v + '</button>').join(''); }
+  $('#xSel').addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (b){ X = +b.dataset.x; renderXSel(); simArr.rebuild(); } });
+  renderXSel();
+
+  // ---------- 5. Cân bằng ----------
+  const CBS = [{ name: 'Ví dụ 1', a: [4, 1, 7, 8, 5, 6], K: 1 }, { name: 'Ví dụ 2', a: [4, -1, 7, 8, 5, 6], K: 2 }];
+  let CB = 0;
+  const has = (b, v) => { let lo = 0, hi = b.length; while (lo < hi){ const m = (lo + hi) >> 1; if (b[m] >= v) hi = m; else lo = m + 1; } return lo < b.length && b[lo] === v ? lo : -1; };
+  function buildCb(){
+    const { a, K } = CBS[CB], b = a.slice().sort((x, y) => x - y), S = [], good = [];
+    const snap = o => S.push(Object.assign({ b, K, cur: -1, lo: -1, hi: -1, good: good.slice() }, o));
+    snap({ line: 2, msg: 'Dãy ' + a.join(', ') + ' sau khi sắp xếp: <b>' + b.join(', ') + '</b>, K = ' + K + '. Giờ xét lần lượt từng số v.' });
+    b.forEach((v, i) => {
+      const lo = has(b, v - K), hi = has(b, v + K), ok = lo >= 0 && hi >= 0;
+      if (ok) good.push(i);
+      snap({ line: ok ? 9 : 8, cur: i, lo, hi, msg: 'v = <b>' + v + '</b>: cần ' + (v - K) + ' và ' + (v + K) + '. ' +
+        (lo >= 0 ? 'Có ' + (v - K) + '. ' : 'Không có ' + (v - K) + '. ') + (hi >= 0 ? 'Có ' + (v + K) + '. ' : 'Không có ' + (v + K) + '. ') +
+        (ok ? '✓ <b>' + v + ' cân bằng</b>, đếm được ' + good.length + '.' : '✗ Không cân bằng.') });
+    });
+    snap({ line: 10, msg: '🎉 Có <b>' + good.length + '</b> số cân bằng K = ' + K + ': ' + good.map(i => b[i]).join(', ') + '. Mỗi lần “tìm” là một lần chia đôi như mục 4, nên cả bài chỉ khoảng N × 17 × 2 bước.' });
+    return S;
+  }
+  function renderCb(s){
+    const b = s.b;
+    let h = '<span class="nm">a =</span>';
+    b.forEach((v, i) => {
+      const cls = i === s.cur ? ' cur' : (i === s.lo || i === s.hi) ? ' src' : s.good.includes(i) ? ' done' : '';
+      const sub = i === s.lo ? '−K' : i === s.hi ? '+K' : s.good.includes(i) && i !== s.cur ? '✓' : '&nbsp;';
+      h += '<div class="cellx' + cls + '"><small>[' + i + ']</small><b>' + v + '</b><span class="sub">' + sub + '</span></div>';
+    });
+    $('#cbA').innerHTML = h;
+    if (s.cur >= 0){
+      const v = b[s.cur];
+      $('#cbNeed').innerHTML = '<span class="chip ' + (s.lo >= 0 ? 'yes' : 'no') + '">' + (v - s.K) + (s.lo >= 0 ? ' ✓ có' : ' ✗ không có') + '</span><span class="chip ' + (s.hi >= 0 ? 'yes' : 'no') + '">' + (v + s.K) + (s.hi >= 0 ? ' ✓ có' : ' ✗ không có') + '</span>';
+    } else $('#cbNeed').innerHTML = '';
+    $('#cbInfo').innerHTML = '<span>Đã đếm: <b>' + s.good.length + '</b></span>';
+    follow($('#cbWrap'));
+  }
+  const simCb = makeSim($('#simCb'), {
+    build: buildCb, render: renderCb,
+    code: () => [
+      'from bisect import bisect_left',
+      'a.sort()',
+      'def co(v):                  # v có trong a không?',
+      '    i = bisect_left(a, v)   # ô Đúng đầu tiên của a[i] >= v',
+      '    return i < n and a[i] == v',
+      'dem = 0',
+      'for v in a:',
+      '    if co(v - K) and co(v + K):',
+      '        dem += 1',
+      'print(dem)'
+    ]
+  });
+  function renderCbSel(){ $('#cbSel').innerHTML = CBS.map((c, i) => '<button class="btn' + (i === CB ? ' on' : '') + '" data-i="' + i + '">' + c.name + '</button>').join(''); }
+  $('#cbSel').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b){ CB = +b.dataset.i; renderCbSel(); simCb.rebuild(); } });
+  renderCbSel();
+
+  // ---------- 6. Chia đôi đáp án ----------
+  const KMAX = 10, Sk = k => k * (k + 1) * (2 * k + 1) / 6;
+  let XA = 100;
+  const L6 = { init: 4, mid: 6, lo: 8, hi: 10, end: 11 };
+  function buildAns(){
+    return binSteps(KMAX, k => Sk(k) > XA, {
+      start: (lo, hi) => 'Câu hỏi cho mỗi k: <b>“S(k) &gt; ' + XA + '?”</b> (cột vượt vạch đỏ chưa?). Tìm ô Đúng đầu tiên trong khoảng k từ ' + lo + ' đến ' + hi + '. Đi thi thì hi = 2.000.000, ở đây lấy 10 cho vừa màn hình.',
+      ask: (m, lo, hi) => 'Vùng còn lại từ ' + lo + ' đến ' + hi + '. Hỏi <code>mid = ' + m + '</code>: S(' + m + ') = ' + Array.from({ length: m }, (_, t) => (t + 1) * (t + 1)).join(' + ').replace(/^$/, '0') + ' = <b>' + Sk(m) + '</b>.',
+      no: (m, lo) => Sk(m) + ' ≤ ' + XA + ': <b>Sai</b> (chưa vượt). Các k nhỏ hơn còn có tổng nhỏ hơn, cũng Sai. <code>lo = ' + lo + '</code>.',
+      yes: (m) => Sk(m) + ' &gt; ' + XA + ': <b>Đúng</b> (đã vượt). Các k lớn hơn cũng vượt. Giữ ' + m + ' lại: <code>hi = ' + m + '</code>.',
+      end: lo => 'Ô Đúng đầu tiên là k = ' + lo + ' (S = ' + Sk(lo) + ' &gt; ' + XA + '). Vậy đáp án là <b>' + (lo - 1) + '</b>: chọn được ' + (lo - 1) + ' số chính phương ' + Array.from({ length: lo - 1 }, (_, t) => (t + 1) * (t + 1)).join(', ') + ', tổng ' + Sk(lo - 1) + ' ≤ ' + XA + '.'
+    }, L6);
+  }
+  function renderAns(s){
+    const mx = Sk(KMAX), H = 130, ht = v => 3 + Math.round(v / mx * (H - 6));
+    let h = '<span class="nm"><span class="xl" style="bottom:' + ht(XA) + 'px">x=' + XA + '</span></span>';
+    for (let k = 0; k <= KMAX; k++){
+      h += '<div class="hbar' + (k === s.mid && !s.done ? ' cur' : s.know[k] === false ? ' f' : s.know[k] === true ? ' t' : '') + '" style="height:' + ht(Sk(k)) + 'px"></div>';
+    }
+    h += '<div class="xline" style="bottom:' + ht(XA) + 'px"></div>';
+    $('#ansH').innerHTML = h;
+    let a = '<span class="nm">S(k)</span>';
+    for (let k = 0; k <= KMAX; k++){
+      const cls = s.done && k === s.lo - 1 ? ' path' : s.done && k === s.lo ? ' t ok' : cellCls(s, k);
+      a += '<div class="cellx' + cls + '"><small>k=' + k + '</small><b>' + Sk(k) + '</b><span class="sub">' + (s.done && k === s.lo - 1 ? 'đáp án' : mark(s.know[k])) + '</span></div>';
+    }
+    $('#ansA').innerHTML = a;
+    $('#ansP').innerHTML = ptrRow(s, KMAX);
+    follow($('#ansWrap'));
+  }
+  const simAns = makeSim($('#simAns'), {
+    build: buildAns, render: renderAns,
+    code: () => [
+      'def S(k):                 # 1 + 4 + ... + k*k',
+      '    return k * (k + 1) * (2 * k + 1) // 6',
+      'x = ' + XA,
+      'lo, hi = 0, 10            # đi thi: hi = 2 * 10**6',
+      'while lo < hi:',
+      '    mid = (lo + hi) // 2',
+      '    if S(mid) <= x:       # chưa vượt: Sai',
+      '        lo = mid + 1',
+      '    else:                 # đã vượt: Đúng',
+      '        hi = mid',
+      'print(lo - 1)             # k lớn nhất có S(k) <= x'
+    ]
+  });
+  $('#xAns').addEventListener('input', e => { XA = +e.target.value; $('#xAnsV').textContent = XA; simAns.rebuild(); });
+
+  renderCode($('#codeTpl'), [
+    'lo, hi = 0, CHAC_CHAN_DUNG    # đáp án nằm trong [lo, hi]',
+    'while lo < hi:',
+    '    mid = (lo + hi) // 2',
+    '    if dung(mid):             # câu hỏi có/không',
+    '        hi = mid',
+    '    else:',
+    '        lo = mid + 1',
+    '# lo là ô Đúng đầu tiên'
+  ]);
+})();
+</script>
+</body>
+</html>

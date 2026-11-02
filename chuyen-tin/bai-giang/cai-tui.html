@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bài toán cái túi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 5.4 */
+.items{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; }
+.item{ font:inherit; color:var(--ink); background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:8px 2px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; transition:transform .2s, background .2s, border-color .2s; }
+.item .em{ font-size:30px; line-height:1.15; }
+.item b{ font-size:14px; }
+.item small{ font-size:12px; color:var(--muted); line-height:1.3; }
+.item.on{ background:var(--path-soft); border-color:var(--path); transform:translateY(-4px); }
+.bag{ display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.bag > .em{ font-size:34px; }
+.slots{ display:flex; gap:4px; flex-wrap:wrap; }
+.sl{ width:34px; height:34px; border-radius:8px; border:2px dashed var(--line); display:grid; place-items:center; font-size:17px; flex:none; }
+.sl.f{ border-style:solid; }
+.sl.c0{ background:var(--done-soft); border-color:var(--done); }
+.sl.c1{ background:var(--src-soft); border-color:var(--src); }
+.sl.c2{ background:var(--path-soft); border-color:var(--path); }
+.sl.c3{ background:var(--surface-2); border-color:var(--muted); }
+.sl.over{ background:var(--accent-soft); border-color:var(--accent); border-style:solid; }
+.sl.sm{ width:24px; height:24px; font-size:12px; border-radius:6px; }
+.sl.it{ background:var(--accent-soft); border:2px solid var(--accent); }
+.sl.rest{ background:var(--src-soft); border:2px solid var(--src); }
+.baginfo{ font-weight:700; font-size:1.05rem; }
+.baginfo.bad{ color:var(--accent); }
+.combos{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; }
+.combo{ border:2px solid var(--line); border-radius:10px; padding:4px 2px; text-align:center; font-size:12px; background:var(--surface); line-height:1.35; animation:pop .4s both; }
+.combo .e{ font-size:14px; min-height:21px; letter-spacing:-1px; white-space:nowrap; }
+.combo.over{ opacity:.38; text-decoration:line-through; }
+.combo.best{ border-color:var(--done); background:var(--done-soft); font-weight:700; }
+.kt .nm{ flex-direction:column; justify-content:center; align-items:flex-start; line-height:1.1; }
+.kt .nm .e{ font-size:18px; }
+.kt .nm small{ font-size:10.5px; color:var(--muted); }
+.wh{ width:44px; flex:none; text-align:center; font-weight:800; font-size:13px; color:var(--muted); border-radius:8px; padding:2px 0; }
+.wh.on{ background:var(--accent); color:var(--accent-ink); }
+.arr.whr{ margin-bottom:-2px; }
+.cellx.pick{ box-shadow:inset 0 0 0 3px var(--src); }
+.cellx.path{ background:var(--path-soft); border-color:var(--path); }
+.cellx.bad{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.cellx.bad .sub{ color:var(--accent-ink); }
+.cellx.r0{ background:var(--surface-2); }
+.opts{ display:grid; gap:8px; margin-top:12px; }
+@media (min-width:560px){ .opts{ grid-template-columns:1fr 1fr; } }
+.opt{ background:var(--surface); border:2px solid var(--line); border-radius:12px; padding:8px 10px; font-size:14px; transition:background .25s, border-color .25s; }
+.opt .h{ font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.opt .h b{ font-size:1.2rem; }
+.opt .slots{ margin-top:6px; }
+.opt .cap{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+.opt.win{ border-color:var(--src); background:var(--src-soft); }
+.opt.no{ opacity:.6; border-style:dashed; }
+.chosen-row{ font-size:15px; font-weight:700; }
+.chosen-row .e{ font-size:24px; }
+.rowwrap{ position:relative; padding-top:46px; }
+.arcs{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; overflow:visible; }
+.arcs path{ fill:none; stroke:var(--src); stroke-width:3; }
+.arcs polygon{ fill:var(--src); }
+.arcs text{ fill:var(--src); font-weight:800; font-size:13px; font-family:inherit; }
+.arcs.bad path{ stroke:var(--accent); } .arcs.bad polygon{ fill:var(--accent); } .arcs.bad text{ fill:var(--accent); }
+.mode{ display:flex; gap:6px; flex-wrap:wrap; }
+.road{ position:relative; height:150px; margin:0 6px; }
+.road .ln{ position:absolute; left:-6px; right:-6px; top:76px; height:6px; border-radius:3px; background:var(--line); }
+.zone{ position:absolute; top:26px; height:60px; background:var(--accent-soft); border:2px dashed var(--accent); border-radius:10px; transition:left .35s, width .35s; }
+.zone span{ position:absolute; top:-22px; right:0; font-size:11.5px; color:var(--accent); font-weight:700; white-space:nowrap; }
+.tw{ position:absolute; top:34px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; width:34px; }
+.tw .ic{ font-size:17px; width:32px; height:32px; display:grid; place-items:center; border-radius:50%; border:2px solid var(--line); background:var(--surface); transition:background .25s, border-color .25s, opacity .25s; }
+.tw .pf{ font-weight:800; font-size:13px; margin-top:16px; }
+.tw .ps{ font-size:11px; color:var(--muted); }
+.tw.cur .ic{ background:var(--accent); border-color:var(--accent); }
+.tw.ok .ic{ background:var(--src-soft); border-color:var(--src); }
+.tw.near .ic{ opacity:.4; }
+.tw.path .ic{ background:var(--path); border-color:var(--path); }
+.tw.path .pf{ color:var(--path); }
+.krow{ display:flex; align-items:center; gap:10px; font-weight:600; flex-wrap:wrap; margin-bottom:6px; }
+@media (max-width:520px){ .wh, .kt .cellx{ width:30px; } .kt .arr{ gap:3px; } .kt .cellx{ padding:3px 1px; } .kt .cellx .sub{ font-size:10px; } .item .em{ font-size:26px; } .item small{ font-size:11px; } .sl{ width:30px; height:30px; font-size:15px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Quy hoạch động</span>
+  <h1>Bài toán cái túi</h1>
+  <p class="slogan">Mỗi món chỉ có một câu hỏi: lấy hay không lấy?</p>
+  <p class="lead">Chọn một số món sao cho tổng giá trị lớn nhất mà không vượt sức chứa. Ý tưởng “lấy hay không lấy” này gặp rất nhiều trong đề thi, kể cả khi đề không hề nhắc tới cái túi.</p>
+  <div class="notebook" aria-label="Bốn món đồ và một ba lô chứa 6 kg">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Bốn món đồ, một ba lô chỉ chứa được 6 kg. Mang món nào đi dã ngoại để vui nhất?</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#bai-toan">1. Xếp ba lô</a>
+    <a href="#thu-het">2. Thử hết?</a>
+    <a href="#cong-thuc">3. Công thức 4 bước</a>
+    <a href="#mo-phong">4. Mô phỏng bảng</a>
+    <a href="#truy-vet">5. Món nào được lấy?</a>
+    <a href="#mot-hang">6. Một hàng là đủ</a>
+    <a href="#de-that">7. Đề thật Sư phạm</a>
+    <a href="#tong-ket">8. Tổng kết</a>
+    <a href="#bai-tap">9. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="bai-toan">
+  <h2><span class="num">1</span>Xếp ba lô đi dã ngoại</h2>
+  <p>Lớp Minh đi dã ngoại. Ba lô của Minh chứa tối đa <b>6 kg</b>. Mỗi món đồ có cân nặng và “điểm vui” riêng. Mỗi món chỉ có một cái: lấy hoặc không lấy, không cắt đôi được.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: chạm để bỏ đồ vào ba lô</h3>
+    <div class="items" id="items"></div>
+    <div class="bag">
+      <span class="em" aria-hidden="true">🎒</span>
+      <div class="slots" id="bagSlots"></div>
+      <span class="baginfo" id="bagInfo"></span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="packClear">Dỡ hết</button>
+      <button class="btn" id="packGreedy">Mẹo: lấy món “đáng giá” nhất trước</button>
+      <button class="btn" id="packBest">Tốt nhất là bao nhiêu?</button>
+    </div>
+    <div class="explain" id="packMsg"></div>
+  </div>
+
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">⚖️</div>
+      <h4>Có giới hạn</h4>
+      <p>Tổng cân nặng không được vượt sức chứa. Đây là điều làm bài toán khó.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🙅</div>
+      <h4>Tham lam không chắc đúng</h4>
+      <p>Lấy món “đáng giá nhất mỗi kg” trước nghe rất hợp lý, nhưng có lúc thua cách khác.</p>
+    </div>
+  </div>
+  <div class="remember">Ghi nhớ: cái túi = mỗi món chọn <b>lấy</b> hoặc <b>không lấy</b>, tổng cân nặng ≤ sức chứa, tổng giá trị lớn nhất.</div>
+</section>
+
+<!-- 2 -->
+<section id="thu-het">
+  <h2><span class="num">2</span>Thử hết mọi cách được không?</h2>
+  <p>4 món, mỗi món lấy hoặc không, nên có <b>2 × 2 × 2 × 2 = 16</b> cách. Đây là cả 16 cách: cách bị gạch là quá 6 kg, ô vàng là cách tốt nhất.</p>
+  <div class="panel">
+    <div class="combos" id="combos"></div>
+    <p class="code-cap" id="comboCap" style="margin:10px 0 0"></p>
+  </div>
+  <p>Với 4 món thì thử hết rất nhanh. Nhưng mỗi món thêm vào làm số cách <b>nhân đôi</b>. Kéo thanh trượt để so với quy hoạch động (mục 3), ở đây túi chứa 1.000 kg:</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">Số món n = <span id="nVal"></span>
+      <input type="range" id="nSlider" min="10" max="60" step="5" value="30" aria-label="Chọn số món">
+    </label>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Thử mọi cách chọn</div><div class="v" id="opsAll"></div><div class="t" id="timeAll"></div></div>
+      <div class="stat good"><div class="k">Quy hoạch động</div><div class="v" id="opsDp"></div><div class="t" id="timeDp"></div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Ước lượng thô, giả sử Python làm khoảng 10 triệu phép tính mỗi giây.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="cong-thuc">
+  <h2><span class="num">3</span>Công thức 4 bước</h2>
+  <p>Câu hỏi then chốt: <b>nhìn vào món cuối cùng</b>. Hoặc nó không được lấy, hoặc nó được lấy và chiếm một phần ba lô. Cả hai trường hợp đều đưa về một bài toán nhỏ hơn.</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Đặt tên trạng thái</h4>
+      <p>Lấy một món thì túi còn ít chỗ hơn. Vì vậy trạng thái cần <b>hai</b> con số: dùng mấy món đầu, và túi còn chứa bao nhiêu.</p>
+      <div class="ex"><code>dp[i][w]</code> = điểm vui lớn nhất khi chỉ dùng <b>i món đầu</b>, túi chứa <b>w kg</b>.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Tìm công thức truy hồi</h4>
+      <p>Với món thứ i (nặng kg, vui v):</p>
+      <div class="ex">Không lấy: <code>dp[i-1][w]</code><br>Lấy (nếu kg ≤ w): <code>v + dp[i-1][w - kg]</code><br><code>dp[i][w]</code> = số lớn hơn.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Xác định cơ sở</h4>
+      <p>Chưa có món nào thì chẳng có gì để vui.</p>
+      <div class="ex"><code>dp[0][w] = 0</code> với mọi w.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Thứ tự tính và đáp án</h4>
+      <p>Mỗi ô chỉ cần hàng ngay trên, nên điền <b>từng hàng từ trên xuống</b>.</p>
+      <div class="ex">Đáp án là ô góc dưới phải <code>dp[n][W]</code>.</div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao lại là “w - kg”?</b> Nếu lấy món i, món đó chiếm kg cân. Phần còn lại của túi chỉ còn <b>w − kg</b> kg cho các món trước, và cách xếp tốt nhất cho phần đó đã nằm sẵn trong bảng.</div>
+</section>
+
+<!-- 4 -->
+<section id="mo-phong">
+  <h2><span class="num">4</span>Mô phỏng: điền bảng từng ô</h2>
+  <p>Mỗi hàng là một món, mỗi cột là một sức chứa w từ 0 đến 6 kg. Ở mỗi ô, nhìn hai ô <b>hàng ngay trên</b>: ô thẳng trên (mũi tên ↓, không lấy) và ô lùi sang trái đúng số kg của món (dấu +v, lấy). Hình ba lô nhỏ bên dưới cho thấy món chiếm bao nhiêu chỗ và phần còn lại dành cho ai.</p>
+
+  <div class="sim" id="simKs">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="ksRandom">🎲 Đồ mới</button>
+      <button class="btn" id="ksReset">Đồ mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap kt" id="ksWrap"></div>
+          <div class="opts" id="ksOpts"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Ô đang điền</span><span><i class="lg-src"></i>Hai ô hàng trên (viền đậm: được chọn)</span><span><i class="lg-done"></i>Đã điền</span><span><i class="lg-path"></i>Đường lần ngược</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="truy-vet">
+  <h2><span class="num">5</span>Món nào được lấy?</h2>
+  <p>Bảng cho biết điểm vui lớn nhất, nhưng đề thường hỏi thêm: <i>lấy những món nào?</i> Đi ngược từ ô góc dưới phải lên:</p>
+  <ul>
+    <li>Nếu <code>dp[i][w]</code> <b>bằng</b> ô ngay trên: món i không cần lấy, đi thẳng lên.</li>
+    <li>Nếu <b>khác</b>: chắc chắn đã lấy món i. Ghi món đó lại, đi lên và lùi sang trái đúng kg cân.</li>
+  </ul>
+  <p>Các bước cuối của mô phỏng ở mục 4 vẽ đường đi này màu tím.</p>
+  <div class="code" id="codeTrace"></div>
+</section>
+
+<!-- 6 -->
+<section id="mot-hang">
+  <h2><span class="num">6</span>Một hàng là đủ, nhưng phải đi ngược</h2>
+  <p>Mỗi hàng chỉ cần hàng ngay trên, nên có thể dùng <b>một hàng duy nhất</b> và ghi đè dần. Cách này tiết kiệm bộ nhớ khi W lớn. Nhưng có một cái bẫy: duyệt w theo chiều nào?</p>
+  <p>Mô phỏng dưới đây xử lý cái lều (4 kg, 20 điểm) với túi tới 8 kg. Dưới mỗi ô là những món đang nằm trong túi đó. Hãy thử cả hai chiều.</p>
+
+  <div class="sim" id="simRow">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <div class="mode">
+        <button class="btn primary" id="rowDown">Đi ngược (w giảm)</button>
+        <button class="btn" id="rowUp">Đi xuôi (w tăng)</button>
+      </div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap rowwrap" id="rowWrap">
+            <svg class="arcs" id="rowArcs" aria-hidden="true"></svg>
+            <div class="arr" id="rowD"></div>
+          </div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Ô đang ghi đè</span><span><i class="lg-src"></i>Ô được đọc (lùi 4 ô)</span><span><i class="lg-done"></i>Đã ghi đè bằng giá trị mới</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Mẹo nhớ:</b> đi ngược thì ô bên trái <b>chưa bị ghi đè</b>, vẫn là kết quả “các món trước”, nên mỗi món dùng tối đa một lần. Đi xuôi thì một món có thể được lấy nhiều lần. Đó là lỗi, trừ khi đề cho phép lấy mỗi món bao nhiêu cái cũng được (bài tập 4).</div>
+</section>
+
+<!-- 7 -->
+<section id="de-that">
+  <h2><span class="num">7</span>Đề thật: Lắp đặt trạm thu phát sóng (Sư phạm 2023)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Dọc một con đường có n địa điểm ở vị trí p₁ ≤ p₂ ≤ … ≤ pₙ, đặt trạm ở điểm i được lợi nhuận aᵢ. Hai trạm phải cách nhau <b>ít nhất k</b>. Chọn các điểm để tổng lợi nhuận lớn nhất. n ≤ 10⁶, có tới 10 bộ test; <b>40% số test có n ≤ 1000</b>.</p>
+  </div>
+  <p>Không có ba lô nào, nhưng mỗi điểm vẫn chỉ có câu hỏi: <b>đặt trạm hay không?</b></p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Trạng thái</h4>
+      <p><code>dp[i]</code> = lợi nhuận lớn nhất khi chỉ dùng <b>i điểm đầu</b>.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Không đặt ở điểm i</h4>
+      <p>Lợi nhuận như với i − 1 điểm đầu: <code>dp[i-1]</code>.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Đặt ở điểm i</h4>
+      <p>Các điểm quá gần (cách dưới k) bị loại. Gọi j là số điểm đủ xa, nằm ở vị trí ≤ pᵢ − k: được <code>aᵢ + dp[j]</code>.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Đáp án</h4>
+      <p><code>dp[n]</code>. Cơ sở <code>dp[0] = 0</code>.</p>
+    </div>
+  </div>
+  <p>Mô phỏng dùng ví dụ thứ ba của đề. Vùng đỏ là khoảng “quá gần” điểm đang xét: các trạm trong vùng này không được đặt cùng.</p>
+
+  <div class="sim" id="simRoad">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>k = <input type="range" id="roadK" min="1" max="9" value="5" aria-label="Khoảng cách tối thiểu k"> <b id="roadKv">5</b></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="road" id="road"></div>
+          <div class="arr-wrap"><div class="arr" id="roadD"></div></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Điểm đang xét</span><span><i class="lg-src"></i>Điểm đủ xa (đặt cùng được)</span><span><i class="lg-path"></i>Các trạm được chọn</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao j chỉ tăng?</b> Điểm i càng về sau thì pᵢ − k càng lớn, nên số điểm đủ xa không bao giờ giảm. Vòng <code>while</code> chỉ đẩy j tiến lên, tổng cộng không quá n lần. Cả bài chạy khoảng n bước, đủ cho n = 10⁶. Nếu chưa nghĩ ra mẹo này, cứ với mỗi i dò lại j từ đầu (khoảng n × n bước) để chắc 40% số điểm. Nhớ đọc dữ liệu nhanh bằng <code>sys.stdin</code> vì dữ liệu rất lớn.</div>
+  <p><a href="../luyen-de/index.html#bai=csp-2023-tram-thu-phat">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 8 -->
+<section id="tong-ket">
+  <h2><span class="num">8</span>Tổng kết</h2>
+  <h3>Khi nào nên nghĩ tới “lấy hay không lấy”?</h3>
+  <ul>
+    <li>Đề cho một danh sách và hỏi <b>chọn một số phần tử</b> sao cho tổng lớn nhất / ít nhất / đúng bằng một số.</li>
+    <li>Có một <b>giới hạn</b> chung (cân nặng, tiền, thời gian) hoặc một <b>luật</b> giữa các phần tử được chọn (không đứng gần nhau).</li>
+    <li>Tham lam có vẻ đúng nhưng em tìm được phản ví dụ, như ba lô ở mục 1.</li>
+  </ul>
+  <h3>Bảng tóm tắt</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Dạng</th><th>Trạng thái</th><th>Công thức</th><th>Số phép tính</th></tr></thead>
+      <tbody>
+        <tr><td>Cái túi (bảng)</td><td><code>dp[i][w]</code></td><td><code>max(dp[i-1][w], v + dp[i-1][w-kg])</code></td><td>khoảng n × W</td></tr>
+        <tr><td>Cái túi (một hàng)</td><td><code>dp[w]</code></td><td>như trên, <b>w đi ngược</b></td><td>khoảng n × W</td></tr>
+        <tr><td>Chọn trên dãy có luật</td><td><code>dp[i]</code></td><td><code>max(dp[i-1], a[i] + dp[j])</code></td><td>khoảng n</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Đi xuôi với một hàng</b>: một món bị lấy nhiều lần (mục 6).</li>
+    <li><b>Quên kiểm tra kg ≤ w</b>: chỉ số <code>w - kg</code> âm, Python lặng lẽ đọc từ cuối mảng và cho kết quả sai.</li>
+    <li><b>Mảng thiếu một ô</b>: túi chứa từ 0 đến W kg nên cần <code>W + 1</code> ô.</li>
+    <li><b>W quá lớn</b> (ví dụ 10⁹): bảng không vừa bộ nhớ. Khi đó phải tìm cách khác, thường đề sẽ cho W nhỏ hoặc có subtask W nhỏ.</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="bai-tap">
+  <h2><span class="num">9</span>Bài tập tự luyện</h2>
+  <p>Trước khi viết code, hãy trả lời 4 câu hỏi ở mục 3 và tính tay một bảng nhỏ.</p>
+
+  <div class="ex-item">
+    <h4>Bài 1. Đủ tiền đúng bằng S <span class="level lv1">Dễ</span></h4>
+    <p>Có n tờ tiền mệnh giá khác nhau, mỗi tờ một cái. Có chọn được một số tờ có tổng <b>đúng bằng</b> S không? In YES hoặc NO.</p>
+    <details><summary>Gợi ý</summary><p>dp[s] không cần là số lớn nhất, chỉ cần True/False: “có ghép được tổng s không”. dp[0] = True. Mỗi tờ tiền: lấy hay không lấy? Nhớ đi ngược.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. In ra các món được lấy <span class="level lv1">Dễ</span></h4>
+    <p>Giải bài ba lô và in thêm danh sách các món được chọn.</p>
+    <details><summary>Gợi ý</summary><p>Cần giữ cả bảng 2 chiều để lần ngược như mục 5. So sánh mỗi ô với ô ngay trên nó.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Chia kẹo công bằng <span class="level lv2">Vừa</span></h4>
+    <p>Có n túi kẹo, túi thứ i có aᵢ viên. Chia hết các túi cho hai bạn (không mở túi) sao cho chênh lệch số kẹo giữa hai bạn <b>nhỏ nhất</b>.</p>
+    <details><summary>Gợi ý</summary><p>Một bạn nhận tổng s thì bạn kia nhận T − s. Muốn chênh lệch nhỏ, s nên gần T/2 nhất. Dùng bài 1 để biết những tổng s nào ghép được.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Mỗi món lấy bao nhiêu cái cũng được <span class="level lv2">Vừa</span></h4>
+    <p>Như bài ba lô, nhưng cửa hàng có vô số cái mỗi loại. Ví dụ được mang 2 cái lều nếu túi đủ chỗ.</p>
+    <details><summary>Gợi ý</summary><p>Xem lại mô phỏng mục 6: chiều duyệt nào cho phép một món được lấy nhiều lần?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Lắp đặt trạm thu phát sóng <span class="level lv4">Đề thật</span></h4>
+    <p>Sư phạm 2023, bài 4. Viết cách dò lại j cho mỗi i để chắc 40% số điểm, rồi đổi sang j chỉ tăng để lấy trọn điểm.</p>
+    <details><summary>Gợi ý</summary><p>Mục 7 đã có đủ công thức. Đề có T bộ test: nhớ tạo lại mảng dp cho mỗi bộ. Thử với k lớn hơn mọi khoảng cách: đáp án phải bằng lợi nhuận lớn nhất của một điểm.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2023-tram-thu-phat">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 5: Quy hoạch động. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  const ITEMS = [
+    { e: '⛺', name: 'Lều', kg: 4, v: 20 },
+    { e: '🎸', name: 'Đàn', kg: 3, v: 13 },
+    { e: '🍉', name: 'Dưa hấu', kg: 3, v: 13 },
+    { e: '📷', name: 'Máy ảnh', kg: 2, v: 5 }
+  ];
+  const CAP = 6;
+  const range = (a, b, st = 1) => { const r = []; for (let x = a; st > 0 ? x < b : x > b; x += st) r.push(x); return r; };
+  const tm = ops => {
+    const s = ops / 1e7;
+    if (s < 0.01) return 'chưa tới 0,01 giây';
+    if (s < 120) return 'khoảng ' + s.toLocaleString('vi-VN', { maximumFractionDigits: s < 1 ? 2 : 0 }) + ' giây';
+    if (s < 7200) return 'khoảng ' + fmt(Math.round(s / 60)) + ' phút';
+    if (s < 86400 * 365) return 'khoảng ' + fmt(Math.round(s / 3600)) + ' giờ';
+    return 'khoảng ' + fmt(Math.round(s / 86400 / 365)) + ' năm';
+  };
+
+  // ---------- Hero ----------
+  $('#nbRow').innerHTML = ITEMS.map((it, i) => '<div class="nb-cell nb-a" style="animation-delay:' + (i * 0.1) + 's">' + it.e + '</div>').join('') +
+    '<span class="nm" style="text-align:center">→</span><div class="nb-cell nb-p last" style="animation-delay:.5s">🎒</div>';
+
+  // ---------- 1. Xếp ba lô ----------
+  (function(){
+    let on = [];
+    const best = 26;
+    function render(){
+      $('#items').innerHTML = ITEMS.map((it, i) => '<button class="item' + (on.includes(i) ? ' on' : '') + '" data-i="' + i + '" aria-pressed="' + on.includes(i) + '"><span class="em" aria-hidden="true">' + it.e + '</span><b>' + it.name + '</b><small>' + it.kg + ' kg · ' + it.v + ' điểm</small></button>').join('');
+      const sel = on.slice().sort((x, y) => x - y);
+      const kg = sel.reduce((s, i) => s + ITEMS[i].kg, 0), v = sel.reduce((s, i) => s + ITEMS[i].v, 0);
+      const slots = []; sel.forEach(i => { for (let t = 0; t < ITEMS[i].kg; t++) slots.push(i); });
+      let h = '';
+      for (let t = 0; t < Math.max(CAP, slots.length); t++)
+        h += t < slots.length ? '<span class="sl f c' + slots[t] + (t >= CAP ? ' over' : '') + '">' + ITEMS[slots[t]].e + '</span>' : '<span class="sl"></span>';
+      $('#bagSlots').innerHTML = h;
+      $('#bagInfo').className = 'baginfo' + (kg > CAP ? ' bad' : '');
+      $('#bagInfo').textContent = kg + ' / ' + CAP + ' kg · ' + v + ' điểm';
+      $('#packMsg').innerHTML = !sel.length
+        ? 'Chạm vào một món để bỏ vào ba lô, chạm lần nữa để lấy ra. Mỗi ô vuông là 1 kg. Hãy làm tổng điểm vui <b>lớn nhất</b>.'
+        : kg > CAP ? 'Quá nặng! ' + kg + ' kg mà ba lô chỉ chứa ' + CAP + ' kg (các ô đỏ bị tràn). Bỏ bớt một món.'
+        : v === best ? '🎉 ' + v + ' điểm, đây là cách tốt nhất! Để ý: cách này <b>không có cái lều</b>, món “đáng giá” nhất. Nhưng làm sao máy tính biết chắc không còn cách nào hơn? Xem mục 2.'
+        : 'Tổng ' + kg + ' kg, ' + v + ' điểm vui. Còn cách nào vui hơn không?';
+    }
+    $('#items').addEventListener('click', e => {
+      const b = e.target.closest('.item'); if (!b) return;
+      const i = +b.dataset.i;
+      on = on.includes(i) ? on.filter(x => x !== i) : on.concat(i);
+      render();
+    });
+    $('#packClear').onclick = () => { on = []; render(); };
+    $('#packGreedy').onclick = () => {
+      on = [0, 3]; render();
+      $('#packMsg').innerHTML = 'Mẹo tham lam: tính điểm vui trên mỗi kg. ⛺ được 20 : 4 = <b>5</b>, 🎸 và 🍉 được 13 : 3 ≈ <b>4,3</b>, 📷 được 5 : 2 = <b>2,5</b>. Lấy ⛺ trước (4 kg), còn 2 kg chỉ vừa 📷. Tổng <b>25 điểm</b>. Nghe rất hợp lý… Nhưng có cách nào hơn 25 không?';
+    };
+    $('#packBest').onclick = () => { $('#packMsg').innerHTML = 'Cách tốt nhất được <b>' + best + ' điểm</b>, hơn mẹo tham lam 1 điểm. Em tìm ra chưa?'; };
+    render();
+  })();
+
+  // ---------- 2. Thử hết ----------
+  (function(){
+    const all = [];
+    for (let m = 0; m < 16; m++){
+      const s = ITEMS.filter((_, i) => m >> i & 1);
+      all.push({ s, kg: s.reduce((a, o) => a + o.kg, 0), v: s.reduce((a, o) => a + o.v, 0) });
+    }
+    const ok = all.filter(c => c.kg <= CAP), best = Math.max(...ok.map(c => c.v));
+    $('#combos').innerHTML = all.map((c, t) => '<div class="combo' + (c.kg > CAP ? ' over' : c.v === best ? ' best' : '') + '" style="animation-delay:' + (t * 0.04) + 's"><div class="e">' + (c.s.map(o => o.e).join('') || '∅') + '</div>' + c.kg + ' kg · ' + c.v + '</div>').join('');
+    $('#comboCap').textContent = 'Có ' + ok.length + ' cách không quá ' + CAP + ' kg. Tốt nhất: ' + best + ' điểm. Mỗi ô ghi: cân nặng · điểm vui.';
+    function update(){
+      const n = +$('#nSlider').value, a = Math.pow(2, n), d = n * 1001;
+      $('#nVal').textContent = n;
+      $('#opsAll').textContent = (a < 1e15 ? fmt(a) : '≈ ' + (a / 1e18).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' tỉ tỉ') + ' cách';
+      $('#timeAll').textContent = tm(a);
+      $('#opsDp').textContent = fmt(d) + ' ô bảng';
+      $('#timeDp').textContent = tm(d);
+    }
+    $('#nSlider').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- 4. Bảng dp[i][w] ----------
+  const POOL = [['⛺','Lều'],['🎸','Đàn'],['🍉','Dưa hấu'],['📷','Máy ảnh'],['📚','Sách'],['🧸','Gấu bông'],['🔦','Đèn pin'],['🍞','Bánh mì'],['⚽','Bóng'],['🎧','Tai nghe']];
+  let KS = ITEMS.slice();
+  function buildKs(){
+    const it = KS, n = it.length, W = CAP, S = [];
+    const dp = Array.from({ length: n + 1 }, (_, i) => Array(W + 1).fill(i === 0 ? 0 : null));
+    const how = Array.from({ length: n + 1 }, () => Array(W + 1).fill(''));
+    const snap = o => S.push(Object.assign({ dp: dp.map(r => r.slice()), how: how.map(r => r.slice()), i: -1, w: -1, keep: null, take: null, win: null, path: [], chosen: [] }, o));
+    snap({ line: 4, msg: 'Bảng có ' + (n + 1) + ' hàng: hàng ∅ (chưa có món nào) và mỗi món một hàng. Cột w là sức chứa của túi, từ 0 đến ' + W + ' kg. Hàng ∅ toàn số 0: chưa có món nào thì chẳng có gì để vui.' });
+    for (let i = 1; i <= n; i++){
+      const o = it[i - 1];
+      for (let w = 0; w <= W; w++){
+        const keep = dp[i - 1][w], can = w >= o.kg, take = can ? dp[i - 1][w - o.kg] + o.v : null;
+        const win = can && take > keep ? 'take' : 'keep';
+        dp[i][w] = win === 'take' ? take : keep;
+        how[i][w] = win === 'take' ? 'lấy' : 'bỏ';
+        const head = 'Hàng ' + o.e + ' ' + o.name + ' (' + o.kg + ' kg, ' + o.v + ' điểm), túi <b>' + w + ' kg</b>. ';
+        const msg = !can
+          ? head + o.name + ' nặng ' + o.kg + ' kg, <b>không vừa</b> túi ' + w + ' kg. Chỉ có cách không lấy: chép ô ngay trên xuống, <code>dp[' + i + '][' + w + '] = ' + keep + '</code>.'
+          : head + 'Không lấy: ô ngay trên = <b>' + keep + '</b>. Lấy: ' + o.kg + ' kg cho ' + o.name + ', ' + (w - o.kg) + ' kg còn lại xếp tốt nhất được ô <code>dp[' + (i - 1) + '][' + (w - o.kg) + '] = ' + (take - o.v) + '</code>, cộng ' + o.v + ' thành <b>' + take + '</b>. ' +
+            (win === 'take' ? 'Lấy tốt hơn' : take === keep ? 'Bằng nhau, giữ cách không lấy' : 'Không lấy tốt hơn') + ': <code>dp[' + i + '][' + w + '] = ' + dp[i][w] + '</code>.';
+        snap({ line: can ? 10 : 7, i, w, keep, take, win, msg });
+      }
+    }
+    snap({ line: 11, i: n, w: W, msg: '🎉 Đáp án ở ô góc dưới phải: <code>dp[' + n + '][' + W + '] = ' + dp[n][W] + '</code> điểm vui. Còn lấy những món nào? Bấm Sau để lần ngược.' });
+    const path = [], chosen = [];
+    let w = W;
+    for (let i = n; i >= 1; i--){
+      path.push([i, w]);
+      const o = it[i - 1];
+      if (dp[i][w] !== dp[i - 1][w]){
+        chosen.unshift(i - 1);
+        snap({ path: path.slice(), chosen: chosen.slice(), msg: 'Ô hàng ' + o.e + ', túi ' + w + ' kg = ' + dp[i][w] + ', <b>khác</b> ô ngay trên (' + dp[i - 1][w] + '). Vậy <b>đã lấy ' + o.name + '</b>. Lên một hàng và lùi ' + o.kg + ' kg: còn ' + (w - o.kg) + ' kg.' });
+        w -= o.kg;
+      } else {
+        snap({ path: path.slice(), chosen: chosen.slice(), msg: 'Ô hàng ' + o.e + ', túi ' + w + ' kg = ' + dp[i][w] + ', <b>bằng</b> ô ngay trên. Không cần ' + o.name + ', đi thẳng lên.' });
+      }
+    }
+    path.push([0, w]);
+    snap({ path: path.slice(), chosen: chosen.slice(), msg: '✅ Về tới hàng ∅. Mang theo: <b>' + chosen.map(k => it[k].e + ' ' + it[k].name).join(', ') + '</b>, nặng ' + chosen.reduce((s, k) => s + it[k].kg, 0) + ' kg, được ' + dp[n][W] + ' điểm vui.' });
+    return S;
+  }
+  function renderKs(s){
+    const it = KS, n = it.length, W = CAP, onPath = new Set(s.path.map(p => p[0] + ',' + p[1]));
+    const o = s.i > 0 ? it[s.i - 1] : null, calc = s.keep !== null;
+    let h = '<div class="arr whr"><span class="nm">w =</span>' + range(0, W + 1).map(w => '<span class="wh' + (w === s.w && calc ? ' on' : '') + '">' + w + '</span>').join('') + '</div>';
+    for (let r = 0; r <= n; r++){
+      h += '<div class="arr"><span class="nm">' + (r === 0 ? '<span class="e">∅</span><small>0 món</small>' : '<span class="e">' + it[r - 1].e + '</span><small>' + it[r - 1].kg + 'kg·' + it[r - 1].v + '</small>') + '</span>';
+      for (let w = 0; w <= W; w++){
+        let cls = '', sub = '&nbsp;';
+        const v = s.dp[r][w];
+        if (onPath.has(r + ',' + w)){ cls = ' path'; if (r > 0 && s.dp[r][w] !== s.dp[r - 1][w]) sub = 'lấy'; }
+        else if (r === s.i && w === s.w && calc){ cls = ' cur'; sub = s.how[r][w]; }
+        else if (calc && r === s.i - 1 && w === s.w){ cls = ' src' + (s.win === 'keep' ? ' pick' : ''); sub = '↓'; }
+        else if (calc && r === s.i - 1 && s.take !== null && w === s.w - o.kg){ cls = ' src' + (s.win === 'take' ? ' pick' : ''); sub = '+' + o.v; }
+        else if (r === 0) cls = ' r0';
+        else if (v !== null) cls = ' done';
+        h += '<div class="cellx' + cls + '"><b>' + (v === null ? '?' : v) + '</b><span class="sub">' + sub + '</span></div>';
+      }
+      h += '</div>';
+    }
+    $('#ksWrap').innerHTML = h;
+    // Hình ba lô cho hai lựa chọn
+    let q = '';
+    if (calc){
+      const box = (k, c, e) => '<span class="sl sm ' + c + '">' + (e || '') + '</span>';
+      const keepSlots = range(0, s.w).map(() => box(0, 'rest')).join('') || '<span class="cap">túi 0 kg</span>';
+      q += '<div class="opt' + (s.win === 'keep' ? ' win' : '') + '"><div class="h"><span>Không lấy ' + o.e + '</span><b>' + s.keep + '</b></div><div class="slots">' + keepSlots + '</div><div class="cap">Cả ' + s.w + ' kg dành cho các món trước</div></div>';
+      if (s.take === null)
+        q += '<div class="opt no"><div class="h"><span>Lấy ' + o.e + '</span><b>✗</b></div><div class="slots">' + range(0, o.kg).map(t => box(0, t < s.w ? 'it' : 'over', o.e)).join('') + '</div><div class="cap">Cần ' + o.kg + ' kg, túi chỉ có ' + s.w + ' kg</div></div>';
+      else
+        q += '<div class="opt' + (s.win === 'take' ? ' win' : '') + '"><div class="h"><span>Lấy ' + o.e + '</span><b>' + o.v + ' + ' + (s.take - o.v) + ' = ' + s.take + '</b></div><div class="slots">' + range(0, o.kg).map(() => box(0, 'it', o.e)).join('') + range(0, s.w - o.kg).map(() => box(0, 'rest')).join('') + '</div><div class="cap">' + o.kg + ' kg cho ' + o.name + ', ' + (s.w - o.kg) + ' kg còn lại cho các món trước</div></div>';
+    } else if (s.path.length){
+      q = '<div class="opt win" style="grid-column:1/-1"><div class="chosen-row">Món được lấy: ' + (s.chosen.length ? s.chosen.map(k => '<span class="e">' + it[k].e + '</span>').join(' ') : 'chưa tìm thấy') + '</div></div>';
+    }
+    $('#ksOpts').innerHTML = q;
+    follow($('#ksWrap'));
+  }
+  const simKs = makeSim($('#simKs'), {
+    build: buildKs, render: renderKs,
+    code: () => [
+      'kg  = [' + KS.map(o => o.kg).join(', ') + ']    # cân nặng',
+      'vui = [' + KS.map(o => o.v).join(', ') + ']  # điểm vui',
+      'n, W = ' + KS.length + ', ' + CAP,
+      'dp = [[0] * (W + 1) for _ in range(n + 1)]',
+      'for i in range(1, n + 1):',
+      '    for w in range(W + 1):',
+      '        dp[i][w] = dp[i-1][w]          # không lấy',
+      '        if w >= kg[i-1]:               # túi đủ chỗ',
+      '            lay = vui[i-1] + dp[i-1][w - kg[i-1]]',
+      '            dp[i][w] = max(dp[i][w], lay)',
+      'print(dp[n][W])'
+    ]
+  });
+  $('#ksRandom').onclick = () => {
+    const p = POOL.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+    KS = p.map(([e, name]) => ({ e, name, kg: rnd(1, 4), v: rnd(2, 20) }));
+    simKs.rebuild();
+  };
+  $('#ksReset').onclick = () => { KS = ITEMS.slice(); simKs.rebuild(); };
+
+  renderCode($('#codeTrace'), [
+    'w = W',
+    'chon = []',
+    'for i in range(n, 0, -1):',
+    '    if dp[i][w] != dp[i-1][w]:   # khác ô trên: đã lấy món i',
+    '        chon.append(i)',
+    '        w -= kg[i-1]',
+    'print(chon[::-1])'
+  ]);
+
+  // ---------- 6. Một hàng ----------
+  let ROW_MODE = 'down';
+  const RW = 8, TENT = ITEMS[0];
+  function buildRow(){
+    const S = [], dp = Array(RW + 1).fill(0), has = Array.from({ length: RW + 1 }, () => []), upd = Array(RW + 1).fill(false);
+    const snap = o => S.push(Object.assign({ dp: dp.slice(), has: has.map(x => x.slice()), upd: upd.slice(), cur: -1, src: -1, bad: -1 }, o));
+    snap({ line: 2, msg: 'Một hàng <code>dp</code> duy nhất, ban đầu toàn 0: kết quả khi chưa có món nào. Giờ xử lý ⛺ Lều (4 kg, 20 điểm) bằng cách ghi đè từng ô, đi ' + (ROW_MODE === 'down' ? '<b>ngược</b> từ w = 8 xuống 4.' : '<b>xuôi</b> từ w = 4 lên 8.') });
+    const order = ROW_MODE === 'down' ? range(RW, TENT.kg - 1, -1) : range(TENT.kg, RW + 1);
+    for (const w of order){
+      const old = dp[w], src = w - TENT.kg, srcNew = upd[src], take = dp[src] + TENT.v;
+      if (take > old){ dp[w] = take; has[w] = has[src].concat(TENT.e); }
+      upd[w] = true;
+      const twice = has[w].length >= 2;
+      let msg = '<code>dp[' + w + '] = max(dp[' + w + '], dp[' + src + '] + 20) = max(' + old + ', ' + (take - TENT.v) + ' + 20) = ' + dp[w] + '</code>. ' +
+        (srcNew ? 'Ô dp[' + src + '] <b>vừa bị ghi đè</b> ở bước trước, trong đó đã có ⛺.' : 'Ô dp[' + src + '] chưa bị ghi đè: vẫn là kết quả “chưa có lều”.');
+      if (twice) msg += ' ⚠️ Túi ' + w + ' kg giờ có <b>2 cái lều</b>, trong khi ta chỉ có một cái!';
+      snap({ line: 4, cur: w, src, bad: twice ? w : -1, msg });
+    }
+    snap({ line: 4, msg: ROW_MODE === 'down'
+      ? '✅ Đi ngược: mỗi ô luôn đọc một ô <b>chưa bị ghi đè</b>, nên lều được lấy nhiều nhất một lần. dp[8] = 20, đúng.'
+      : '❌ Đi xuôi: dp[8] = 40 vì lều được tính <b>hai lần</b>. Đây là lỗi hay gặp nhất khi viết cái túi bằng một hàng.' });
+    return S;
+  }
+  function renderRow(s){
+    let h = '<span class="nm">dp =</span>';
+    for (let w = 0; w <= RW; w++){
+      const cls = w === s.bad ? ' cur bad' : w === s.cur ? ' cur' : w === s.src ? ' src' : s.upd[w] ? ' done' : '';
+      h += '<div class="cellx' + cls + '"><small>[' + w + ']</small><b>' + s.dp[w] + '</b><span class="sub">' + (s.has[w].join('') || '&nbsp;') + '</span></div>';
+    }
+    $('#rowD').innerHTML = h;
+    follow($('#rowWrap'));
+    const svg = $('#rowArcs'), wrap = $('#rowWrap');
+    svg.setAttribute('width', wrap.scrollWidth); svg.setAttribute('height', wrap.offsetHeight);
+    svg.classList.toggle('bad', s.bad >= 0);
+    if (s.cur < 0){ svg.innerHTML = ''; return; }
+    const cells = $('#rowD').querySelectorAll('.cellx'), wr = wrap.getBoundingClientRect();
+    const bx = wr.left - wrap.scrollLeft, by = wr.top;
+    const A = cells[s.src].getBoundingClientRect(), B = cells[s.cur].getBoundingClientRect();
+    const x1 = A.left - bx + A.width / 2, x2 = B.left - bx + B.width / 2, y = A.top - by - 3, mx = (x1 + x2) / 2, cy = y - 50;
+    const ang = Math.atan2(y - cy, x2 - mx), L = 10;
+    const tri = [[x2, y], [x2 - L * Math.cos(ang - 0.45), y - L * Math.sin(ang - 0.45)], [x2 - L * Math.cos(ang + 0.45), y - L * Math.sin(ang + 0.45)]];
+    svg.innerHTML = '<path d="M' + x1 + ' ' + y + ' Q' + mx + ' ' + cy + ' ' + x2 + ' ' + y + '"/><polygon points="' + tri.map(p => p.join(',')).join(' ') + '"/><text x="' + mx + '" y="' + (y - 28) + '" text-anchor="middle">+20</text>';
+  }
+  const simRow = makeSim($('#simRow'), {
+    build: buildRow, render: renderRow,
+    code: () => [
+      'kg, vui = 4, 20         # cái lều',
+      'dp = [0] * 9            # túi 0..8 kg',
+      ROW_MODE === 'down' ? 'for w in range(8, kg - 1, -1):   # đi ngược' : 'for w in range(kg, 9):   # đi xuôi (sai!)',
+      '    dp[w] = max(dp[w], dp[w - kg] + vui)'
+    ]
+  });
+  function setMode(m){ ROW_MODE = m; $('#rowDown').classList.toggle('primary', m === 'down'); $('#rowUp').classList.toggle('primary', m === 'up'); simRow.rebuild(); }
+  $('#rowDown').onclick = () => setMode('down');
+  $('#rowUp').onclick = () => setMode('up');
+
+  // ---------- 7. Trạm thu phát ----------
+  const RP = [1, 5, 10, 15, 17], RA = [5, 20, 10, 15, 25];
+  let RK = 5;
+  function buildRoad(){
+    const n = RP.length, k = RK, S = [], dp = Array(n + 1).fill(null), jj = Array(n + 1).fill(0);
+    dp[0] = 0;
+    const snap = o => S.push(Object.assign({ dp: dp.slice(), i: -1, j: -1, phase: 0, path: [] }, o));
+    snap({ line: 5, msg: n + ' địa điểm trên đường, số trên trạm là lợi nhuận, số dưới là vị trí. Hai trạm phải cách nhau ít nhất <b>k = ' + k + '</b>. <code>dp[0] = 0</code>: chưa dùng điểm nào.' });
+    let j = 0;
+    for (let i = 1; i <= n; i++){
+      while (RP[j] <= RP[i - 1] - k) j++;
+      jj[i] = j;
+      snap({ line: 9, i, j, phase: 1, msg: 'Xét điểm ' + i + ' ở vị trí ' + RP[i - 1] + '. Các điểm ở vị trí ≤ ' + RP[i - 1] + ' − ' + k + ' = ' + (RP[i - 1] - k) + ' đủ xa (xanh): có <b>j = ' + j + '</b> điểm. Các điểm trong vùng đỏ quá gần, không đặt cùng được.' });
+      const keep = dp[i - 1], take = RA[i - 1] + dp[j];
+      dp[i] = Math.max(keep, take);
+      snap({ line: 12, i, j, phase: 2, msg: 'Không đặt: <code>dp[' + (i - 1) + '] = ' + keep + '</code>. Đặt: <code>' + RA[i - 1] + ' + dp[' + j + '] = ' + take + '</code>. ' + (take > keep ? 'Đặt trạm tốt hơn' : 'Không đặt tốt hơn hoặc bằng') + ': <code>dp[' + i + '] = ' + dp[i] + '</code>.' });
+    }
+    const path = [];
+    for (let i = n; i > 0;){ if (dp[i] === dp[i - 1]) i--; else { path.unshift(i); i = jj[i]; } }
+    snap({ line: 13, path, msg: '🎉 Đáp án <code>dp[' + n + '] = ' + dp[n] + '</code>. Lần ngược như cái túi: ô nào khác ô trước nó thì đã đặt trạm ở đó, rồi nhảy về j. Các trạm được chọn ở vị trí ' + path.map(i => RP[i - 1]).join(', ') + ' (tím).' });
+    return S;
+  }
+  function renderRoad(s){
+    const n = RP.length, lo = RP[0], hi = RP[n - 1], X = p => 4 + (p - lo) / (hi - lo || 1) * 92;
+    const onPath = new Set(s.path);
+    let h = '<div class="ln"></div>';
+    if (s.i > 0){
+      const a = Math.max(lo - 1, RP[s.i - 1] - RK), b = RP[s.i - 1];
+      h += '<div class="zone" style="left:calc(' + X(a) + '% + 18px);width:' + (X(b) - X(a)) + '%"><span>quá gần (&lt; ' + RK + ')</span></div>';
+    }
+    RP.forEach((p, t) => {
+      const i = t + 1;
+      const cls = onPath.has(i) ? ' path' : i === s.i ? ' cur' : s.i > 0 && i <= s.j ? ' ok' : s.i > 0 && i < s.i ? ' near' : '';
+      h += '<div class="tw' + cls + '" style="left:' + X(p) + '%"><span class="ic">📡</span><span class="pf">+' + RA[t] + '</span><span class="ps">' + p + '</span></div>';
+    });
+    $('#road').innerHTML = h;
+    let d = '<span class="nm">dp =</span>';
+    for (let i = 0; i <= n; i++){
+      const cls = s.phase && i === s.i ? ' cur' : s.phase === 2 && (i === s.i - 1 || i === s.j) ? ' src' : s.dp[i] !== null ? ' done' : '';
+      const sub = s.phase === 2 && i === s.i - 1 && i === s.j ? 'cả hai' : s.phase === 2 && i === s.i - 1 ? 'không đặt' : s.phase === 2 && i === s.j ? '+' + RA[s.i - 1] : '&nbsp;';
+      d += '<div class="cellx' + cls + '"><small>[' + i + ']</small><b>' + (s.dp[i] === null ? '?' : s.dp[i]) + '</b><span class="sub">' + sub + '</span></div>';
+    }
+    $('#roadD').innerHTML = d;
+  }
+  const simRoad = makeSim($('#simRoad'), {
+    build: buildRoad, render: renderRoad,
+    code: () => [
+      'p = [' + RP.join(', ') + ']     # vị trí',
+      'a = [' + RA.join(', ') + ']     # lợi nhuận',
+      'k = ' + RK,
+      'n = len(p)',
+      'dp = [0] * (n + 1)   # dp[i]: lãi lớn nhất, i điểm đầu',
+      'j = 0                # số điểm đủ xa điểm i',
+      'for i in range(1, n + 1):',
+      '    while p[j] <= p[i-1] - k:',
+      '        j += 1',
+      '    khong_dat = dp[i-1]',
+      '    dat = a[i-1] + dp[j]',
+      '    dp[i] = max(khong_dat, dat)',
+      'print(dp[n])'
+    ]
+  });
+  $('#roadK').addEventListener('input', e => { RK = +e.target.value; $('#roadKv').textContent = RK; simRoad.rebuild(); });
+})();
+</script>
+</body>
+</html>

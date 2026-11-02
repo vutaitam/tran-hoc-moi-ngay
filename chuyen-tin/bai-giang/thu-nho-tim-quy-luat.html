@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thử nhỏ tìm quy luật</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 3.1 */
+.stones{ display:flex; flex-wrap:wrap; gap:7px; min-height:72px; align-content:flex-start; padding:4px 0; }
+.st{ width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #D5DBE6, #7D869A); transition:opacity .4s, transform .4s; }
+.st.gone{ opacity:.3; transform:scale(.7); }
+.st.gone.you{ box-shadow:0 0 0 3px var(--src); }
+.st.gone.cpu{ box-shadow:0 0 0 3px var(--accent); }
+.score{ display:flex; gap:16px; flex-wrap:wrap; font-weight:700; margin-top:8px; font-size:15px; }
+.score .y{ color:var(--src); } .score .c{ color:var(--accent); }
+.left{ font-size:1.6rem; font-weight:800; }
+.tiles{ display:grid; grid-template-columns:repeat(8, minmax(0,1fr)); gap:5px; }
+.tiles.t10{ grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
+.tile{ border:2px solid var(--line); border-radius:10px; background:var(--surface); text-align:center; padding:4px 0; font-weight:800; font-size:15px; line-height:1.2; color:var(--ink); font-family:inherit; transition:background .25s, border-color .25s, transform .25s; }
+.tile small{ display:block; font-size:10.5px; font-weight:600; color:var(--muted); }
+.tile.win{ background:var(--src-soft); border-color:var(--src); }
+.tile.lose{ background:var(--accent-soft); border-color:var(--accent); }
+.tile.lose small{ color:var(--accent); } .tile.win small{ color:var(--src); }
+.tile.cur{ transform:scale(1.08); box-shadow:0 0 0 3px var(--done); }
+.tile.look{ box-shadow:0 0 0 3px var(--path); }
+.tile.odd{ background:var(--done-soft); border-color:var(--done); }
+.tile.sel{ box-shadow:0 0 0 3px var(--path); }
+.t10 .tile{ font-size:13px; padding:5px 0; cursor:pointer; }
+.quiz{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+.quiz input{ font:inherit; font-weight:700; width:9em; padding:8px 10px; border-radius:10px; border:2px solid var(--line); background:var(--surface); color:var(--ink); }
+.fb{ margin-top:8px; font-weight:600; min-height:1.5em; }
+.fb.ok{ color:var(--src); } .fb.no{ color:var(--accent); }
+.cellx.dim{ opacity:.35; }
+.cellx.path{ background:var(--path); border-color:var(--path); color:#fff; }
+.cellx.path small{ color:#fff; }
+.stairs{ display:flex; align-items:flex-end; gap:1px; height:160px; padding:0 2px; border-bottom:2px solid var(--line); cursor:pointer; }
+.stairs i{ flex:1 1 0; border-radius:3px 3px 0 0; min-width:0; transition:opacity .2s; }
+.stairs i.s0{ background:var(--done); } .stairs i.s1{ background:var(--src); } .stairs i.s2{ background:var(--path); } .stairs i.s3{ background:var(--accent); }
+.stairs i.on{ outline:2px solid var(--ink); }
+.ticks{ position:relative; height:20px; font-size:11.5px; color:var(--muted); font-weight:700; }
+.ticks span{ position:absolute; transform:translateX(-50%); }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
+.chip{ display:inline-block; padding:3px 10px; border-radius:999px; font-weight:700; font-size:14px; background:var(--surface); border:2px solid var(--line); }
+.chip.o{ background:var(--src-soft); border-color:var(--src); }
+.chip.e{ background:var(--done-soft); border-color:var(--done); }
+.chip.end{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.vo-detail{ margin-top:12px; min-height:7em; }
+@media (max-width:520px){ .tile{ font-size:13px; border-radius:8px; } .tile small{ font-size:9.5px; letter-spacing:-.2px; } .tiles{ gap:4px; } .t10 .tile{ font-size:11.5px; padding:4px 0; border-radius:8px; } .tiles.t10{ gap:3px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Ad-hoc và tham lam</span>
+  <h1>Thử nhỏ để tìm quy luật</h1>
+  <p class="slogan">n lớn tới 1 tỉ? Hãy hỏi n = 1, 2, 3 trước.</p>
+  <p class="lead">Nhiều bài thi có n rất lớn, không thể làm từng bước. Bí quyết: viết chương trình chậm cho n nhỏ, in bảng kết quả, nhìn ra quy luật, rồi biến quy luật thành công thức.</p>
+  <div class="notebook" aria-label="Đáp án đề LUCK với n từ 2 đến 15">
+    <div class="nb-row" id="nbN"></div>
+    <div class="nb-row" id="nbA"></div>
+    <p class="nb-note">Đáp án đề LUCK (PTNK 2023) với n từ 2 đến 15. Em có thấy gì lạ không? Đáp án đứng yên rồi bỗng nhảy lên.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#tro-choi">1. Trò chơi bốc sỏi</a>
+    <a href="#bang">2. Lập bảng n nhỏ</a>
+    <a href="#cong-thuc">3. Công thức 4 bước</a>
+    <a href="#luck">4. Đề thật LUCK</a>
+    <a href="#bac-thang">5. Quy luật bậc thang</a>
+    <a href="#code-nhanh">6. Code nhanh</a>
+    <a href="#veryodd">7. Đề thật VERYODD</a>
+    <a href="#tong-ket">8. Tổng kết</a>
+    <a href="#bai-tap">9. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="tro-choi">
+  <h2><span class="num">1</span>Trò chơi bốc sỏi: em đấu với máy</h2>
+  <p>Có một đống sỏi. Hai người lần lượt bốc <b>1, 2 hoặc 3 viên</b>. Ai bốc được <b>viên cuối cùng</b> thì thắng. Em đi trước. Thử chơi vài ván xem có thắng được máy không.</p>
+
+  <div class="panel">
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">Còn lại: <span class="left" id="stLeft"></span> viên</div>
+    <div class="stones" id="stones"></div>
+    <div class="controls">
+      <button class="btn primary" data-k="1">Bốc 1</button>
+      <button class="btn primary" data-k="2">Bốc 2</button>
+      <button class="btn primary" data-k="3">Bốc 3</button>
+      <button class="btn" id="stNew">Ván mới</button>
+      <button class="btn" id="stHint">Bí quyết của máy?</button>
+    </div>
+    <div class="explain" id="stMsg"></div>
+    <div class="score"><span class="y" id="scY"></span><span class="c" id="scC"></span></div>
+  </div>
+  <p>Máy không hề gian lận. Máy chỉ biết một quy luật nhỏ. Làm sao tìm ra quy luật đó khi chưa ai chỉ cho mình? Câu trả lời ở mục 2: <b>thử với đống sỏi nhỏ trước</b>.</p>
+</section>
+
+<!-- 2 -->
+<section id="bang">
+  <h2><span class="num">2</span>Lập bảng cho n nhỏ</h2>
+  <p>Gọi một số viên là <b>thế thắng</b> nếu người đến lượt ở đó chắc chắn thắng (khi chơi khéo), ngược lại là <b>thế thua</b>. Còn 0 viên là thế thua: người kia vừa bốc viên cuối.</p>
+  <p>Với n viên, em được bốc 1, 2 hoặc 3, để lại n − 1, n − 2 hoặc n − 3 viên cho đối thủ. Chỉ cần <b>một</b> cách đẩy đối thủ vào thế thua là em thắng. Máy tính lần lượt từ nhỏ đến lớn như sau:</p>
+
+  <div class="sim" id="simWin">
+    <div class="sim-head"><span class="title">Mô phỏng</span></div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="tiles" id="winTiles"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-src"></i>Thế thắng</span><span><i class="lg-cur"></i>Thế thua</span><span><i class="lg-done"></i>Đang xét</span><span><i class="lg-path"></i>Các thế em có thể để lại</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Đoán thử</h3>
+    <p style="margin:0">Bảng xếp 8 ô một hàng. Nhìn các cột màu hồng. Không cần chạy thêm, em đoán:</p>
+    <div class="quiz">n = 1000: <button class="btn" data-q="1000" data-v="lose">Thua</button><button class="btn" data-q="1000" data-v="win">Thắng</button></div>
+    <div class="quiz">n = 2026: <button class="btn" data-q="2026" data-v="lose">Thua</button><button class="btn" data-q="2026" data-v="win">Thắng</button></div>
+    <div class="fb" id="winFb"></div>
+  </div>
+  <div class="remember">Quy luật: thế thua là 0, 4, 8, 12, … tức <code>n % 4 == 0</code>. Bí quyết của máy: luôn bốc sao cho số viên còn lại chia hết cho 4. Một dòng code thay cho cả bảng: <code>print('Thua' if n % 4 == 0 else 'Thắng')</code>.</div>
+</section>
+
+<!-- 3 -->
+<section id="cong-thuc">
+  <h2><span class="num">3</span>Công thức 4 bước</h2>
+  <p>Mục 2 chính là cách làm chung cho mọi bài “n rất lớn, không biết bắt đầu từ đâu”:</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Viết code trâu</h4>
+      <p>Làm đúng y như đề nói, không cần nhanh. Code này đã lấy được subtask n nhỏ.</p>
+      <div class="ex">Mô phỏng, thử hết, đếm từng cái.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>In bảng n nhỏ</h4>
+      <p>In kết quả với n = 1, 2, …, 30 (hoặc 100). Xếp thành hàng, thành lưới, vẽ biểu đồ.</p>
+      <div class="ex"><code>for n in range(1, 31): print(n, trau(n))</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Tìm mẫu</h4>
+      <p>Hay gặp: lặp lại theo chu kỳ, đứng yên rồi nhảy (bậc thang), gấp đôi, gấp ba, số chính phương.</p>
+      <div class="ex">Nhìn <b>hiệu</b> và <b>tỉ số</b> giữa các số liên tiếp.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Kiểm tra bằng máy</h4>
+      <p>Đoán đúng vài số chưa đủ. Cho máy so công thức với code trâu cho mọi n đến 1000.</p>
+      <div class="ex"><code>assert trau(n) == nhanh(n)</code></div>
+    </div>
+  </div>
+  <div class="code" id="codeCheck"></div>
+  <div class="tip"><b>Đi thi:</b> code trâu không bỏ đi. Nếu không tìm ra quy luật, nộp code trâu để lấy điểm subtask nhỏ. Nếu tìm ra, dùng nó để kiểm tra code nhanh trước khi nộp.</div>
+</section>
+
+<!-- 4 -->
+<section id="luck">
+  <h2><span class="num">4</span>Đề thật: Số may mắn (PTNK 2023)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Có n lá bài số 1, 2, …, n. Chia lần lượt vào các ô 1, 2, 3, … Nhặt các lá ở ô số <b>chia 3 dư 2</b> (ô 2, 5, 8, …), bỏ các lá khác. Còn nhiều hơn 1 lá thì chia lại từ ô 1. Lá cuối cùng là lá may mắn. Tìm nó với <b>n ≤ 10⁹</b>; 50% số test có n ≤ 1000.</p>
+  </div>
+  <p>Bước 1 của công thức: code trâu. Python cắt danh sách rất gọn: <code>bai[1::3]</code> lấy các vị trí 1, 4, 7, … (Python đếm từ 0), tức là ô 2, 5, 8, …</p>
+
+  <div class="sim" id="simLuck">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>n = <input type="range" id="luckN" min="2" max="20" value="15" aria-label="Số lá bài n"> <b id="luckNv">15</b></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="luckWrap"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-src"></i>Lá được nhặt (ô 2, 5, 8, …)</span><span><i class="lg-done"></i>Lá đã giữ ở lần trước</span><span><i class="lg-path"></i>Lá may mắn</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <p>Code trâu chạy khoảng n bước. Với n = 10⁹ thì quá chậm, và danh sách 1 tỉ số cũng không vừa bộ nhớ. Đến bước 2: in bảng.</p>
+</section>
+
+<!-- 5 -->
+<section id="bac-thang">
+  <h2><span class="num">5</span>In bảng: quy luật bậc thang</h2>
+  <p>Đây là đáp án của code trâu với n từ 2 đến 60, mỗi cột là một n, cột càng cao đáp án càng lớn. Chạm vào biểu đồ để xem từng giá trị.</p>
+  <div class="panel">
+    <div class="stairs" id="stairs" role="img" aria-label="Biểu đồ bậc thang đáp án LUCK"></div>
+    <div class="ticks" id="ticks"></div>
+    <div class="info" id="stairInfo"></div>
+  </div>
+  <p>Đáp án <b>đứng yên</b> một đoạn rồi <b>nhảy</b>. Các bậc bắt đầu ở n = 2, 5, 14, 41, và đáp án đúng bằng chỗ bắt đầu bậc. Câu hỏi quan trọng nhất: bậc tiếp theo bắt đầu ở đâu?</p>
+  <div class="panel">
+    <div class="quiz">Bậc sau 41 bắt đầu ở n = <input type="number" id="stepGuess" inputmode="numeric" aria-label="Đoán bậc tiếp theo"><button class="btn primary" id="stepCheck">Kiểm tra</button></div>
+    <div class="fb" id="stepFb"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="code-nhanh">
+  <h2><span class="num">6</span>Từ quy luật ra code nhanh</h2>
+  <p>Các bậc: 2, 5, 14, 41, 122, … Mỗi bậc bằng <b>bậc trước × 3 − 1</b>. Đáp án là bậc lớn nhất không vượt quá n. Mỗi vòng lặp nhân ba, nên dù n = 10⁹ cũng chưa tới 20 vòng.</p>
+  <div class="code" id="codeFast"></div>
+  <div class="panel">
+    <h3 style="margin-top:0">Chạy thử với n bất kỳ</h3>
+    <div class="quiz">n = <input type="text" id="fastN" value="1000000000" inputmode="numeric" aria-label="Nhập n" style="width:12em"><button class="btn primary" id="fastGo">Tính</button></div>
+    <div class="chips" id="fastChips"></div>
+    <div class="fb" id="fastFb"></div>
+  </div>
+  <div class="tip"><b>Bước 4 đừng quên:</b> trước khi nộp, chạy <code>assert trau(n) == nhanh(n)</code> cho mọi n từ 2 đến 3000. Em sẽ yên tâm hơn nhiều so với chỉ thử ví dụ của đề.</div>
+</section>
+
+<!-- 7 -->
+<section id="veryodd">
+  <h2><span class="num">7</span>Đề thật: Số rất lẻ (PTNK 2026)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Số m &gt; 1 là <b>số rất lẻ</b> nếu (1) xếp được mọi ước của m lên vòng tròn sao cho hai số cạnh nhau có tổng lẻ, và (2) tổng các ước của m là số lẻ. Cho n ≤ 10¹⁸, đếm số ước của n là số rất lẻ. 20% số test có n ≤ 1000.</p>
+  </div>
+  <p>Định nghĩa rắc rối quá. Đừng vội suy luận, hãy để máy <b>thử nhỏ</b>. Hai số cạnh nhau có tổng lẻ nghĩa là một chẵn một lẻ, nên quanh vòng tròn chẵn, lẻ phải xen kẽ: <b>số ước chẵn = số ước lẻ</b>. Chạm vào một số để xem các ước của nó.</p>
+  <div class="panel">
+    <div class="tiles t10" id="voTiles"></div>
+    <div class="controls"><button class="btn primary" id="voAll">Máy thử hết 2 … 100</button></div>
+    <div class="explain vo-detail" id="voMsg"></div>
+  </div>
+  <details class="panel"><summary><b>Em thấy gì ở 2, 18, 50, 98?</b> (bấm để xem)</summary>
+    <p>Chia đôi: 1, 9, 25, 49 = 1², 3², 5², 7². Vậy số rất lẻ có dạng <b>2 × (số lẻ)²</b>. Số tiếp theo phải là 2 × 9² = 162, và máy xác nhận đúng như vậy. Bài toán trở thành: đếm các ước của n có dạng 2 × t² với t lẻ. Phần này cần phân tích thừa số nguyên tố (chương 2), nhưng nhờ thử nhỏ mà em biết <b>phải đếm cái gì</b>.</p>
+  </details>
+  <p><a href="../luyen-de/index.html#bai=ptnk-2026-veryodd">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 8 -->
+<section id="tong-ket">
+  <h2><span class="num">8</span>Tổng kết</h2>
+  <h3>Khi nào nên thử nhỏ?</h3>
+  <ul>
+    <li>n rất lớn (10⁹, 10¹⁸) nhưng đề lại dễ mô phỏng khi n nhỏ.</li>
+    <li>Trò chơi hai người, quá trình lặp đi lặp lại, định nghĩa kỳ lạ khó suy luận thẳng.</li>
+    <li>Em không nghĩ ra gì: thử nhỏ vẫn cho điểm subtask và gợi ý hướng đi.</li>
+  </ul>
+  <h3>Các mẫu hay gặp</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Mẫu</th><th>Dấu hiệu trên bảng</th><th>Ví dụ</th></tr></thead>
+      <tbody>
+        <tr><td>Chu kỳ</td><td>Lặp lại sau mỗi k số</td><td>Bốc sỏi: <code>n % 4</code></td></tr>
+        <tr><td>Bậc thang</td><td>Đứng yên rồi nhảy</td><td>LUCK: 2, 5, 14, 41</td></tr>
+        <tr><td>Gấp lên</td><td>Tỉ số liên tiếp gần như không đổi</td><td>Hiệu 3, 9, 27, 81</td></tr>
+        <tr><td>Dạng đặc biệt</td><td>Toàn số chính phương, lũy thừa, …</td><td>VERYODD: 2 × t²</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Đoán từ quá ít số</b>: 3, 4 giá trị thì hợp với rất nhiều quy luật. In ít nhất 20 đến 30 giá trị.</li>
+    <li><b>Không kiểm tra</b>: công thức đúng với ví dụ của đề chưa chắc đúng với mọi n. Luôn so với code trâu.</li>
+    <li><b>Sai ở n nhỏ nhất</b>: quy luật hay “vỡ” ở n = 0, 1, 2. Kiểm tra riêng các giá trị biên.</li>
+    <li><b>Vứt code trâu</b>: nó vừa là điểm subtask, vừa là trọng tài cho code nhanh.</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="bai-tap">
+  <h2><span class="num">9</span>Bài tập tự luyện</h2>
+  <p>Mỗi bài: viết code trâu, in bảng, đoán, rồi kiểm tra bằng máy.</p>
+  <div class="ex-item">
+    <h4>Bài 1. Bốc sỏi tới k viên <span class="level lv1">Dễ</span></h4>
+    <p>Như mục 1 nhưng mỗi lượt được bốc từ 1 đến k viên. Cho n, k ≤ 10¹⁸, người đi trước thắng hay thua?</p>
+    <details><summary>Gợi ý</summary><p>Lập bảng với k = 2, rồi k = 4. Các cột hồng cách nhau bao nhiêu ô?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Chữ số tận cùng của 2ⁿ <span class="level lv1">Dễ</span></h4>
+    <p>Cho n ≤ 10¹⁸. In chữ số hàng đơn vị của 2ⁿ.</p>
+    <details><summary>Gợi ý</summary><p>In chữ số cuối của 2¹, 2², …, 2¹². Dãy lặp lại sau mấy số? Cẩn thận với n = 0.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Đếm hình vuông trên bàn cờ <span class="level lv2">Vừa</span></h4>
+    <p>Bàn cờ n × n ô có bao nhiêu hình vuông (mọi kích thước)? n ≤ 10⁶.</p>
+    <details><summary>Gợi ý</summary><p>Thử n = 1, 2, 3 được 1, 5, 14. Nhìn hiệu giữa các số liên tiếp. (Thật thú vị: lại là 2, 5, 14 nhưng quy luật khác LUCK!)</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Số may mắn <span class="level lv4">Đề thật</span></h4>
+    <p>PTNK 2023. Nộp code trâu trước để chắc 50%, sau đó dùng quy luật bậc thang.</p>
+    <details><summary>Gợi ý</summary><p>Mục 4 đến 6 đã đi trọn 4 bước. Hãy tự gõ lại không nhìn, rồi so với code trâu cho n đến 3000.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=ptnk-2023-luck">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Số rất lẻ <span class="level lv4">Đề thật</span></h4>
+    <p>PTNK 2026. Lấy 20% với n ≤ 1000 bằng cách kiểm tra từng ước theo định nghĩa.</p>
+    <details><summary>Gợi ý</summary><p>Với n ≤ 1000: duyệt mọi ước m của n, đếm ước chẵn, ước lẻ, tính tổng ước. Khi đã biết dạng 2 × t², thử t lẻ từ 1 trở lên và kiểm tra 2t² có chia hết n không: đủ cho n ≤ 10¹² nữa.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=ptnk-2026-veryodd">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 3: Ad-hoc và tham lam. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  function luck(n){ let a = Array.from({ length: n }, (_, i) => i + 1); while (a.length > 1) a = a.filter((_, i) => i % 3 === 1); return a[0]; }
+
+  // ---------- Hero ----------
+  (function(){
+    const ns = Array.from({ length: 14 }, (_, i) => i + 2);
+    $('#nbN').innerHTML = '<span class="nm">n</span>' + ns.map((n, i) => '<div class="nb-cell nb-a" style="animation-delay:' + (i * 0.05) + 's">' + n + '</div>').join('');
+    $('#nbA').innerHTML = '<span class="nm">lá</span>' + ns.map((n, i) => { const v = luck(n), jump = v === n; return '<div class="nb-cell ' + (jump ? 'nb-p last' : 'nb-p') + '" style="animation-delay:' + (0.4 + i * 0.05) + 's">' + v + '</div>'; }).join('');
+  })();
+
+  // ---------- 1. Bốc sỏi ----------
+  (function(){
+    let N0, n, last = null, over = false, busy = false, sc = { y: 0, c: 0 };
+    const msg = h => { $('#stMsg').innerHTML = h; };
+    function render(){
+      let h = '';
+      for (let t = 0; t < N0; t++){
+        if (t < n) h += '<span class="st"></span>';
+        else if (last && t < n + last.k) h += '<span class="st gone ' + last.who + '"></span>';
+      }
+      $('#stones').innerHTML = h;
+      $('#stLeft').textContent = n;
+      document.querySelectorAll('#tro-choi [data-k]').forEach(b => { b.disabled = over || busy || +b.dataset.k > n; });
+      $('#scY').textContent = 'Em thắng: ' + sc.y; $('#scC').textContent = 'Máy thắng: ' + sc.c;
+    }
+    function newGame(){ N0 = n = rnd(10, 21); last = null; over = false; busy = false; render(); msg('Đống sỏi có <b>' + n + ' viên</b>. Em đi trước: chọn bốc 1, 2 hoặc 3 viên.'); }
+    function take(k){
+      n -= k; last = { who: 'you', k };
+      if (n === 0){ over = true; sc.y++; render(); msg('🎉 Em bốc viên cuối cùng, <b>em thắng!</b> Lần sau máy có để em thắng dễ vậy không? Bấm “Ván mới”.'); return; }
+      busy = true; render(); msg('Em bốc ' + k + ' viên, còn ' + n + '. Máy đang nghĩ…');
+      setTimeout(() => {
+        const c = n % 4 || 1;
+        n -= c; last = { who: 'cpu', k: c }; busy = false;
+        if (n === 0){ over = true; sc.c++; render(); msg('😮 Máy bốc ' + c + ' viên cuối cùng, <b>máy thắng</b>. Thử thêm vài ván. Để ý xem sau mỗi lượt của máy, số sỏi còn lại là bao nhiêu.'); return; }
+        render(); msg('Máy bốc ' + c + ' viên (viền hồng), còn <b>' + n + ' viên</b>. Đến lượt em.');
+      }, 700);
+    }
+    document.querySelectorAll('#tro-choi [data-k]').forEach(b => b.onclick = () => take(+b.dataset.k));
+    $('#stNew').onclick = newGame;
+    $('#stHint').onclick = () => msg('Gợi ý: sau lượt của máy, số sỏi còn lại thường là 4, 8, 12, 16, … Vì sao những con số này đặc biệt? Mục 2 sẽ cho máy tính tự tìm ra.');
+    newGame();
+  })();
+
+  // ---------- 2. Bảng thắng thua ----------
+  const WN = 32;
+  function buildWin(){
+    const S = [], win = Array(WN).fill(null);
+    win[0] = false;
+    const snap = o => S.push(Object.assign({ win: win.slice(), cur: -1, look: [] }, o));
+    snap({ line: 1, msg: 'Còn <b>0 viên</b> mà đến lượt mình: người kia vừa bốc viên cuối, nên 0 là <b>thế thua</b>. Giờ tính n = 1, 2, 3, … dựa vào các ô trước.' });
+    for (let n = 1; n < WN; n++){
+      const look = [1, 2, 3].filter(b => b <= n).map(b => n - b);
+      const good = look.find(m => !win[m]);
+      win[n] = good !== undefined;
+      const msg = win[n]
+        ? 'Còn <b>' + n + '</b> viên: bốc ' + (n - good) + ' viên để lại <b>' + good + '</b>, đó là thế thua cho đối thủ. Vậy ' + n + ' là <b>thế thắng</b>.'
+        : 'Còn <b>' + n + '</b> viên: bốc 1, 2 hay 3 đều để lại ' + look.join(', ') + ' viên, toàn là thế thắng cho đối thủ. Vậy ' + n + ' là <b>thế thua</b>!';
+      snap({ line: win[n] ? 5 : 3, cur: n, look, msg });
+    }
+    const lose = win.map((w, i) => w ? -1 : i).filter(i => i >= 0);
+    snap({ line: 6, msg: '🎉 Các thế thua: <b>' + lose.join(', ') + '</b>. Đều là bội của 4! Xếp 8 ô một hàng nên chúng thẳng thành hai cột hồng.' });
+    return S;
+  }
+  function renderWin(s){
+    let h = '';
+    for (let n = 0; n < WN; n++){
+      const w = s.win[n];
+      const cls = (w === null ? '' : w ? ' win' : ' lose') + (n === s.cur ? ' cur' : s.look.includes(n) ? ' look' : '');
+      h += '<div class="tile' + cls + '">' + n + '<small>' + (w === null ? '?' : w ? 'thắng' : 'thua') + '</small></div>';
+    }
+    $('#winTiles').innerHTML = h;
+  }
+  makeSim($('#simWin'), {
+    build: buildWin, render: renderWin,
+    code: () => [
+      'thang = [False] * 32   # thang[n]: đi trước có thắng?',
+      'for n in range(1, 32):',
+      '    for b in (1, 2, 3):          # bốc b viên',
+      '        if b <= n and not thang[n - b]:',
+      '            thang[n] = True       # để đối thủ vào thế thua',
+      'print([n for n in range(32) if not thang[n]])'
+    ]
+  });
+  document.querySelectorAll('#bang [data-q]').forEach(b => b.onclick = () => {
+    const q = +b.dataset.q, ok = (q % 4 === 0 ? 'lose' : 'win') === b.dataset.v;
+    $('#winFb').className = 'fb ' + (ok ? 'ok' : 'no');
+    $('#winFb').textContent = ok
+      ? (q % 4 === 0 ? '✓ Đúng: 1000 chia hết cho 4 nên là thế thua.' : '✓ Đúng: 2026 chia 4 dư 2. Bốc 2 viên để lại 2024, chia hết cho 4.')
+      : '✗ Chưa đúng. Thử tính ' + q + ' chia 4 dư mấy, rồi nhìn lại bảng.';
+  });
+
+  renderCode($('#codeCheck'), [
+    'def trau(n):     # cách chậm nhưng chắc đúng',
+    '    ...',
+    'def nhanh(n):    # công thức em đoán',
+    '    ...',
+    'for n in range(1, 1001):',
+    '    if trau(n) != nhanh(n):',
+    '        print("Sai ở n =", n)',
+    '        break'
+  ]);
+
+  // ---------- 4. LUCK ----------
+  let LN = 15;
+  function buildLuck(){
+    const S = [], rounds = [Array.from({ length: LN }, (_, i) => i + 1)];
+    const snap = o => S.push(Object.assign({ rounds: rounds.map(r => r.slice()), phase: 'chia', win: null }, o));
+    snap({ line: 2, msg: 'Lần 1: chia ' + LN + ' lá vào ' + LN + ' ô, theo thứ tự tăng dần.' });
+    while (rounds[rounds.length - 1].length > 1){
+      const cur = rounds[rounds.length - 1], keep = cur.filter((_, i) => i % 3 === 1);
+      snap({ line: 4, phase: 'nhat', msg: 'Nhặt các lá ở ô 2, 5, 8, …: được <b>' + keep.join(', ') + '</b>. Các lá khác bị bỏ.' });
+      rounds.push(keep);
+      if (keep.length > 1) snap({ line: 3, msg: 'Còn ' + keep.length + ' lá, chưa xong. Lần ' + rounds.length + ': chia lại từ ô 1.' });
+    }
+    const w = rounds[rounds.length - 1][0];
+    snap({ line: 5, win: w, msg: '🎉 Chỉ còn 1 lá: <b>' + w + '</b> là lá may mắn với n = ' + LN + '. Cần ' + (rounds.length - 1) + ' lần nhặt.' });
+    return S;
+  }
+  function renderLuck(s){
+    const R = s.rounds, last = R.length - 1;
+    let h = '';
+    R.forEach((r, k) => {
+      h += '<div class="arr"><span class="nm">lần ' + (k + 1) + '</span>';
+      r.forEach((v, i) => {
+        let cls = '';
+        if (s.win !== null && v === s.win && k === last) cls = ' path';
+        else if (k === last && s.phase === 'nhat') cls = i % 3 === 1 ? ' src' : ' dim';
+        else if (k < last) cls = i % 3 === 1 ? ' done' : ' dim';
+        h += '<div class="cellx' + cls + '"><small>ô ' + (i + 1) + '</small><b>' + v + '</b></div>';
+      });
+      h += '</div>';
+    });
+    $('#luckWrap').innerHTML = h;
+  }
+  const simLuck = makeSim($('#simLuck'), {
+    build: buildLuck, render: renderLuck,
+    code: () => [
+      'n = ' + LN,
+      'bai = list(range(1, n + 1))    # lá 1, 2, ..., n',
+      'while len(bai) > 1:',
+      '    bai = bai[1::3]            # giữ ô 2, 5, 8, ...',
+      'print(bai[0])'
+    ]
+  });
+  $('#luckN').addEventListener('input', e => { LN = +e.target.value; $('#luckNv').textContent = LN; simLuck.rebuild(); });
+
+  // ---------- 5. Bậc thang ----------
+  (function(){
+    const N = 60, vals = [];
+    for (let n = 2; n <= N; n++) vals.push(luck(n));
+    const lv = v => [2, 5, 14, 41].indexOf(v);
+    $('#stairs').innerHTML = vals.map((v, t) => '<i class="s' + lv(v) + '" data-n="' + (t + 2) + '" style="height:' + (8 + v / 41 * 140) + 'px"></i>').join('');
+    $('#ticks').innerHTML = [2, 5, 14, 41, 60].map(n => '<span style="left:' + ((n - 2 + 0.5) / (N - 1) * 100) + '%">' + n + '</span>').join('');
+    const show = n => {
+      document.querySelectorAll('#stairs i').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+      $('#stairInfo').innerHTML = '<span>n = <b>' + n + '</b></span><span>Lá may mắn: <b>' + luck(n) + '</b></span>';
+    };
+    const pick = e => {
+      const r = $('#stairs').getBoundingClientRect(), x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+      show(Math.min(N, Math.max(2, 2 + Math.floor(x / r.width * (N - 1)))));
+    };
+    $('#stairs').addEventListener('click', pick);
+    $('#stairs').addEventListener('touchmove', e => { pick(e); }, { passive: true });
+    show(15);
+    let tries = 0;
+    $('#stepCheck').onclick = () => {
+      const g = +$('#stepGuess').value, fb = $('#stepFb');
+      if (g === 122){ fb.className = 'fb ok'; fb.innerHTML = '✓ Chính xác! Code trâu xác nhận: luck(121) = ' + luck(121) + ', luck(122) = ' + luck(122) + '. Hiệu giữa các bậc là 3, 9, 27, 81: gấp ba mỗi lần.'; return; }
+      tries++;
+      fb.className = 'fb no';
+      fb.innerHTML = tries === 1 ? '✗ Chưa đúng. Gợi ý: tính hiệu 5 − 2, 14 − 5, 41 − 14.'
+        : tries === 2 ? '✗ Chưa đúng. Các hiệu là 3, 9, 27. Hiệu tiếp theo là bao nhiêu?'
+        : '✗ Hiệu tiếp theo là 81, vậy bậc mới bắt đầu ở 41 + 81 = ?';
+    };
+  })();
+
+  // ---------- 6. Code nhanh ----------
+  renderCode($('#codeFast'), [
+    'n = int(input())',
+    'bac = 2                    # các bậc: 2, 5, 14, 41, ...',
+    'while bac * 3 - 1 <= n:',
+    '    bac = bac * 3 - 1',
+    'print(bac)'
+  ]);
+  (function(){
+    function go(){
+      const t = $('#fastN').value.trim(), fb = $('#fastFb');
+      if (!/^\d{1,19}$/.test(t) || BigInt(t) < 2n){ fb.className = 'fb no'; fb.textContent = 'Nhập một số nguyên từ 2 đến 10¹⁸.'; $('#fastChips').innerHTML = ''; return; }
+      const n = BigInt(t), seq = [2n];
+      while (seq[seq.length - 1] * 3n - 1n <= n) seq.push(seq[seq.length - 1] * 3n - 1n);
+      $('#fastChips').innerHTML = seq.map((v, i) => '<span class="chip' + (i === seq.length - 1 ? ' end' : '') + '">' + v.toLocaleString('vi-VN') + '</span>').join('<span aria-hidden="true">→</span>');
+      fb.className = 'fb ok';
+      fb.innerHTML = 'Lá may mắn: <b>' + seq[seq.length - 1].toLocaleString('vi-VN') + '</b>. Vòng lặp chạy ' + (seq.length - 1) + ' lần, trong khi code trâu phải xử lý khoảng ' + n.toLocaleString('vi-VN') + ' lá.';
+    }
+    $('#fastGo').onclick = go;
+    $('#fastN').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    go();
+  })();
+
+  // ---------- 7. VERYODD ----------
+  (function(){
+    const divs = m => { const d = []; for (let x = 1; x <= m; x++) if (m % x === 0) d.push(x); return d; };
+    const info = m => { const d = divs(m), o = d.filter(x => x % 2), e = d.filter(x => x % 2 === 0), s = d.reduce((a, b) => a + b, 0); return { d, o, e, s, ok: o.length === e.length && s % 2 === 1 }; };
+    let all = false, sel = 18;
+    function render(){
+      let h = '';
+      for (let m = 2; m <= 100; m++) h += '<button class="tile' + (all && info(m).ok ? ' odd' : '') + (m === sel ? ' sel' : '') + '" data-m="' + m + '">' + m + '</button>';
+      $('#voTiles').innerHTML = h;
+      const r = info(sel), c1 = r.o.length === r.e.length, c2 = r.s % 2 === 1;
+      $('#voMsg').innerHTML = '<b>m = ' + sel + '</b>. Ước lẻ: ' + r.o.map(x => '<span class="chip o">' + x + '</span>').join(' ') +
+        ' · Ước chẵn: ' + (r.e.map(x => '<span class="chip e">' + x + '</span>').join(' ') || 'không có') +
+        '<br>' + (c1 ? '✓' : '✗') + ' ' + r.o.length + ' ước lẻ, ' + r.e.length + ' ước chẵn' + (c1 ? ': xếp xen kẽ được.' : ': không xếp xen kẽ được.') +
+        '<br>' + (c2 ? '✓' : '✗') + ' Tổng các ước = ' + r.s + (c2 ? ' (lẻ).' : ' (chẵn).') +
+        '<br>' + (r.ok ? '⇒ <b>' + sel + ' là số rất lẻ.</b>' : '⇒ Không phải số rất lẻ.') +
+        (all ? '' : ' Thử chạm số khác, hoặc để máy thử hết.');
+    }
+    $('#voTiles').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; sel = +b.dataset.m; render(); });
+    $('#voAll').onclick = () => { all = true; render(); $('#voMsg').innerHTML += '<br>🟨 Máy tìm thấy các số rất lẻ đến 100: <b>2, 18, 50, 98</b>. Chỉ có 4 số! Chúng có điểm gì chung?'; };
+    render();
+  })();
+})();
+</script>
+</body>
+</html>

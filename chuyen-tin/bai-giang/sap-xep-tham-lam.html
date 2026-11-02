@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sắp xếp rồi chọn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 1.3 */
+.deck{ position:relative; height:64px; margin:6px 0 4px; }
+.card{ position:absolute; top:0; width:calc(12.5% - 5px); height:58px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:19px; background:var(--surface); border:2px solid var(--line); transition:left .7s cubic-bezier(.5,0,.2,1), background .25s, border-color .25s, transform .25s; }
+.card.hit{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); transform:translateY(-5px); }
+.card.hit2{ background:var(--path-soft); border-color:var(--path); transform:translateY(-5px); }
+.qs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.qs .btn.on{ background:var(--path-soft); border-color:var(--path); }
+.gift{ width:48px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:12px; padding:4px 2px 5px; text-align:center; display:flex; flex-direction:column; line-height:1.2; transition:background .25s, border-color .25s, opacity .25s; }
+.gift .e{ font-size:22px; }
+.gift b{ font-size:15px; }
+.gift.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.gift.take{ background:var(--path-soft); border-color:var(--path); }
+.gift.stop{ opacity:.4; border-style:dashed; }
+.wallet{ margin-top:14px; display:flex; align-items:center; gap:10px; font-weight:700; }
+.wallet .em{ font-size:26px; }
+.wbar{ flex:1; height:22px; border-radius:999px; background:var(--surface); border:2px solid var(--line); overflow:hidden; position:relative; }
+.wbar i{ position:absolute; left:0; top:0; bottom:0; background:var(--done); border-radius:999px; transition:width .35s; }
+.wbar i.low{ background:var(--accent); }
+.basket{ margin-top:10px; font-weight:700; min-height:32px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.basket .e{ font-size:22px; animation:pop .35s both; }
+.ptr{ display:flex; gap:4px; min-width:max-content; margin-top:4px; }
+.ptr .nm{ font-family:var(--mono); font-weight:600; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.ptr span.p{ width:44px; flex:none; text-align:center; font-weight:800; font-size:14px; line-height:1.1; }
+.ptr .l{ color:var(--src); } .ptr .r{ color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.l{ background:var(--src-soft); border-color:var(--src); }
+.cellx.dim{ opacity:.35; }
+.krow{ display:flex; align-items:center; gap:12px; font-weight:600; flex-wrap:wrap; }
+@media (max-width:520px){ .card{ font-size:16px; height:50px; } .deck{ height:56px; } .gift{ width:36px; } .gift .e{ font-size:18px; } .gift b{ font-size:14px; } .ptr span.p{ width:36px; } .ptr .nm{ width:40px; font-size:13px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Mảng một chiều</span>
+  <h1>Sắp xếp rồi chọn</h1>
+  <p class="slogan">Xếp hàng ngay ngắn, mọi câu hỏi tự trả lời.</p>
+  <p class="lead">Rất nhiều bài trở nên dễ ngay sau một dòng <code>a.sort()</code>: số lớn nhất nằm cuối, hai số gần nhau nhất đứng cạnh nhau, món rẻ nhất đứng đầu. Bài này học cách “sắp xếp trước, nghĩ sau” và vài kiểu chọn tham lam đơn giản.</p>
+  <div class="notebook" aria-label="Dãy số trước và sau khi sắp xếp">
+    <div class="nb-row" id="nbA"></div>
+    <div class="nb-row" id="nbB"></div>
+    <p class="nb-note">Trước và sau <code>a.sort()</code>: hai số gần nhau nhất (29 và 34) giờ đứng cạnh nhau.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#the-bai">1. Thẻ lộn xộn</a>
+    <a href="#python">2. Sắp xếp trong Python</a>
+    <a href="#mua-qua">3. Mua nhiều quà nhất</a>
+    <a href="#hai-dau">4. Ghép cặp từ hai đầu</a>
+    <a href="#de-that">5. Đề thật</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="the-bai">
+  <h2><span class="num">1</span>Tám tấm thẻ lộn xộn</h2>
+  <p>Chọn một câu hỏi và thử trả lời bằng mắt. Sau đó bấm <b>Sắp xếp</b> và hỏi lại: câu trả lời nằm ở đâu?</p>
+  <div class="panel">
+    <div class="deck" id="deck"></div>
+    <div class="qs" id="qs"></div>
+    <div class="controls">
+      <button class="btn primary" id="sortBtn">Sắp xếp</button>
+      <button class="btn" id="shufBtn">Xáo lại</button>
+    </div>
+    <div class="explain" id="deckMsg"></div>
+  </div>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">📏</div>
+      <h4>Vị trí nói lên thứ hạng</h4>
+      <p>Sau khi sắp xếp tăng dần, số nhỏ thứ k nằm ở <code>a[k-1]</code>, số lớn nhất ở <code>a[-1]</code>.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🤝</div>
+      <h4>Hàng xóm là gần nhau nhất</h4>
+      <p>Hai số gần nhau nhất luôn đứng <b>cạnh nhau</b> sau khi sắp xếp. Chỉ cần so các cặp kề.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="python">
+  <h2><span class="num">2</span>Sắp xếp trong Python</h2>
+  <p>Không cần tự viết thuật toán sắp xếp. Python có sẵn và rất nhanh: 10⁵ số chỉ mất vài phần trăm giây.</p>
+  <div class="code" id="codeSort"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Muốn</th><th>Viết</th></tr></thead>
+      <tbody>
+        <tr><td>Sắp tăng dần, sửa luôn dãy</td><td><code>a.sort()</code></td></tr>
+        <tr><td>Tạo dãy mới đã sắp, giữ dãy cũ</td><td><code>b = sorted(a)</code></td></tr>
+        <tr><td>Sắp giảm dần</td><td><code>a.sort(reverse=True)</code></td></tr>
+        <tr><td>Sắp theo phần thứ hai của cặp</td><td><code>a.sort(key=lambda x: x[1])</code></td></tr>
+        <tr><td>Nhớ vị trí ban đầu</td><td><code>sorted((a[i], i) for i in range(n))</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tip"><b>Cẩn thận:</b> sắp xếp làm mất thứ tự ban đầu. Nếu đề hỏi “ở vị trí nào”, hãy sắp các cặp (giá trị, vị trí) thay vì chỉ giá trị.</div>
+</section>
+
+<!-- 3 -->
+<section id="mua-qua">
+  <h2><span class="num">3</span>Mua được nhiều quà nhất</h2>
+  <p>Lan có 15 nghìn đồng, muốn mua <b>nhiều món nhất</b> (mỗi món một cái). Nên mua món nào trước? Câu trả lời tự nhiên: <b>món rẻ nhất</b>. Sắp xếp giá tăng dần rồi mua lần lượt cho tới khi hết tiền.</p>
+
+  <div class="sim" id="simGift">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="giftRandom">🎲 Cửa hàng mới</button>
+      <button class="btn" id="giftReset">Cửa hàng mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="giftWrap"><div class="arr" id="giftA"></div></div>
+          <div class="wallet"><span class="em" aria-hidden="true">👛</span><div class="wbar"><i id="wFill"></i></div><span id="wTxt"></span></div>
+          <div class="basket" id="basket"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Món đang xét</span><span><i class="lg-path"></i>Đã mua</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao mua món rẻ trước là đúng?</b> Giả sử có một cách mua k món mà không chọn món rẻ nhất. Đổi một món trong đó lấy món rẻ nhất: vẫn k món, mà tiền chỉ ít đi. Cứ đổi như vậy, cách “rẻ trước” không bao giờ thua. Lý luận “đổi chỗ không thiệt” này là cách kiểm tra một mẹo tham lam.</div>
+</section>
+
+<!-- 4 -->
+<section id="hai-dau">
+  <h2><span class="num">4</span>Ghép cặp từ hai đầu</h2>
+  <p>Bài toán: đếm số cặp người có <b>tổng cân nặng ≤ p</b>. Thử mọi cặp mất khoảng n × n / 2 bước. Sau khi sắp xếp có mẹo hay hơn: nhìn <b>người nhẹ nhất</b> (đầu trái, mũi tên l) và <b>người nặng nhất</b> (đầu phải, mũi tên r).</p>
+  <ul>
+    <li>Nếu hai người này đi chung được, thì người nhẹ nhất đi chung được với <b>tất cả</b> những người từ l + 1 đến r (họ còn nhẹ hơn người ở r). Cộng luôn r − l cặp, rồi bỏ người nhẹ nhất.</li>
+    <li>Nếu không đi chung được, người nặng nhất không đi với ai được nữa. Bỏ người đó.</li>
+  </ul>
+
+  <div class="sim" id="simPair">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>p = <input type="range" id="pairP" min="5" max="16" value="9" aria-label="Tải trọng p"> <b id="pairPv">9</b></label>
+      <button class="btn" id="pairRandom">🎲 Dãy mới</button>
+      <button class="btn" id="pairReset">Ví dụ đề</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="pairWrap">
+            <div class="arr" id="pairA"></div>
+            <div class="ptr" id="pairP2"></div>
+          </div>
+          <div class="info" id="pairInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-src"></i>Người nhẹ nhất còn lại (l)</span><span><i class="lg-cur"></i>Người nặng nhất còn lại (r)</span><span><i class="lg-path"></i>Bạn đồng hành của l</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao nhanh?</b> Mỗi bước bỏ đi một người (ở đầu trái hoặc đầu phải), nên chỉ có khoảng n bước sau khi sắp xếp. Với n = 2 × 10⁵ vẫn chạy kịp.</div>
+</section>
+
+<!-- 5 -->
+<section id="de-that">
+  <h2><span class="num">5</span>Đề thật</h2>
+  <h3>Sư phạm 2025 · Hội thao</h3>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">n vận động viên nặng a₁, …, aₙ kg; xe đạp đôi chở tối đa p kg. Đếm số cách chọn <b>hai</b> vận động viên có tổng cân nặng ≤ p. n ≤ 2 × 10⁵; <b>60% số điểm</b> có n ≤ 1000.</p>
+  </div>
+  <p>Chính là mô phỏng mục 4. Ví dụ của đề: cân nặng 4 8 4 1 10 với p = 9, sắp xếp được 1 4 4 8 10, đếm được <b>4</b> cặp (1 với 4, 4, 8 và 4 với 4).</p>
+  <div class="tip"><b>Chiến lược lấy điểm:</b> hai vòng <code>for</code> thử mọi cặp đủ 60% (n ≤ 1000). Trọn điểm thì sắp xếp rồi ghép từ hai đầu. Hai người nặng bằng nhau vẫn là hai người khác nhau, đếm bình thường.</div>
+  <p><a href="../luyen-de/index.html#bai=csp-2025-hoi-thao">Mở đề Hội thao trong ngân hàng đề ↗</a></p>
+
+  <h3>KHTN 2025 · DIEM: Chênh lệch tổng sức</h3>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">N đội, đội i có sức bền mᵢ và sức mạnh vᵢ; tổng sức Tᵢ = mᵢ + vᵢ. In chênh lệch giữa tổng sức lớn nhất và bé nhất. N ≤ 10⁵, các số tới 10⁹.</p>
+  </div>
+  <p>Có thể tính hết Tᵢ, sắp xếp rồi lấy <code>T[-1] - T[0]</code>. Nhưng chỉ cần lớn nhất và bé nhất thì <b>không cần sắp xếp</b>: đi một lượt, giữ hai giá trị.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Đội</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+      <tbody>
+        <tr><td>m + v</td><td>4+6</td><td>1+3</td><td>2+5</td><td>4+2</td><td>3+3</td><td>7+2</td><td>8+1</td><td>7+8</td></tr>
+        <tr><td>T</td><td>10</td><td><b>4</b></td><td>7</td><td>6</td><td>6</td><td>9</td><td>9</td><td><b>15</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Đáp án 15 − 4 = <b>11</b>, khớp ví dụ của đề.</p>
+  <div class="code" id="codeDiem"></div>
+  <p><a href="../luyen-de/index.html#bai=khtn-2025-diem">Mở đề DIEM trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <h3>Khi nào nên sắp xếp trước?</h3>
+  <ul>
+    <li>Đề hỏi về <b>thứ hạng</b>: lớn thứ k, nhỏ nhất, ở giữa.</li>
+    <li>Đề hỏi về <b>các cặp</b>: gần nhau nhất, tổng không quá p, hiệu bằng d.</li>
+    <li>Đề cho được <b>chọn tuỳ ý</b> thứ tự hoặc chọn một nhóm: thường nên chọn từ rẻ đến đắt, từ nhẹ đến nặng.</li>
+  </ul>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Mất vị trí ban đầu</b>: sắp các cặp (giá trị, vị trí) nếu cần in vị trí.</li>
+    <li><b>Sắp xếp xâu thay vì số</b>: quên <code>int()</code> thì "10" &lt; "9". Đọc dữ liệu bằng <code>map(int, ...)</code>.</li>
+    <li><b>Tham lam chưa kiểm tra</b>: luôn thử lý luận “đổi chỗ không thiệt” hoặc tìm phản ví dụ nhỏ (xem bài Tham lam ở chương 3).</li>
+    <li><b>Đếm cặp hai lần hoặc ghép một người với chính mình</b>: cặp (i, j) cần i &lt; j.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Hai số gần nhau nhất <span class="level lv1">Dễ</span></h4>
+    <p>Cho n số. Tìm hiệu nhỏ nhất giữa hai số bất kỳ. n ≤ 10⁵.</p>
+    <details><summary>Gợi ý</summary><p>Sắp xếp, rồi chỉ so các cặp đứng cạnh nhau: <code>a[i+1] - a[i]</code>.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Thuyền cứu hộ <span class="level lv2">Vừa</span></h4>
+    <p>Mỗi thuyền chở tối đa <b>hai người</b> và tải trọng p. Cần ít nhất bao nhiêu thuyền để chở hết n người (mỗi người nặng không quá p)?</p>
+    <details><summary>Gợi ý</summary><p>Sắp xếp, nhìn người nặng nhất: cho người nhẹ nhất đi cùng nếu được, không thì đi một mình. Giống mục 4, mỗi bước dùng một thuyền.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Xếp hàng chờ ít nhất <span class="level lv2">Vừa</span></h4>
+    <p>n bạn xếp hàng nộp bài, bạn i cần tᵢ phút. Mỗi bạn phải chờ tất cả các bạn đứng trước. Xếp thứ tự sao cho <b>tổng thời gian chờ</b> nhỏ nhất.</p>
+    <details><summary>Gợi ý</summary><p>Bạn làm nhanh nên đứng trước hay sau? Thử đổi chỗ hai bạn đứng cạnh nhau xem tổng thay đổi thế nào.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Hội thao <span class="level lv4">Đề thật</span></h4>
+    <p>Sư phạm 2025, bài 2. Viết hai vòng for trước, rồi đổi sang ghép từ hai đầu.</p>
+    <details><summary>Gợi ý</summary><p>Đúng mô phỏng mục 4. Thử với p rất nhỏ (không cặp nào) và p rất lớn (mọi cặp: n × (n − 1) / 2).</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2025-hoi-thao">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. DIEM <span class="level lv4">Đề thật</span></h4>
+    <p>KHTN 2025, bài 1. Bài khởi động: làm trong 10 phút.</p>
+    <details><summary>Gợi ý</summary><p>Một lượt, giữ lớn nhất và bé nhất. Khởi tạo bằng tổng của đội đầu tiên, không khởi tạo bằng 0.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khtn-2025-diem">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 1: Mảng một chiều. Bài trước: <a href="tong-tien-to.html">Tổng tiền tố</a> · Bài sau: <a href="hai-con-tro.html">Hai con trỏ</a>. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  // ---------- Hero ----------
+  (function(){
+    const a = [42, 17, 88, 5, 63, 29, 71, 34], b = a.slice().sort((x, y) => x - y);
+    $('#nbA').innerHTML = '<span class="nm">a</span>' + a.map((v, i) => '<div class="nb-cell ' + (v === 29 || v === 34 ? 'nb-p' : 'nb-a') + '" style="animation-delay:' + (i * 0.06) + 's">' + v + '</div>').join('');
+    $('#nbB').innerHTML = '<span class="nm">sắp</span>' + b.map((v, i) => '<div class="nb-cell ' + (v === 29 || v === 34 ? 'nb-p last' : 'nb-a') + '" style="animation-delay:' + (0.5 + i * 0.06) + 's">' + v + '</div>').join('');
+  })();
+
+  // ---------- 1. Thẻ lộn xộn ----------
+  (function(){
+    let vals = [42, 17, 88, 5, 63, 29, 71, 34], sorted = false, q = -1;
+    const Q = [
+      ['Lớn nhất?', s => [s[s.length - 1]], s => 'Số lớn nhất là <b>' + s[s.length - 1] + '</b>, nằm ở cuối hàng: <code>a[-1]</code>.'],
+      ['Nhỏ thứ ba?', s => [s[2]], s => 'Số nhỏ thứ ba là <b>' + s[2] + '</b>, nằm ở ô thứ ba: <code>a[2]</code>.'],
+      ['Hai số gần nhau nhất?', s => { let k = 0; for (let i = 1; i < s.length - 1; i++) if (s[i + 1] - s[i] < s[k + 1] - s[k]) k = i; return [s[k], s[k + 1]]; },
+        s => { let k = 0; for (let i = 1; i < s.length - 1; i++) if (s[i + 1] - s[i] < s[k + 1] - s[k]) k = i; return 'Hai số gần nhau nhất là <b>' + s[k] + '</b> và <b>' + s[k + 1] + '</b> (cách ' + (s[k + 1] - s[k]) + '). Sau khi sắp xếp chúng đứng cạnh nhau.'; }],
+      ['Số ở giữa?', s => [s[3], s[4]], s => 'Hai số ở giữa là <b>' + s[3] + '</b> và <b>' + s[4] + '</b>: 3 số nhỏ hơn đứng bên trái, 3 số lớn hơn đứng bên phải.']
+    ];
+    function render(){
+      const s = vals.slice().sort((x, y) => x - y), hit = q >= 0 ? Q[q][1](s) : [];
+      const pos = sorted ? vals.map(v => s.indexOf(v)) : vals.map((_, i) => i);
+      $('#deck').innerHTML = vals.map((v, i) => '<div class="card' + (hit.includes(v) && sorted ? ' hit' : hit.includes(v) ? ' hit2' : '') + '" style="left:calc(' + (pos[i] * 12.5) + '% + 2px)">' + v + '</div>').join('');
+      $('#qs').innerHTML = Q.map((x, i) => '<button class="btn' + (i === q ? ' on' : '') + '" data-q="' + i + '">' + x[0] + '</button>').join('');
+      $('#deckMsg').innerHTML = q < 0 ? 'Chọn một câu hỏi. Khi thẻ còn lộn xộn, em phải nhìn hết cả 8 thẻ (với câu hỏi gần nhau nhất thì phải so mọi cặp: 28 cặp!).'
+        : sorted ? Q[q][2](s) + ' Không cần tìm, chỉ cần nhìn đúng chỗ.'
+        : 'Đáp án được tô tím. Em phải dò khắp hàng mới thấy. Giờ bấm <b>Sắp xếp</b> xem đáp án chạy về đâu.';
+    }
+    $('#qs').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b){ q = +b.dataset.q; render(); } });
+    $('#sortBtn').onclick = () => { sorted = true; render(); };
+    $('#shufBtn').onclick = () => {
+      sorted = false;
+      vals = Array.from({ length: 8 }, () => rnd(1, 99)).filter((v, i, arr) => arr.indexOf(v) === i);
+      while (vals.length < 8){ const v = rnd(1, 99); if (!vals.includes(v)) vals.push(v); }
+      render();
+    };
+    render();
+  })();
+
+  renderCode($('#codeSort'), [
+    'a = [42, 17, 88, 5, 63, 29, 71, 34]',
+    'a.sort()                 # [5, 17, 29, 34, 42, 63, 71, 88]',
+    'print(a[-1])             # lớn nhất: 88',
+    'print(a[2])              # nhỏ thứ ba: 29',
+    'gan = min(a[i+1] - a[i] for i in range(len(a) - 1))',
+    'print(gan)               # 5 (giữa 29 và 34)'
+  ]);
+
+  // ---------- 3. Mua quà ----------
+  const SHOP0 = [['🧸', 7], ['📒', 3], ['🎮', 9], ['✏️', 2], ['🧃', 5], ['🍫', 4]];
+  const EMO = ['🧸', '📒', '🎮', '✏️', '🧃', '🍫', '🎈', '🧩', '🖍️', '🍪'];
+  let SHOP = SHOP0.slice(), MONEY = 15;
+  function buildGift(){
+    const S = [], items = SHOP.slice(), srt = items.slice().sort((x, y) => x[1] - y[1]);
+    let tien = MONEY, taken = [];
+    const snap = o => S.push(Object.assign({ list: items, tien, taken: taken.slice(), cur: -1, stop: -1 }, o));
+    snap({ line: 2, msg: 'Cửa hàng có ' + items.length + ' món, giá ghi theo nghìn đồng. Lan có <b>' + MONEY + ' nghìn</b>. Món nào mua trước?' });
+    snap({ list: srt, line: 3, msg: 'Sắp xếp giá <b>tăng dần</b>: món rẻ nhất lên đầu. Giờ chỉ cần đi từ trái sang phải.' });
+    for (let i = 0; i < srt.length; i++){
+      const [e, g] = srt[i];
+      if (g > tien){ snap({ list: srt, line: 6, cur: i, stop: i, msg: 'Món ' + e + ' giá ' + g + ' nghìn, nhưng ví chỉ còn ' + tien + ' nghìn. Không mua được, và các món sau còn đắt hơn nên <b>dừng luôn</b>.' }); break; }
+      tien -= g; taken.push(i);
+      snap({ list: srt, line: 8, cur: i, msg: 'Mua ' + e + ' giá ' + g + ' nghìn. Ví còn <b>' + tien + '</b> nghìn. Đã mua ' + taken.length + ' món.' });
+    }
+    snap({ list: srt, line: 9, msg: '✅ Mua được nhiều nhất <b>' + taken.length + ' món</b>: ' + taken.map(i => srt[i][0]).join(' ') + '. Còn thừa ' + tien + ' nghìn.' });
+    return S;
+  }
+  function renderGift(s){
+    $('#giftA').innerHTML = '<span class="nm">giá</span>' + s.list.map(([e, g], i) => '<div class="gift' + (i === s.stop ? ' cur' : s.taken.includes(i) ? ' take' : i === s.cur ? ' cur' : s.stop >= 0 && i > s.stop ? ' stop' : '') + '"><span class="e">' + e + '</span><b>' + g + '</b></div>').join('');
+    $('#wFill').style.width = (s.tien / MONEY * 100) + '%';
+    $('#wFill').className = s.tien < 3 ? 'low' : '';
+    $('#wTxt').textContent = s.tien + ' / ' + MONEY + ' nghìn';
+    $('#basket').innerHTML = 'Giỏ: ' + (s.taken.length ? s.taken.map(i => '<span class="e">' + s.list[i][0] + '</span>').join('') : '<span style="color:var(--muted);font-weight:500">trống</span>');
+    follow($('#giftWrap'));
+  }
+  const simGift = makeSim($('#simGift'), {
+    build: buildGift, render: renderGift,
+    code: () => [
+      'gia = [' + SHOP.map(x => x[1]).join(', ') + ']',
+      'tien = ' + MONEY,
+      'gia.sort()              # rẻ nhất lên đầu',
+      'dem = 0',
+      'for g in gia:',
+      '    if g > tien: break   # không đủ tiền: dừng',
+      '    tien -= g',
+      '    dem += 1',
+      'print(dem)'
+    ]
+  });
+  $('#giftRandom').onclick = () => { const e = EMO.slice().sort(() => Math.random() - 0.5); SHOP = e.slice(0, rnd(5, 7)).map(x => [x, rnd(1, 9)]); simGift.rebuild(); };
+  $('#giftReset').onclick = () => { SHOP = SHOP0.slice(); simGift.rebuild(); };
+
+  // ---------- 4. Hai đầu ----------
+  const PAIR0 = [4, 8, 4, 1, 10];
+  let PAIR = PAIR0.slice(), P = 9;
+  function buildPair(){
+    const S = [], a = PAIR.slice().sort((x, y) => x - y), n = a.length;
+    let l = 0, r = n - 1, dem = 0;
+    const snap = o => S.push(Object.assign({ a, l, r, dem, rng: [], sorted: true, gone: [] }, o));
+    snap({ a: PAIR, sorted: false, l: -1, r: -1, line: 1, msg: 'Cân nặng của ' + n + ' người, xe chở tối đa <b>p = ' + P + '</b> kg.' });
+    snap({ line: 3, msg: 'Sắp xếp tăng dần. Mũi tên <b>l</b> ở người nhẹ nhất, mũi tên <b>r</b> ở người nặng nhất.' });
+    while (l < r){
+      const sum = a[l] + a[r];
+      if (sum <= P){
+        dem += r - l;
+        snap({ rng: [l + 1, r], line: 7, msg: 'a[l] + a[r] = ' + a[l] + ' + ' + a[r] + ' = ' + sum + ' ≤ ' + P + '. Người nặng ' + a[l] + ' đi được với <b>cả ' + (r - l) + ' người</b> tô tím (ai cũng không nặng hơn ' + a[r] + '). Cộng ' + (r - l) + ', tổng <b>' + dem + '</b> cặp. Bỏ người nhẹ nhất: l tiến.' });
+        l++;
+      } else {
+        snap({ line: 9, msg: 'a[l] + a[r] = ' + a[l] + ' + ' + a[r] + ' = ' + sum + ' &gt; ' + P + '. Ngay cả người nhẹ nhất cũng không đi được với người nặng ' + a[r] + ', nên người này hết cặp. Bỏ đi: r lùi.' });
+        r--;
+      }
+    }
+    snap({ line: 10, l: -1, r: -1, msg: '✅ Hai mũi tên gặp nhau. Có <b>' + dem + '</b> cặp đi chung được xe.' });
+    return S;
+  }
+  function renderPair(s){
+    const a = s.a;
+    $('#pairA').innerHTML = '<span class="nm">a =</span>' + a.map((v, i) => {
+      const out = s.sorted && s.l >= 0 && (i < s.l || i > s.r);
+      const cls = !s.sorted || s.l < 0 ? '' : out ? ' dim' : i === s.l ? ' l' : i === s.r ? ' cur' : (s.rng.length && i >= s.rng[0] && i <= s.rng[1]) ? ' rng' : '';
+      return '<div class="cellx' + cls + '"><small>[' + i + ']</small><b>' + v + '</b></div>';
+    }).join('');
+    $('#pairP2').innerHTML = '<span class="nm"></span>' + a.map((_, i) => '<span class="p">' + (s.l === i ? '<span class="l">▲<br>l</span>' : '') + (s.r === i ? '<span class="r">▲<br>r</span>' : '') + '</span>').join('');
+    $('#pairInfo').innerHTML = '<span>Số cặp: <b>' + s.dem + '</b></span><span>p = <b>' + P + '</b></span>';
+    follow($('#pairWrap'));
+  }
+  const simPair = makeSim($('#simPair'), {
+    build: buildPair, render: renderPair,
+    code: () => [
+      'a = [' + PAIR.join(', ') + ']',
+      'p = ' + P,
+      'a.sort()',
+      'l, r = 0, len(a) - 1',
+      'dem = 0',
+      'while l < r:',
+      '    if a[l] + a[r] <= p:',
+      '        dem += r - l     # l đi với mọi người l+1..r',
+      '        l += 1',
+      '    else: r -= 1         # r không đi với ai được',
+      'print(dem)'
+    ]
+  });
+  $('#pairP').addEventListener('input', e => { P = +e.target.value; $('#pairPv').textContent = P; simPair.rebuild(); });
+  $('#pairRandom').onclick = () => { PAIR = Array.from({ length: rnd(6, 8) }, () => rnd(1, 10)); simPair.rebuild(); };
+  $('#pairReset').onclick = () => { PAIR = PAIR0.slice(); P = 9; $('#pairP').value = 9; $('#pairPv').textContent = 9; simPair.rebuild(); };
+
+  renderCode($('#codeDiem'), [
+    'import sys',
+    'data = sys.stdin.read().split()',
+    'n = int(data[0])',
+    'T = [int(data[1 + 2*i]) + int(data[2 + 2*i]) for i in range(n)]',
+    'print(max(T) - min(T))     # không cần sắp xếp'
+  ]);
+})();
+</script>
+</body>
+</html>

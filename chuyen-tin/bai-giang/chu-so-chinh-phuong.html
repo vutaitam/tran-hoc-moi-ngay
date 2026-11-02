@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chữ số và đếm theo khối</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 2.5 */
+.strip{ display:flex; gap:2px; flex-wrap:wrap; font-family:var(--mono); font-weight:600; font-size:15px; }
+.strip span{ padding:2px 1px; border-radius:4px; }
+.strip .g{ color:var(--muted); }
+.strip .hit{ background:var(--accent); color:var(--accent-ink); padding:2px 4px; }
+.cards{ display:flex; gap:6px; align-items:center; min-height:58px; flex-wrap:wrap; }
+.dcard{ width:42px; height:52px; border-radius:10px; display:grid; place-items:center; font-weight:800; font-size:24px; background:var(--surface); border:2px solid var(--line); transition:background .25s, border-color .25s; }
+.dcard.cur{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); animation:pop .35s both; }
+.dcard.done{ background:var(--done-soft); border-color:var(--done); }
+.dcard.sm{ width:34px; height:40px; font-size:18px; }
+.rowlbl{ font-weight:700; font-size:14px; color:var(--muted); min-width:52px; }
+.vrow{ display:flex; gap:10px; align-items:center; margin:6px 0; flex-wrap:wrap; }
+.sumbig{ font-size:1.4rem; font-weight:800; }
+.chainx{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-weight:800; font-size:1.2rem; margin-top:10px; }
+.chainx .lk{ color:var(--muted); font-size:13px; font-weight:600; }
+.chainx .fin{ background:var(--accent); color:var(--accent-ink); border-radius:10px; padding:2px 12px; }
+.g9{ display:grid; grid-template-columns:repeat(9, minmax(0,1fr)); gap:4px; }
+.g9 .hd{ text-align:center; font-size:11.5px; font-weight:700; color:var(--muted); }
+.g9 .c{ border:2px solid var(--line); background:var(--surface); border-radius:8px; text-align:center; padding:3px 0; font-weight:700; font-size:14px; line-height:1.2; transition:background .2s, border-color .2s; }
+.g9 .c small{ display:block; font-size:10px; color:var(--muted); font-weight:600; }
+.g9 .c.in{ background:var(--src-soft); border-color:var(--src); }
+.g9 .c.full{ background:var(--done-soft); border-color:var(--done); }
+.g9 .rs{ grid-column:1/-1; font-size:12px; color:var(--muted); text-align:right; margin:-2px 2px 2px; }
+.blocks{ display:grid; gap:8px; }
+.blk{ display:grid; grid-template-columns:62px 1fr; gap:4px 10px; align-items:center; font-size:13.5px; }
+.blk .bd{ font-weight:800; }
+.blk .bar{ height:16px; border-radius:8px; background:var(--surface); border:2px solid var(--line); position:relative; overflow:hidden; }
+.blk .bar i{ position:absolute; left:0; top:0; bottom:0; background:var(--done); opacity:.6; transition:width .35s; }
+.blk .bar b{ position:absolute; top:-2px; width:4px; height:16px; background:var(--accent); border-radius:2px; }
+.blk .tx{ grid-column:2; color:var(--muted); }
+.blk.cur .bd{ color:var(--accent); }
+.blk.cur .bar{ border-color:var(--accent); }
+.blk.wait{ opacity:.4; }
+.zoom{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:flex-end; }
+.znum{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+.znum .ds{ display:flex; gap:2px; }
+.znum .ds span{ width:24px; height:30px; border-radius:6px; display:grid; place-items:center; font-weight:800; background:var(--surface); border:2px solid var(--line); font-size:15px; }
+.znum.so .ds span{ border-color:var(--src); background:var(--src-soft); }
+.znum .ds span.hit{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.zoom.long .znum .ds span{ width:19px; height:26px; font-size:13px; border-radius:5px; }
+.znum small{ font-size:11px; color:var(--muted); }
+.kin{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.kin input{ font:inherit; font-weight:700; font-size:16px; width:12em; max-width:100%; padding:6px 10px; border-radius:10px; border:2px solid var(--line); background:var(--surface); color:var(--ink); }
+.dots{ display:flex; flex-direction:column; gap:4px; align-items:flex-start; min-height:60px; }
+.dots .r{ display:flex; gap:4px; }
+.dots i{ width:14px; height:14px; border-radius:50%; background:var(--src); display:block; animation:pop .3s both; }
+.dots i.x{ background:var(--accent); }
+.cmp{ display:grid; gap:8px; margin-top:12px; }
+.cmp .ln{ font-family:var(--mono); font-size:14px; background:var(--surface); border:2px solid var(--line); border-radius:10px; padding:8px 10px; overflow-wrap:anywhere; }
+.cmp .ln.bad{ border-color:var(--accent); background:var(--accent-soft); }
+.cmp .ln.ok{ border-color:var(--src); background:var(--src-soft); }
+.g10{ display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
+.g10 .c{ border:2px solid var(--line); background:var(--surface); border-radius:8px; text-align:center; padding:4px 0; font-weight:700; font-size:13px; }
+.g10 .c.x{ background:var(--src-soft); border-color:var(--src); }
+.g10 .c.y{ background:var(--done-soft); border-color:var(--done); }
+.g10 .c.xy{ background:var(--path); border-color:var(--path); color:#fff; }
+.sl3{ display:grid; gap:6px; }
+.sl3 label{ display:flex; align-items:center; gap:10px; font-weight:600; }
+.sl3 label b{ min-width:2em; }
+@media (max-width:520px){ .dcard{ width:36px; height:46px; font-size:20px; } .g9 .c{ font-size:12.5px; } .g10 .c{ font-size:11.5px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Số học</span>
+  <h1>Chữ số và đếm theo khối</h1>
+  <p class="slogan">Khi N lên tới 10¹⁸, đừng đếm từng số: hãy đếm cả khối.</p>
+  <p class="lead">Bóc chữ số, số chính phương, đếm bội… nghe dễ. Cái khó là đề cho N rất lớn để vòng lặp “thử từng số” không kịp. Bài này dạy em nhìn ra các <b>khối lặp lại</b> và tính cả khối bằng một phép chia.</p>
+  <div class="notebook" aria-label="Dãy viết liền các số 1, 2, 3, ...">
+    <div class="strip" id="heroStrip"></div>
+    <p class="nb-note">Viết liền 1, 2, 3, … thành một dãy chữ số. Chữ số thứ 21 đến 24 là <b>5161</b>. Còn chữ số thứ 10¹⁴ là gì? Đề PTNK 2023 hỏi đúng câu này (mục 3).</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#boc">1. Bóc chữ số</a>
+    <a href="#so-nut">2. Số nút: khối 9</a>
+    <a href="#khoi">3. Khối chữ số</a>
+    <a href="#chinh-phuong">4. Số chính phương</a>
+    <a href="#boi">5. Đếm bội</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="boc">
+  <h2><span class="num">1</span>Bóc chữ số như bóc vỏ hành</h2>
+  <p>Hai phép toán quen thuộc làm được mọi việc với chữ số:</p>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🔍</div>
+      <h4><code>n % 10</code>: nhìn chữ số cuối</h4>
+      <p>2026 % 10 = 6.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">✂️</div>
+      <h4><code>n // 10</code>: cắt bỏ chữ số cuối</h4>
+      <p>2026 // 10 = 202.</p>
+    </div>
+  </div>
+  <p>Lặp lại hai việc này cho tới khi n = 0 là lấy ra được từng chữ số, từ phải sang trái.</p>
+
+  <div class="sim" id="simDig">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="digRandom">🎲 Số mới</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="vrow"><span class="rowlbl">n =</span><div class="cards" id="digN"></div></div>
+          <div class="vrow"><span class="rowlbl">đã bóc</span><div class="cards" id="digOut"></div></div>
+          <div class="vrow"><span class="rowlbl">tong =</span><span class="sumbig" id="digSum"></span></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Chữ số cuối đang xét</span><span><i class="lg-done"></i>Đã bóc ra</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Cách ngắn trong Python:</b> <code>sum(map(int, str(n)))</code> đổi n thành xâu rồi cộng từng ký tự. Cả hai cách đều đúng. Nên biết cách <code>% 10</code> vì nhiều bài cần làm với từng chữ số theo thứ tự từ phải sang.</div>
+</section>
+
+<!-- 2 -->
+<section id="so-nut">
+  <h2><span class="num">2</span>Số nút: mọi thứ lặp lại theo khối 9</h2>
+  <p>Đề BRVT 2025 định nghĩa <b>số nút</b> của N: cộng các chữ số, nếu được số lớn hơn 9 thì lại cộng tiếp, đến khi còn một chữ số. Gõ thử một số:</p>
+  <div class="panel">
+    <div class="kin"><input id="rootIn" inputmode="numeric" value="76" aria-label="Nhập số N"><button class="btn" id="rootRnd">🎲</button></div>
+    <div class="chainx" id="rootChain"></div>
+  </div>
+  <p>Đề hỏi <b>tổng số nút của mọi số từ A đến B</b>, với B tới 10⁹. Tính từng số một thì Python cần cỡ vài phút. Hãy xếp các số thành hàng 9 số và nhìn số nút (chữ nhỏ):</p>
+  <div class="panel">
+    <div class="g9" id="g9"></div>
+    <div class="sl3" style="margin-top:12px">
+      <label>A = <b id="aV"></b><input type="range" id="aS" min="1" max="54" value="1" aria-label="A"></label>
+      <label>B = <b id="bV"></b><input type="range" id="bS" min="1" max="54" value="30" aria-label="B"></label>
+    </div>
+    <div class="explain" id="g9Msg"></div>
+  </div>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Quy luật</h4>
+      <p>Số nút của n bằng <code>1 + (n - 1) % 9</code>. Hàng nào cũng là 1, 2, …, 9 nên mỗi hàng đủ có tổng 45.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Tổng từ 1 đến t</h4>
+      <p>Có <code>t // 9</code> hàng đủ, còn lẻ <code>r = t % 9</code> số có số nút 1, 2, …, r.</p>
+      <div class="ex"><code>F(t) = 45 * (t // 9) + r * (r + 1) // 2</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Từ A đến B</h4>
+      <p>Lấy tổng tới B trừ đi tổng tới A − 1, giống tổng tiền tố.</p>
+      <div class="ex"><code>F(B) - F(A - 1)</code></div>
+    </div>
+  </div>
+  <div class="tip"><b>Bẫy:</b> viết <code>n % 9</code> sẽ cho 0 với 9, 18, 27, … trong khi số nút của chúng là 9. Hãy thử lại với n = 9 trước khi nộp.</div>
+  <p><a href="../luyen-de/index.html#bai=brvt-2025-minhhoa-bai2">Mở đề Số nút (BRVT 2025) ↗</a></p>
+</section>
+
+<!-- 3 -->
+<section id="khoi">
+  <h2><span class="num">3</span>Đếm theo khối chữ số: tìm chữ số thứ k</h2>
+  <div class="panel problem">
+    <h4>Đề PTNK 2023: Mật khẩu</h4>
+    <p style="margin:0">Viết liền 1, 2, 3, … thành dãy <span class="mini" style="font-family:var(--mono)">123456789101112…</span> Cho k ≤ 10¹⁴, in 4 chữ số liên tiếp bắt đầu từ chữ số thứ k. <b>50% số test có k ≤ 10⁶</b>.</p>
+  </div>
+  <p><b>Lấy 50% trước:</b> với k ≤ 10⁶, cứ ghép chuỗi <code>''.join(str(i) for i in range(1, 300000))</code> rồi cắt ra 4 ký tự. Với k = 10¹⁴ thì không thể ghép chuỗi. Hãy chia các số thành <b>khối theo số chữ số</b>:</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Khối</th><th>Từ … đến</th><th>Bao nhiêu số</th><th>Bao nhiêu chữ số</th></tr></thead>
+      <tbody>
+        <tr><td>1 chữ số</td><td>1 … 9</td><td>9</td><td>9 × 1 = 9</td></tr>
+        <tr><td>2 chữ số</td><td>10 … 99</td><td>90</td><td>90 × 2 = 180</td></tr>
+        <tr><td>3 chữ số</td><td>100 … 999</td><td>900</td><td>900 × 3 = 2.700</td></tr>
+        <tr><td>d chữ số</td><td>10ᵈ⁻¹ …</td><td>9 × 10ᵈ⁻¹</td><td>9 × 10ᵈ⁻¹ × d</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Cách tìm: bỏ qua nguyên khối khi k còn lớn hơn số chữ số của khối, cho tới khi k rơi vào một khối. Trong khối đó mọi số dài đúng d chữ số, nên một phép chia cho biết k nằm trong số nào.</p>
+
+  <div class="sim" id="simPw">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <div class="kin"><input id="pwK" inputmode="numeric" value="21" aria-label="Vị trí k" style="width:10em"><button class="btn" id="pwGo">Chạy với k này</button></div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="blocks" id="pwBlocks"></div>
+          <div class="zoom" id="pwZoom"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-done"></i>Khối bỏ qua cả khối</span><span><i class="lg-cur"></i>Vị trí k</span><span><i class="lg-src"></i>Số chứa chữ số cần tìm</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Ghép 4 chữ số:</b> gọi hàm tìm chữ số với k, k + 1, k + 2, k + 3 rồi ghép thành <b>xâu</b>. Đừng đổi sang số: mật khẩu “0310” mà in thành 310 là mất điểm. Bốn chữ số có thể vắt qua hai số, thậm chí qua hai khối (ví dụ k = 8: “8910”), nên làm riêng từng vị trí là an toàn nhất.</div>
+  <p><a href="../luyen-de/index.html#bai=ptnk-2023-password">Mở đề Mật khẩu (PTNK 2023) ↗</a></p>
+</section>
+
+<!-- 4 -->
+<section id="chinh-phuong">
+  <h2><span class="num">4</span>Số chính phương: xếp được thành hình vuông</h2>
+  <p>x là <b>số chính phương</b> nếu x = k × k với k nguyên. Bằng hình: x viên bi xếp vừa khít một hình vuông. Kéo thử:</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">x = <b id="xV"></b>
+      <input type="range" id="xS" min="1" max="64" value="20" aria-label="Chọn x">
+    </label>
+    <div class="two" style="margin-top:10px;align-items:center">
+      <div class="dots" id="dots"></div>
+      <div class="eq" id="xEq" style="font-weight:600"></div>
+    </div>
+  </div>
+  <p>Cách kiểm tra: lấy <b>căn bậc hai nguyên</b> <code>k = isqrt(x)</code> (cạnh hình vuông lớn nhất xếp được), rồi xem <code>k * k == x</code>. Vì sao không dùng <code>math.sqrt</code>? Vì nó tính bằng <b>số thực</b>, có làm tròn. Với số lớn, kết quả có thể lệch 1:</p>
+  <div class="panel">
+    <div class="kin">
+      <input id="bigIn" inputmode="numeric" value="9999999999999999" aria-label="Nhập N">
+      <button class="btn" data-big="99">99</button>
+      <button class="btn" data-big="9999999999999999">10¹⁶ − 1</button>
+      <button class="btn" data-big="999999999999999999">10¹⁸ − 1</button>
+    </div>
+    <div class="cmp" id="bigCmp"></div>
+  </div>
+  <div class="remember">Ghi nhớ: căn bậc hai dùng <code>from math import isqrt</code>. Số chính phương trong đoạn [A, B] có đúng <code>isqrt(B) - isqrt(A - 1)</code> số, không cần duyệt.</div>
+
+  <h3>Đề thật: SQRT (KHTN 2026)</h3>
+  <p>Cho N ≤ 10⁵ số, mỗi số ≤ 10⁹. Đếm bao nhiêu số là số chính phương (ví dụ <code>1 4 7 16 10</code> → 3). Đây là bài lấy trọn điểm nếu viết cẩn thận:</p>
+  <div class="code" id="codeSqrt"></div>
+  <p><a href="../luyen-de/index.html#bai=khtn-2026-sqrt">Mở đề SQRT (KHTN 2026) ↗</a></p>
+</section>
+
+<!-- 5 -->
+<section id="boi">
+  <h2><span class="num">5</span>Đếm bội: mỗi X số lại có một bội</h2>
+  <div class="panel problem">
+    <h4>Đề Haizuka 2024: Chữ số yêu thích</h4>
+    <p style="margin:0">Hải thích bội của X, Linh thích bội của Y. Đếm các số từ 1 đến N là bội của X <b>hoặc</b> Y. N ≤ 10¹⁸. Ví dụ X = 3, Y = 7, N = 15: có 7 số (3, 6, 7, 9, 12, 14, 15).</p>
+  </div>
+  <p>Trong dãy 1..N, bội của X xuất hiện đều đặn: cứ mỗi khối X số có đúng một bội. Nên số bội của X là <code>N // X</code>. Kéo để xem:</p>
+  <div class="panel">
+    <div class="sl3">
+      <label>X = <b id="fxV"></b><input type="range" id="fxS" min="1" max="10" value="3" aria-label="X"></label>
+      <label>Y = <b id="fyV"></b><input type="range" id="fyS" min="1" max="10" value="7" aria-label="Y"></label>
+      <label>N = <b id="fnV"></b><input type="range" id="fnS" min="10" max="60" value="15" aria-label="N"></label>
+    </div>
+    <div class="g10" id="g10" style="margin-top:12px"></div>
+    <div class="legend" style="margin-top:8px"><span><i class="lg-src"></i>Bội của X</span><span><i class="lg-done"></i>Bội của Y</span><span><i class="lg-path"></i>Bội của cả hai</span></div>
+    <div class="explain" id="favMsg"></div>
+  </div>
+  <p>Những số tím bị đếm <b>hai lần</b> (một lần trong bội X, một lần trong bội Y), nên phải trừ đi một lần. Số chia hết cả X và Y chính là bội của <b>bội chung nhỏ nhất</b> L = X × Y // ƯCLN(X, Y).</p>
+  <div class="code" id="codeFav"></div>
+  <div class="tip"><b>Dùng <code>//</code>, không dùng <code>/</code>:</b> với N = 10¹⁸, phép chia <code>/</code> ra số thực và bị làm tròn, kết quả có thể lệch. Cũng đừng duyệt từ 1 đến N: 10¹⁸ vòng lặp thì chạy tới hàng nghìn năm.</div>
+  <p><a href="../luyen-de/index.html#bai=haizuka-2024-favoritenum">Mở đề Chữ số yêu thích (Haizuka 2024) ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <h3>Dấu hiệu nên “đếm theo khối”</h3>
+  <ul>
+    <li>N tới 10⁹ hoặc 10¹⁸, trong khi đề hỏi một tổng hay số lượng trên đoạn [1, N] hoặc [A, B].</li>
+    <li>Có một thứ lặp đều: số nút lặp mỗi 9 số, bội của X lặp mỗi X số, số có d chữ số chiếm một khối cố định.</li>
+    <li>Viết F(t) = “kết quả trên [1, t]”, đáp án đoạn [A, B] là <code>F(B) - F(A - 1)</code>.</li>
+  </ul>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Việc</th><th>Python</th><th>Bẫy</th></tr></thead>
+      <tbody>
+        <tr><td>Chữ số cuối, bỏ chữ số cuối</td><td><code>n % 10</code>, <code>n // 10</code></td><td>số 0 có một chữ số</td></tr>
+        <tr><td>Số nút</td><td><code>1 + (n - 1) % 9</code></td><td><code>n % 9</code> sai với bội của 9</td></tr>
+        <tr><td>Căn nguyên, số chính phương</td><td><code>k = isqrt(x)</code>, <code>k * k == x</code></td><td><code>math.sqrt</code> lệch với số lớn</td></tr>
+        <tr><td>Số bội của X trong [1, N]</td><td><code>N // X</code></td><td>dùng <code>/</code> bị làm tròn</td></tr>
+        <tr><td>Bội của X hoặc Y</td><td><code>N//X + N//Y - N//L</code></td><td>quên trừ phần đếm hai lần</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Duyệt tới 10⁹</b>: Python làm khoảng 10 triệu phép mỗi giây, 10⁹ vòng mất vài phút. Chỉ dùng cách này để lấy subtask nhỏ.</li>
+    <li><b>In số thay vì xâu</b>: mất số 0 ở đầu (“0310” thành 310).</li>
+    <li><b>Lệch 1 ở vị trí</b>: đề đánh số từ 1, xâu Python đánh số từ 0. Viết rõ <code>k - 1</code>.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <p>Mỗi bài: viết cách trâu cho N nhỏ, viết cách theo khối, rồi cho hai cách chạy với nhiều N ngẫu nhiên để so.</p>
+  <div class="ex-item">
+    <h4>Bài 1. Đếm số chính phương trong [A, B] <span class="level lv1">Dễ</span></h4>
+    <p>1 ≤ A ≤ B ≤ 10¹⁸.</p>
+    <details><summary>Gợi ý</summary><p>Số chính phương ≤ t có đúng isqrt(t) số. Dùng F(B) − F(A − 1).</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Bội của 2, 3 hoặc 5 <span class="level lv2">Vừa</span></h4>
+    <p>Đếm các số trong [1, N] chia hết cho ít nhất một trong ba số 2, 3, 5. N ≤ 10¹⁸.</p>
+    <details><summary>Gợi ý</summary><p>Cộng ba nhóm, trừ ba nhóm “hai số cùng lúc” (6, 10, 15), rồi cộng lại nhóm “cả ba” (30). Kiểm tra bằng cách trâu với N = 100.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Có bao nhiêu chữ số? <span class="level lv2">Vừa</span></h4>
+    <p>Viết liền các số từ 1 đến N (N ≤ 10¹⁸) thành một dãy. Dãy dài bao nhiêu chữ số?</p>
+    <details><summary>Gợi ý</summary><p>Cộng nguyên các khối 1, 2, … chữ số nằm trọn trong [1, N], rồi cộng phần khối cuối còn dang dở: (N − 10ᵈ⁻¹ + 1) × d.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Số nút <span class="level lv4">Đề thật</span></h4>
+    <p>BRVT 2025. Làm trâu cho phần nhỏ, rồi công thức F(B) − F(A − 1) ở mục 2.</p>
+    <details><summary>Gợi ý</summary><p>Ví dụ của đề là A = 1, B = 5 cho 15. Hãy viết hàm F rồi kiểm tra F(5) = 15, F(9) = 45, F(10) = 46.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=brvt-2025-minhhoa-bai2">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Mật khẩu <span class="level lv4">Đề thật</span></h4>
+    <p>PTNK 2023. Ghép chuỗi để chắc 50%, rồi tìm theo khối cho k ≤ 10¹⁴.</p>
+    <details><summary>Gợi ý</summary><p>Viết hàm <code>chu_so(k)</code> như mô phỏng mục 3, gọi 4 lần. Đối chiếu với cách ghép chuỗi cho mọi k từ 1 đến 5000.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=ptnk-2023-password">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 6. SQRT <span class="level lv4">Đề thật</span></h4>
+    <p>KHTN 2026. Đếm số chính phương trong dãy.</p>
+    <details><summary>Gợi ý</summary><p>Đếm phần tử, kể cả các số trùng nhau. Số 1 = 1² cũng là số chính phương.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khtn-2026-sqrt">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 7. Chữ số yêu thích <span class="level lv4">Đề thật</span></h4>
+    <p>Haizuka 2024. Chú ý ví dụ của đề nhập theo thứ tự X Y N.</p>
+    <details><summary>Gợi ý</summary><p>Thử các trường hợp X = Y, X = 1, N &lt; X. Dùng <code>math.gcd</code> để tính L.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=haizuka-2024-favoritenum">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 2: Số học. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  // Chữ số thứ k (đếm từ 1) của dãy 123456789101112...
+  function digitAt(k){
+    let d = 1, dem = 9, dau = 1;
+    while (k > d * dem){ k -= d * dem; d++; dem *= 10; dau *= 10; }
+    const so = dau + Math.floor((k - 1) / d);
+    return String(so)[(k - 1) % d];
+  }
+  const root = n => 1 + (n - 1) % 9;
+  function isqrtBig(n){            // căn nguyên chính xác với BigInt
+    if (n < 2n) return n;
+    let x = BigInt(Math.floor(Math.sqrt(Number(n))));
+    while (x * x > n) x--;
+    while ((x + 1n) * (x + 1n) <= n) x++;
+    return x;
+  }
+
+  // ---------- Hero ----------
+  (function(){
+    let h = '', pos = 0;
+    for (let i = 1; i <= 24; i++) for (const c of String(i)){ pos++; h += '<span class="' + (pos >= 21 && pos <= 24 ? 'hit' : i % 2 ? '' : 'g') + '">' + c + '</span>'; }
+    $('#heroStrip').innerHTML = h;   // tô xen kẽ theo từng số để thấy ranh giới
+  })();
+
+  // ---------- 1. Bóc chữ số ----------
+  let DN = 2026;
+  function buildDig(){
+    const S = [], out = [];
+    let n = DN, tong = 0;
+    const snap = o => S.push(Object.assign({ n, out: out.slice(), tong, hit: false }, o));
+    snap({ line: 2, msg: 'Bắt đầu với n = <b>' + DN + '</b> và tong = 0. Ta bóc từng chữ số từ <b>bên phải</b>.' });
+    while (n > 0){
+      const d = n % 10;
+      snap({ line: 4, hit: true, msg: '<code>n % 10 = ' + n + ' % 10 = ' + d + '</code>: chữ số cuối là <b>' + d + '</b>. Cộng vào tong: ' + tong + ' + ' + d + ' = ' + (tong + d) + '.' });
+      tong += d; out.push(d); n = Math.floor(n / 10);
+      snap({ line: 5, msg: '<code>n //= 10</code>: cắt bỏ chữ số cuối, n còn <b>' + (n || 0) + '</b>.' + (n ? '' : ' n = 0 nên vòng lặp dừng.') });
+    }
+    snap({ line: 6, msg: '🎉 Tổng các chữ số của ' + DN + ' là <b>' + tong + '</b>. Để ý thứ tự bóc ra là từ phải sang trái: ' + out.join(', ') + '.' });
+    return S;
+  }
+  function renderDig(s){
+    const ds = s.n ? String(s.n).split('') : [];
+    $('#digN').innerHTML = ds.length ? ds.map((c, i) => '<div class="dcard' + (s.hit && i === ds.length - 1 ? ' cur' : '') + '">' + c + '</div>').join('') : '<div class="dcard">0</div>';
+    $('#digOut').innerHTML = s.out.map(d => '<div class="dcard sm done">' + d + '</div>').join('') || '<span style="color:var(--muted)">chưa có</span>';
+    $('#digSum').textContent = s.tong;
+  }
+  const simDig = makeSim($('#simDig'), {
+    build: buildDig, render: renderDig,
+    code: () => [
+      'n = ' + DN,
+      'tong = 0',
+      'while n > 0:',
+      '    tong += n % 10    # chữ số cuối',
+      '    n //= 10          # bỏ chữ số cuối',
+      'print(tong)'
+    ]
+  });
+  $('#digRandom').onclick = () => { DN = rnd(100, 9999999); simDig.rebuild(); };
+
+  // ---------- 2. Số nút ----------
+  (function(){
+    function chain(){
+      const raw = ($('#rootIn').value.match(/\d/g) || []).join('').slice(0, 30) || '0';
+      let s = raw.replace(/^0+(?=\d)/, ''), h = '<span>' + s + '</span>';
+      let guard = 0;
+      while (s.length > 1 && guard++ < 6){
+        const t = String(s.split('').reduce((a, c) => a + +c, 0));
+        h += '<span class="lk">→ cộng chữ số →</span><span>' + t + '</span>';
+        s = t;
+      }
+      h = h.replace(/<span>(\d)<\/span>$/, '<span class="fin">$1</span>');
+      $('#rootChain').innerHTML = h + (raw.length <= 15 && +raw > 0 ? '<span class="lk">&nbsp; công thức: 1 + (n − 1) % 9 = ' + root(+raw) + '</span>' : '');
+    }
+    $('#rootIn').addEventListener('input', chain);
+    $('#rootRnd').onclick = () => { $('#rootIn').value = rnd(10, 99999999); chain(); };
+    chain();
+
+    const F = t => 45 * Math.floor(t / 9) + (t % 9) * (t % 9 + 1) / 2;
+    function grid(){
+      let A = +$('#aS').value, B = +$('#bS').value;
+      if (A > B){ if (this === $('#aS')) $('#bS').value = B = A; else $('#aS').value = A = B; }
+      $('#aV').textContent = A; $('#bV').textContent = B;
+      let h = '';
+      for (let r = 1; r <= 9; r++) h += '<div class="hd">nút ' + r + '</div>';
+      for (let row = 0; row < 6; row++){
+        const lo = row * 9 + 1, hi = lo + 8, full = A <= lo && hi <= B;
+        for (let n = lo; n <= hi; n++) h += '<div class="c' + (n >= A && n <= B ? (full ? ' full' : ' in') : '') + '">' + n + '<small>' + root(n) + '</small></div>';
+        if (full) h += '<div class="rs">hàng đủ 9 số: tổng số nút 45</div>';
+      }
+      $('#g9').innerHTML = h;
+      let brute = 0; for (let n = A; n <= B; n++) brute += root(n);
+      $('#g9Msg').innerHTML = 'Từ ' + A + ' đến ' + B + ': cộng từng số được <b>' + brute + '</b>. Công thức: F(' + B + ') − F(' + (A - 1) + ') = ' + F(B) + ' − ' + F(A - 1) + ' = <b>' + (F(B) - F(A - 1)) + '</b> ✓. ' +
+        'Ví dụ F(' + B + '): có ' + Math.floor(B / 9) + ' hàng đủ (mỗi hàng 45) và ' + (B % 9) + ' số lẻ cuối (1 + … + ' + (B % 9) + ').';
+    }
+    $('#aS').addEventListener('input', grid); $('#bS').addEventListener('input', grid);
+    grid.call($('#bS'));
+  })();
+
+  // ---------- 3. Mật khẩu ----------
+  let PK = 21;
+  function buildPw(){
+    const S = [], blocks = [];
+    let k = PK, d = 1, dem = 9, dau = 1;
+    const snap = o => S.push(Object.assign({ blocks: blocks.map(b => Object.assign({}, b)), k, d, cur: -1, zoom: null }, o));
+    snap({ line: 2, msg: 'Cần chữ số thứ <b>k = ' + fmt(PK) + '</b>. Bắt đầu từ khối các số có 1 chữ số: 1 … 9, gồm 9 chữ số.' });
+    while (k > d * dem){
+      blocks.push({ d, dem, len: d * dem, fill: 1 });
+      const old = k;
+      k -= d * dem;
+      snap({ line: 4, cur: blocks.length - 1, k, msg: 'k = ' + fmt(old) + ' lớn hơn ' + fmt(d * dem) + ' chữ số của khối ' + d + ' chữ số, nên <b>bỏ qua cả khối</b>: k = ' + fmt(old) + ' − ' + fmt(d * dem) + ' = <b>' + fmt(k) + '</b>.' });
+      d++; dem *= 10; dau *= 10;
+    }
+    blocks.push({ d, dem, len: d * dem, fill: k / (d * dem), here: true });
+    snap({ line: 3, cur: blocks.length - 1, k, msg: 'k = ' + fmt(k) + ' không vượt quá ' + fmt(d * dem) + ' chữ số của khối <b>' + d + ' chữ số</b> (từ ' + fmt(dau) + '). Vị trí cần tìm nằm trong khối này.' });
+    const so = dau + Math.floor((k - 1) / d), j = (k - 1) % d;
+    snap({ line: 6, cur: blocks.length - 1, k, zoom: { so, j: -1, d }, msg: 'Mỗi số trong khối dài ' + d + ' chữ số. Trước vị trí k có (k − 1) // ' + d + ' = ' + fmt(Math.floor((k - 1) / d)) + ' số đủ, nên số chứa chữ số cần tìm là <code>so = ' + fmt(dau) + ' + ' + fmt(Math.floor((k - 1) / d)) + ' = ' + fmt(so) + '</code>.' });
+    const pw = [0, 1, 2, 3].map(t => digitAt(PK + t)).join('');
+    snap({ line: 7, cur: blocks.length - 1, k, zoom: { so, j, d }, msg: 'Trong số ' + so + ', lấy chữ số thứ <code>(k − 1) % ' + d + ' = ' + j + '</code> (đếm từ 0): <b>' + String(so)[j] + '</b>. 🎉 Làm lại với k + 1, k + 2, k + 3 ra mật khẩu <b>' + pw + '</b>.' });
+    return S;
+  }
+  function renderPw(s){
+    const all = s.blocks.slice();
+    if (!all.length || !all[all.length - 1].here){ const d = all.length + 1; all.push({ d, dem: 9 * Math.pow(10, d - 1), len: d * 9 * Math.pow(10, d - 1), fill: 0, wait: true }); }
+    $('#pwBlocks').innerHTML = all.map((b, i) => '<div class="blk' + (i === s.cur ? ' cur' : '') + (b.wait ? ' wait' : '') + '"><span class="bd">' + b.d + ' chữ số</span><span class="bar"><i style="width:' + (b.here ? 0 : b.fill * 100) + '%"></i>' + (b.here ? '<b style="left:calc(' + Math.min(98, b.fill * 100) + '% - 2px)"></b>' : '') + '</span><span class="tx">' + fmt(b.dem) + ' số × ' + b.d + ' = ' + fmt(b.len) + ' chữ số' + (b.here ? ' · k ở đây' : b.wait ? '' : ' · bỏ qua') + '</span></div>').join('');
+    if (!s.zoom){ $('#pwZoom').innerHTML = ''; return; }
+    const z = s.zoom, nums = [z.so - 1, z.so, z.so + 1].filter(v => v >= 1);
+    $('#pwZoom').classList.toggle('long', z.d > 6);
+    $('#pwZoom').innerHTML = nums.map(v => '<div class="znum' + (v === z.so ? ' so' : '') + '"><div class="ds">' + String(v).split('').map((c, t) => '<span class="' + (v === z.so && t === z.j ? 'hit' : '') + '">' + c + '</span>').join('') + '</div><small>' + (v === z.so ? 'so' : '&nbsp;') + '</small></div>').join('');
+  }
+  const simPw = makeSim($('#simPw'), {
+    build: buildPw, render: renderPw,
+    code: () => [
+      'k = ' + PK,
+      'd, dem, dau = 1, 9, 1   # khối số có d chữ số: dem số, bắt đầu từ dau',
+      'while k > d * dem:      # k nằm sau cả khối này',
+      '    k -= d * dem        # bỏ qua cả khối',
+      '    d, dem, dau = d + 1, dem * 10, dau * 10',
+      'so = dau + (k - 1) // d        # số chứa chữ số cần tìm',
+      'print(str(so)[(k - 1) % d])    # chữ số trong số đó'
+    ]
+  });
+  $('#pwGo').onclick = () => {
+    const v = +(($('#pwK').value.match(/\d/g) || []).join('') || 1);
+    PK = Math.min(Math.max(1, v), 1e14); $('#pwK').value = PK; simPw.rebuild();
+  };
+
+  // ---------- 4. Số chính phương ----------
+  (function(){
+    function dots(){
+      const x = +$('#xS').value, k = Math.floor(Math.sqrt(x)), rest = x - k * k;
+      $('#xV').textContent = x;
+      let h = '';
+      for (let r = 0; r < k; r++) h += '<div class="r">' + '<i></i>'.repeat(k) + '</div>';
+      for (let t = 0; t < rest; t += k + 1) h += '<div class="r">' + '<i class="x"></i>'.repeat(Math.min(k + 1, rest - t)) + '</div>';
+      $('#dots').innerHTML = h;
+      $('#xEq').innerHTML = 'isqrt(' + x + ') = <b>' + k + '</b><br>' + k + ' × ' + k + ' = ' + (k * k) + (rest ? ', còn thừa <span class="no">' + rest + '</span> viên<br>→ không phải số chính phương' : '<br>→ <b>số chính phương</b> ✓');
+    }
+    $('#xS').addEventListener('input', dots); dots();
+
+    function cmp(){
+      const raw = ($('#bigIn').value.match(/\d/g) || []).join('').slice(0, 19) || '0';
+      const N = BigInt(raw), f = BigInt(Math.floor(Math.sqrt(Number(N)))), r = isqrtBig(N), bad = f !== r;
+      $('#bigCmp').innerHTML =
+        '<div class="ln' + (bad ? ' bad' : ' ok') + '">int(math.sqrt(N)) = ' + f + (bad ? '<br>' + f + '² = ' + (f * f) + (f * f > N ? ' &gt; N ✗ lệch 1!' : ' ✗') : ' ✓') + '</div>' +
+        '<div class="ln ok">math.isqrt(N) &nbsp;&nbsp;= ' + r + '<br>' + r + '² = ' + (r * r) + ' ≤ N ✓</div>';
+    }
+    $('#bigIn').addEventListener('input', cmp);
+    document.querySelectorAll('[data-big]').forEach(b => b.onclick = () => { $('#bigIn').value = b.dataset.big; cmp(); });
+    cmp();
+  })();
+  renderCode($('#codeSqrt'), [
+    'from math import isqrt',
+    'n = int(input())',
+    'a = list(map(int, input().split()))',
+    'dem = 0',
+    'for x in a:',
+    '    k = isqrt(x)          # cạnh hình vuông lớn nhất',
+    '    if k * k == x:        # xếp vừa khít',
+    '        dem += 1',
+    'print(dem)'
+  ]);
+
+  // ---------- 5. Đếm bội ----------
+  (function(){
+    const gcd = (a, b) => b ? gcd(b, a % b) : a;
+    function upd(){
+      const X = +$('#fxS').value, Y = +$('#fyS').value, N = +$('#fnS').value, L = X * Y / gcd(X, Y);
+      $('#fxV').textContent = X; $('#fyV').textContent = Y; $('#fnV').textContent = N;
+      let h = '', cnt = 0;
+      for (let n = 1; n <= N; n++){
+        const a = n % X === 0, b = n % Y === 0;
+        if (a || b) cnt++;
+        h += '<div class="c' + (a && b ? ' xy' : a ? ' x' : b ? ' y' : '') + '">' + n + '</div>';
+      }
+      $('#g10').innerHTML = h;
+      const ans = Math.floor(N / X) + Math.floor(N / Y) - Math.floor(N / L);
+      $('#favMsg').innerHTML = 'Bội của X: <code>' + N + ' // ' + X + ' = ' + Math.floor(N / X) + '</code>. Bội của Y: <code>' + N + ' // ' + Y + ' = ' + Math.floor(N / Y) + '</code>. Bội chung (bội của L = ' + L + '): <code>' + N + ' // ' + L + ' = ' + Math.floor(N / L) + '</code>.<br>' +
+        'Đáp án: ' + Math.floor(N / X) + ' + ' + Math.floor(N / Y) + ' − ' + Math.floor(N / L) + ' = <b>' + ans + '</b>. Đếm trên hình: ' + cnt + ' ô tô màu ✓';
+    }
+    ['#fxS', '#fyS', '#fnS'].forEach(id => $(id).addEventListener('input', upd));
+    upd();
+  })();
+  renderCode($('#codeFav'), [
+    'from math import gcd',
+    'X, Y, N = map(int, input().split())   # thứ tự như ví dụ của đề',
+    'L = X // gcd(X, Y) * Y                # bội chung nhỏ nhất',
+    'print(N // X + N // Y - N // L)'
+  ]);
+})();
+</script>
+</body>
+</html>

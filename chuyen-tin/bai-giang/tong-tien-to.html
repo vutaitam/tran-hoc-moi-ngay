@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tổng tiền tố</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Mom's questions widget */
+.days{ display:flex; gap:5px; overflow-x:auto; padding-bottom:4px; }
+.day{ flex:1 1 0; min-width:28px; border:2px solid var(--line); background:var(--surface); border-radius:12px; text-align:center; padding:4px 2px; line-height:1.25; transition:background .25s, border-color .25s; }
+.day small{ display:block; font-size:11px; color:var(--muted); }
+.days-cap{ font-size:13px; color:var(--muted); margin:0 0 6px; }
+.day b{ font-size:18px; }
+.day .used{ display:block; font-size:11.5px; font-weight:700; color:var(--accent); min-height:1.3em; }
+.day.rng{ background:var(--path-soft); border-color:var(--path); }
+.ask{ font-size:1.05rem; font-weight:700; margin:12px 0 4px; }
+.sumline{ font-family:var(--mono); font-size:14px; color:var(--muted); overflow-wrap:anywhere; }
+.counter{ display:inline-block; margin-top:8px; font-weight:700; background:var(--accent-soft); color:var(--accent); padding:4px 12px; border-radius:999px; font-size:15px; }
+
+/* Ruler */
+.ruler{ display:grid; gap:6px; }
+.rl{ display:grid; gap:3px; align-items:center; }
+.rl .cell{ border:2px solid var(--line); background:var(--surface); border-radius:8px; text-align:center; font-weight:700; font-size:15px; padding:2px 0; transition:background .2s, border-color .2s; }
+.rl .cell small{ display:block; font-size:10.5px; font-weight:600; color:var(--muted); }
+.rl .cell.rng{ background:var(--path-soft); border-color:var(--path); }
+.bar{ border-radius:10px; padding:6px 10px; font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:all .25s; min-height:36px; display:flex; align-items:center; }
+.bar.long{ background:var(--src-soft); border:2px solid var(--src); }
+.bar.short{ background:var(--surface); border:2px dashed var(--muted); color:var(--muted); }
+.bar.res{ background:var(--accent); color:var(--accent-ink); justify-content:center; }
+.bar.empty{ border:2px dashed var(--line); color:var(--muted); background:transparent; font-weight:600; }
+.rl-lbl{ font-size:13px; color:var(--muted); font-weight:600; margin:4px 0 -2px; }
+.eqbig{ font-size:clamp(1.15rem, 4.5vw, 1.5rem); font-weight:800; margin:14px 0 4px; }
+.sliders{ display:flex; flex-wrap:wrap; gap:10px 24px; margin-top:12px; }
+.sliders label{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:15px; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Pots */
+.pots{ display:flex; gap:6px; align-items:flex-end; }
+.pot{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; }
+.pot .plant{ font-size:20px; line-height:1; margin-bottom:2px; transition:transform .3s; }
+.pot.full .plant{ transform:scale(1.25); }
+.glass{ width:100%; max-width:48px; height:110px; border:2px solid var(--line); border-top:0; border-radius:0 0 12px 12px; position:relative; overflow:hidden; background:var(--surface); transition:border-color .2s; }
+.water{ position:absolute; left:0; right:0; bottom:0; background:var(--src-soft); border-top:3px solid var(--src); transition:height .35s; }
+.pot.cur .glass{ border-color:var(--accent); }
+.pot .val{ font-weight:800; font-size:15px; margin-top:2px; }
+.pot .lbl{ font-size:11.5px; color:var(--muted); }
+.cmds{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.cmd{ font-size:13.5px; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--surface); border:1px solid var(--line); }
+.cmd.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Python</span>
+  <h1>Tổng tiền tố</h1>
+  <p class="slogan">Cộng một lần, hỏi bao nhiêu cũng nhanh.</p>
+  <p class="lead">Kỹ thuật dùng nhiều nhất trong các bài về dãy số. Học qua ví dụ gần gũi, hình ảnh và mô phỏng chạy từng bước để các em tự quan sát.</p>
+  <div class="notebook" aria-label="Dãy số và bảng cộng dồn minh hoạ">
+    <div class="nb-row" id="nbA"></div>
+    <div class="nb-row" id="nbP"></div>
+    <p class="nb-note">Hàng dưới là <b>tổng cộng dồn từ đầu</b>. Mỗi ô dưới bằng ô bên trái nó cộng với số ngay phía trên, nên tính rất nhanh.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#bai-toan">1. Bài toán</a>
+    <a href="#vi-sao">2. Vì sao chậm?</a>
+    <a href="#y-tuong">3. Ý tưởng</a>
+    <a href="#cong-thuc">4. Công thức 4 bước</a>
+    <a href="#vd-tiet-kiem">5. Sổ tiết kiệm</a>
+    <a href="#vd-thi-dua">6. Tuần thi đua</a>
+    <a href="#vd-tuoi-cay">7. Tưới cây</a>
+    <a href="#tong-ket">8. Tổng kết</a>
+    <a href="#bai-tap">9. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="bai-toan">
+  <h2><span class="num">1</span>Mẹ hỏi, Lan trả lời</h2>
+  <p>Lan ghi số tiền tiết kiệm mỗi ngày (nghìn đồng) vào một cuốn sổ. Mẹ thỉnh thoảng hỏi: <b>“Từ ngày l đến ngày r, con để dành được bao nhiêu?”</b>. Lần nào Lan cũng cộng lại các ngày đó.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: em là Lan</h3>
+    <p class="days-cap">Số nhỏ phía trên là ngày thứ mấy, số to là tiền để dành (nghìn đồng).</p>
+    <div class="days" id="days"></div>
+    <div class="ask" id="askText"></div>
+    <div class="sumline" id="askSum"></div>
+    <div class="counter" id="askCount"></div>
+    <div class="controls">
+      <button class="btn primary" id="askBtn">Mẹ hỏi câu tiếp theo</button>
+      <button class="btn" id="askReset">Làm lại</button>
+    </div>
+    <div class="explain" id="askMsg"></div>
+  </div>
+
+  <p>Bài toán dùng được tổng tiền tố thường có hai dấu hiệu:</p>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">📒</div>
+      <h4>Dãy số không thay đổi</h4>
+      <p>Các số trong dãy được cho một lần, sau đó chỉ đọc chứ không sửa.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">❓</div>
+      <h4>Hỏi tổng một đoạn rất nhiều lần</h4>
+      <p>Mỗi câu hỏi là tổng các số từ vị trí l đến vị trí r. Số câu hỏi có thể lên tới hàng trăm nghìn.</p>
+    </div>
+  </div>
+  <div class="remember">Ghi nhớ: Tổng tiền tố = Cộng dồn một lần + Trả lời mỗi câu hỏi bằng một phép trừ.</div>
+</section>
+
+<!-- 2 -->
+<section id="vi-sao">
+  <h2><span class="num">2</span>Cộng lại từ đầu chậm đến mức nào?</h2>
+  <p>Cách làm của Lan viết thành Python như sau. Cách làm thẳng như vậy gọi là <b>cách “trâu”</b>: luôn đúng, dễ viết, nhưng chậm.</p>
+  <div class="code" id="codeBrute"></div>
+  <p>Đề thi thường cho dãy dài n số và q câu hỏi. Kéo thanh trượt để xem hai cách phải làm bao nhiêu phép tính (giả sử mỗi câu hỏi đều hỏi cả dãy):</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">n = q = <span id="nVal"></span>
+      <input type="range" id="nSlider" min="0" max="5" value="3" aria-label="Chọn n và q">
+    </label>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Cộng lại từ đầu</div><div class="v" id="opsBrute"></div><div class="t" id="timeBrute"></div></div>
+      <div class="stat good"><div class="k">Tổng tiền tố</div><div class="v" id="opsPre"></div><div class="t" id="timePre"></div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Thời gian ước lượng thô, giả sử Python làm khoảng 10 triệu phép cộng mỗi giây. Đề thi thường cho 1 giây.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="y-tuong">
+  <h2><span class="num">3</span>Ý tưởng: lấy đoạn dài trừ đoạn ngắn</h2>
+  <p>Lan làm thêm một dòng trong sổ: <b>tổng từ ngày đầu tiên đến hôm nay</b>. Gọi dòng đó là <code>pre</code> (viết tắt của <i>prefix</i>, nghĩa là “phần đầu”). Ô <code>pre[i]</code> là tổng các ngày từ 1 đến i.</p>
+  <p>Muốn biết tổng từ ngày l đến ngày r, Lan lấy <b>tổng từ đầu đến ngày r</b> rồi bỏ đi <b>phần đầu không cần</b> (từ ngày 1 đến ngày l − 1). Kéo hai thanh trượt để thử:</p>
+
+  <div class="sim">
+    <div class="sim-head"><span class="title">Thước đo tổng</span></div>
+    <div class="viz">
+      <div class="ruler" id="ruler"></div>
+      <div class="eqbig" id="rulerEq"></div>
+    </div>
+    <div class="sliders">
+      <label>Ngày l = <span id="lVal"></span> <input type="range" id="lSlider" min="1" max="10" value="3" aria-label="Ngày bắt đầu l"></label>
+      <label>Ngày r = <span id="rVal"></span> <input type="range" id="rSlider" min="1" max="10" value="8" aria-label="Ngày kết thúc r"></label>
+    </div>
+    <div class="explain" id="rulerMsg"></div>
+  </div>
+
+  <div class="tip"><b>Vì sao trừ pre[l − 1] mà không phải pre[l]?</b> Vì ngày l phải được giữ lại. Phần cần bỏ đi chỉ là các ngày <i>trước</i> ngày l, tức là từ 1 đến l − 1.</div>
+</section>
+
+<!-- 4 -->
+<section id="cong-thuc">
+  <h2><span class="num">4</span>Công thức 4 bước</h2>
+  <p>Gặp bài hỏi tổng đoạn nhiều lần, các em làm theo 4 bước. Ví dụ đi kèm là cuốn sổ của Lan.</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Thêm ô 0 ở đầu</h4>
+      <p>Đề đánh số từ 1, còn Python đánh số từ 0. Thêm một số 0 vào đầu dãy để ngày 1 nằm đúng ở <code>a[1]</code>.</p>
+      <div class="ex"><code>a = [0] + [5, 2, 0, 7, ...]</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Cộng dồn</h4>
+      <p>Ô sau bằng ô trước cộng thêm một số mới. Chỉ cần đi qua dãy <b>một lần</b>.</p>
+      <div class="ex"><code>pre[0] = 0</code>, <code>pre[i] = pre[i−1] + a[i]</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Trả lời bằng một phép trừ</h4>
+      <p>Lấy tổng đến r, bỏ đi tổng đến l − 1.</p>
+      <div class="ex">Tổng từ l đến r = <code>pre[r] − pre[l−1]</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Thử các trường hợp biên</h4>
+      <p>Tính tay vài câu hỏi đặc biệt rồi so với chương trình.</p>
+      <div class="ex">Đoạn bắt đầu từ ngày 1 (l = 1), đoạn chỉ có 1 ngày (l = r), đoạn đến ngày cuối (r = n).</div>
+    </div>
+  </div>
+  <div class="tip"><b>Nhờ ô pre[0] = 0</b>, câu hỏi bắt đầu từ ngày 1 vẫn dùng đúng công thức: <code>pre[r] − pre[0] = pre[r]</code>. Không cần viết thêm lệnh if.</div>
+</section>
+
+<!-- 5 -->
+<section id="vd-tiet-kiem">
+  <h2><span class="num">5</span>Ví dụ 1: Sổ tiết kiệm của Lan</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Cho số tiền tiết kiệm của <b>n</b> ngày và một số câu hỏi, mỗi câu hỏi gồm hai số <b>l</b>, <b>r</b>. Với mỗi câu hỏi, in ra tổng số tiền từ ngày l đến ngày r.</p>
+  </div>
+  <p>Chương trình làm hai việc tách rời: <b>dựng bảng pre</b> một lần, rồi <b>trả lời từng câu hỏi</b> bằng một phép trừ.</p>
+
+  <div class="sim" id="simSave">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="saveRandom">🎲 Sổ mới</button>
+      <button class="btn" id="saveReset">Sổ mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="saveWrap"><div class="arr" id="saveA"></div><div class="arr" id="saveP"></div></div>
+          <div class="info" id="saveInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang tính</span><span><i class="lg-src"></i>Lấy số từ</span><span><i class="lg-done"></i>Đã ghi vào bảng</span><span><i class="lg-path"></i>Đoạn mẹ hỏi</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="vd-thi-dua">
+  <h2><span class="num">6</span>Ví dụ 2: Tuần thi đua tốt nhất</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Lớp 9A có điểm thi đua của <b>n</b> ngày. Ngày tốt được cộng điểm, ngày vi phạm bị trừ điểm (số âm). Tìm <b>k ngày liên tiếp</b> có tổng điểm <b>lớn nhất</b>.</p>
+  </div>
+  <p>Có n − k + 1 đoạn dài đúng k ngày. Nhờ bảng <code>pre</code>, mỗi đoạn chỉ cần một phép trừ. Đoạn kết thúc ở ngày r thì bắt đầu ở ngày r − k + 1, nên phần cần bỏ là <code>pre[r − k]</code>.</p>
+
+  <div class="sim" id="simWin">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>Số ngày k = <span id="kVal">3</span> <input type="range" id="kSlider" min="2" max="5" value="3" aria-label="Số ngày liên tiếp k"></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="winWrap"><div class="arr" id="winA"></div><div class="arr" id="winP"></div></div>
+          <div class="info" id="winInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-path"></i>Đoạn đang xét</span><span><i class="lg-src"></i>Hai ô pre được dùng</span><span><i class="lg-done"></i>Viền vàng: đoạn tốt nhất</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Cẩn thận với số âm:</b> gán <code>best</code> bằng tổng của đoạn đầu tiên, đừng gán bằng 0. Nếu mọi đoạn đều âm, gán 0 sẽ cho đáp án sai.</div>
+</section>
+
+<!-- 7 -->
+<section id="vd-tuoi-cay">
+  <h2><span class="num">7</span>Ví dụ 3: Tưới cây (làm ngược lại)</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Có <b>n</b> chậu cây xếp hàng, ban đầu chưa có nước. Có nhiều lệnh, mỗi lệnh “tưới <b>x</b> ml cho mọi chậu từ chậu <b>l</b> đến chậu <b>r</b>”. Sau tất cả các lệnh, mỗi chậu có bao nhiêu nước?</p>
+  </div>
+  <p>Cách trâu là mỗi lệnh đi tưới từng chậu một. Nếu đoạn dài và có nhiều lệnh thì rất chậm. Mẹo hay: mỗi lệnh chỉ <b>đánh dấu hai chỗ</b> trong mảng <code>d</code>. Ghi <b>+x</b> ở chậu l (“từ đây được thêm x”) và <b>−x</b> ở ô r + 1 (“từ đây hết được thêm”). Cuối cùng <b>cộng dồn</b> mảng <code>d</code> là ra lượng nước của từng chậu.</p>
+
+  <div class="sim" id="simPot">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="potRandom">🎲 Lệnh mới</button>
+      <button class="btn" id="potReset">Lệnh mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="cmds" id="potCmds"></div>
+          <div class="pots" id="pots"></div>
+          <div class="axis" style="text-align:center;font-size:12.5px;color:var(--muted)">chậu số</div>
+          <div class="arr-wrap" style="margin-top:12px"><div class="arr" id="potD"></div></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang ghi / đang tính</span><span><i class="lg-src"></i>Lấy số từ</span><span><i class="lg-done"></i>Ô đã có dấu</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Mảng d là “ngược lại” của tổng tiền tố.</b> Tổng tiền tố biến dãy thành tổng cộng dồn; mảng d ghi phần thay đổi giữa hai ô liền nhau. Cộng dồn d thì quay về dãy. Người ta gọi d là <b>mảng hiệu</b>.</div>
+</section>
+
+<!-- 8 -->
+<section id="tong-ket">
+  <h2><span class="num">8</span>Tổng kết</h2>
+  <h3>Khi nào nên nghĩ tới tổng tiền tố?</h3>
+  <ul>
+    <li>Đề hỏi <b>tổng một đoạn</b> rất nhiều lần trên một dãy không đổi.</li>
+    <li>Đề bắt thử <b>nhiều đoạn</b> (ví dụ mọi đoạn dài k) và tính tổng mỗi đoạn.</li>
+    <li>Đề có nhiều lệnh <b>cộng cùng một số cho cả đoạn</b>, chỉ hỏi kết quả ở cuối: dùng mảng hiệu.</li>
+  </ul>
+  <h3>Ba ví dụ, cùng một ý tưởng</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Bài</th><th>Ghi sẵn gì?</th><th>Mỗi lần dùng</th><th>Số phép tính</th></tr></thead>
+      <tbody>
+        <tr><td>Sổ tiết kiệm</td><td><code>pre[i]</code>: tổng ngày 1..i</td><td><code>pre[r] − pre[l−1]</code></td><td>n phép cộng + mỗi câu hỏi 1 phép trừ</td></tr>
+        <tr><td>Tuần thi đua</td><td>Cùng bảng <code>pre</code></td><td><code>pre[r] − pre[r−k]</code></td><td>n phép cộng + n phép trừ</td></tr>
+        <tr><td>Tưới cây</td><td>Mảng hiệu <code>d</code></td><td><code>d[l] += x</code>, <code>d[r+1] −= x</code>, cuối cùng cộng dồn</td><td>Mỗi lệnh 2 phép tính + n phép cộng</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Trừ nhầm pre[l]</b>: làm mất ngày l. Phải trừ <code>pre[l − 1]</code>.</li>
+    <li><b>Quên ô 0</b>: không có <code>pre[0] = 0</code> thì câu hỏi bắt đầu từ ngày 1 bị sai hoặc báo lỗi.</li>
+    <li><b>Dùng <code>sum(a[l:r+1])</code> cho từng câu hỏi</b>: lệnh này vẫn cộng từng số, nhanh không hơn cách trâu.</li>
+    <li><b>Mảng hiệu thiếu ô</b>: lệnh có r = n sẽ ghi vào <code>d[n + 1]</code>, nên tạo <code>d</code> gồm n + 2 ô.</li>
+    <li><b>Dãy bị sửa giữa chừng</b>: bảng <code>pre</code> cũ không còn đúng. Bài kiểu này cần cách khác.</li>
+  </ul>
+  <h3>Khuôn mẫu khi đi thi</h3>
+  <p>Đề thi cho n, q rất lớn, nên đọc dữ liệu nhanh và in một lần ở cuối:</p>
+  <div class="code" id="codeExam"></div>
+  <p class="code-cap">Dòng 2 giúp đọc nhanh hơn <code>input()</code> thường, các em cứ chép nguyên. Gom đáp án rồi in một lần nhanh hơn gọi <code>print</code> q lần.</p>
+</section>
+
+<!-- 9 -->
+<section id="bai-tap">
+  <h2><span class="num">9</span>Bài tập tự luyện</h2>
+  <p>Gợi ý chỉ mở hướng suy nghĩ. Các em hãy tự trả lời 4 bước ở mục 4, tính tay vài câu hỏi, rồi mới viết code. Bài có nhãn <b>Đề thật</b> mở trong ngân hàng đề, có đề đầy đủ, gợi ý và lời giải.</p>
+
+  <div class="ex-item">
+    <h4>Bài 1. Tổng đoạn <span class="level lv1">Dễ</span></h4>
+    <p>Cho dãy n số nguyên (có thể âm) và q câu hỏi l r. In tổng từ vị trí l đến vị trí r cho từng câu hỏi. n, q ≤ 100 000.</p>
+    <details><summary>Gợi ý</summary><p>Đây chính là ví dụ 1. Hãy tự viết lại khuôn mẫu đi thi mà không nhìn, rồi thử với l = 1, l = r và r = n.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Đếm số chẵn trong đoạn <span class="level lv1">Dễ</span></h4>
+    <p>Cho dãy n số và q câu hỏi l r. Với mỗi câu hỏi, đoạn từ l đến r có bao nhiêu số chẵn?</p>
+    <details><summary>Gợi ý</summary><p>Tổng tiền tố không chỉ dùng để cộng tiền. Nếu thay mỗi số chẵn bằng 1, số lẻ bằng 0, thì “số lượng số chẵn trong đoạn” trở thành bài toán nào?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Dãy con k phần tử <span class="level lv4">Đề thật</span></h4>
+    <p>Chuyên Lê Quý Đôn Khánh Hòa 2024, bài 3: tìm k phần tử liên tiếp có tổng lớn nhất, kèm thêm điều kiện khi có nhiều đoạn bằng nhau.</p>
+    <details><summary>Gợi ý</summary><p>Phần chính là ví dụ 2. Đọc kỹ điều kiện phụ: khi hai đoạn có tổng bằng nhau thì chọn đoạn nào? Có thể cần thêm một bảng tiền tố thứ hai để đếm.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khanhhoa-2024-bai3">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Cộng dồn nhiều lệnh <span class="level lv2">Vừa</span></h4>
+    <p>Có n số, ban đầu đều bằng 0. Có q lệnh “cộng x vào các số từ vị trí l đến r”. In dãy số sau tất cả các lệnh. n, q ≤ 100 000.</p>
+    <details><summary>Gợi ý</summary><p>Đây là ví dụ 3. Mỗi lệnh chỉ sửa hai ô của mảng hiệu. Nếu ban đầu dãy không toàn 0 mà có sẵn giá trị thì sao? Em có thể cộng dãy ban đầu vào kết quả ở cuối.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Cộng dãy <span class="level lv4">Đề thật</span></h4>
+    <p>Chuyên Sư phạm 2023, bài 3: dãy số và q thao tác cộng x vào mọi phần tử. Tổng tiền tố là một phần của lời giải.</p>
+    <details><summary>Gợi ý</summary><p>Sắp xếp dãy rồi dựng tổng tiền tố một lần. Khi biết tổng x đã cộng từ đầu, phần nào của dãy đổi dấu? Tổng của một nhóm liên tiếp trong dãy đã sắp xếp lấy bằng pre như thế nào?</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2023-cong-day">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 6. Cảm biến <span class="level lv3">Thử thách · Đề thật</span></h4>
+    <p>Năng khiếu TP.HCM 2026: đếm số đoạn của dãy thỏa một điều kiện về trung bình cộng.</p>
+    <details><summary>Gợi ý</summary><p>Với n nhỏ, thử mọi đoạn và tính tổng bằng pre. Với n lớn, hãy biến đổi điều kiện về dạng “tổng đoạn bằng 0”, tức hai ô pre bằng nhau, rồi đếm số cặp bằng nhau.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=ptnk-2026-sensor">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|else|and|or|not|while|import)\b|\b(print|range|len|max|min|map|int|list|sum|str)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    const hit = wrap.querySelectorAll('.cur, .src, .rng');
+    if (!hit.length || wrap.scrollWidth <= wrap.clientWidth) return;
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    let lo = Infinity, hi = -Infinity;
+    hit.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); });
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+  function prefix(a){ const p = [0]; for (let i = 1; i < a.length; i++) p[i] = p[i - 1] + a[i]; return p; }
+
+  // ---------- Hero notebook ----------
+  (function(){
+    const a = [3, 1, 4, 1, 5, 9, 2, 6];
+    let s = 0;
+    $('#nbA').innerHTML = '<span class="nm">số</span>' + a.map((v, i) => '<div class="nb-cell nb-a" style="animation-delay:' + (i * 0.08) + 's">' + v + '</div>').join('');
+    $('#nbP').innerHTML = '<span class="nm">pre</span>' +a.map((v, i) => { s += v; return '<div class="nb-cell nb-p' + (i === a.length - 1 ? ' last' : '') + '" style="animation-delay:' + (0.5 + i * 0.12) + 's">' + s + '</div>'; }).join('');
+  })();
+
+  // ---------- 1. Mom's questions ----------
+  const DAYS = [0, 5, 2, 0, 7, 3, 1, 6, 4, 2, 8];
+  (function(){
+    const preset = [[3, 8], [2, 9], [4, 7], [1, 10], [5, 8]];
+    let asked = 0, adds = 0, used = Array(11).fill(0), cur = null;
+    function render(){
+      $('#days').innerHTML = DAYS.slice(1).map((v, j) => {
+        const i = j + 1, inR = cur && i >= cur[0] && i <= cur[1];
+        return '<div class="day' + (inR ? ' rng' : '') + '"><small>' + i + '</small><b>' + v + '</b><span class="used">' + (used[i] ? '×' + used[i] : '') + '</span></div>';
+      }).join('');
+      if (!cur){
+        $('#askText').textContent = '';
+        $('#askSum').textContent = '';
+        $('#askCount').textContent = 'Đã cộng: 0 lần';
+        $('#askMsg').innerHTML = 'Bấm nút để nghe câu hỏi đầu tiên của mẹ. Số nhỏ màu hồng dưới mỗi ngày cho biết ngày đó đã được cộng bao nhiêu lần.';
+        return;
+      }
+      const [l, r] = cur, part = DAYS.slice(l, r + 1);
+      const total = part.reduce((x, y) => x + y, 0);
+      $('#askText').textContent = 'Mẹ hỏi: từ ngày ' + l + ' đến ngày ' + r + '?';
+      $('#askSum').textContent = part.join(' + ') + ' = ' + total + ' nghìn đồng';
+      $('#askCount').textContent = 'Đã cộng: ' + adds + ' lần sau ' + asked + ' câu hỏi';
+      let maxI = 1; for (let i = 2; i <= 10; i++) if (used[i] > used[maxI]) maxI = i;
+      $('#askMsg').innerHTML = asked < 3
+        ? 'Lan phải cộng ' + (r - l) + ' lần cho câu hỏi này. Hỏi tiếp vài câu nữa xem sao.'
+        : 'Ngày ' + maxI + ' đã bị cộng đi cộng lại <b>' + used[maxI] + ' lần</b>! Lan làm đi làm lại cùng một việc. Có cách nào <b>ghi sẵn</b> để mỗi câu hỏi chỉ cần một phép tính không? Câu trả lời ở mục 3.';
+    }
+    $('#askBtn').onclick = () => {
+      if (asked < preset.length) cur = preset[asked];
+      else { const l = rnd(1, 9); cur = [l, rnd(l + 1, 10)]; }
+      asked++; adds += cur[1] - cur[0];
+      for (let i = cur[0]; i <= cur[1]; i++) used[i]++;
+      render();
+    };
+    $('#askReset').onclick = () => { asked = 0; adds = 0; used = Array(11).fill(0); cur = null; render(); };
+    render();
+  })();
+
+  // ---------- 2. Brute force cost ----------
+  renderCode($('#codeBrute'), [
+    'for _ in range(q):           # mỗi câu hỏi',
+    '    l, r = map(int, input().split())',
+    '    tong = 0',
+    '    for i in range(l, r + 1):  # cộng lại từ ngày l',
+    '        tong += a[i]',
+    '    print(tong)'
+  ]);
+  (function(){
+    const NS = [10, 100, 1000, 10000, 100000, 1000000];
+    const tm = ops => {
+      const s = ops / 1e7;
+      if (s < 0.01) return 'chưa tới 0,01 giây';
+      if (s < 120) return 'khoảng ' + s.toLocaleString('vi-VN', { maximumFractionDigits: s < 1 ? 2 : 0 }) + ' giây';
+      if (s < 7200) return 'khoảng ' + fmt(Math.round(s / 60)) + ' phút';
+      return 'khoảng ' + fmt(Math.round(s / 3600)) + ' giờ';
+    };
+    function update(){
+      const n = NS[+$('#nSlider').value];
+      $('#nVal').textContent = fmt(n);
+      $('#opsBrute').textContent = fmt(n * n) + ' phép cộng';
+      $('#timeBrute').textContent = tm(n * n);
+      $('#opsPre').textContent = fmt(2 * n) + ' phép tính';
+      $('#timePre').textContent = tm(2 * n);
+    }
+    $('#nSlider').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- 3. Ruler ----------
+  (function(){
+    const n = 10, a = DAYS, p = prefix(a);
+    const cols = 'grid-template-columns:repeat(' + n + ', minmax(0, 1fr))';
+    function update(){
+      let l = +$('#lSlider').value, r = +$('#rSlider').value;
+      if (l > r){
+        if (this === $('#lSlider')) { r = l; $('#rSlider').value = r; } else { l = r; $('#lSlider').value = l; }
+      }
+      $('#lVal').textContent = l; $('#rVal').textContent = r;
+      let h = '<div class="rl-lbl">Số tiền mỗi ngày</div><div class="rl" style="' + cols + '">';
+      for (let i = 1; i <= n; i++) h += '<div class="cell' + (i >= l && i <= r ? ' rng' : '') + '"><small>' + i + '</small>' + a[i] + '</div>';
+      h += '</div>';
+      h += '<div class="rl-lbl">Tổng từ đầu đến ngày r: pre[' + r + '] = ' + p[r] + '</div><div class="rl" style="' + cols + '"><div class="bar long" style="grid-column:1 / ' + (r + 1) + '">' + p[r] + '</div></div>';
+      h += '<div class="rl-lbl">Phần thừa, từ đầu đến ngày l − 1: pre[' + (l - 1) + '] = ' + p[l - 1] + '</div><div class="rl" style="' + cols + '">' +
+           (l > 1 ? '<div class="bar short" style="grid-column:1 / ' + l + '">' + p[l - 1] + '</div>'
+                  : '<div class="bar empty" style="grid-column:1 / ' + (n + 1) + '">pre[0] = 0, không có gì để bỏ</div>') + '</div>';
+      h += '<div class="rl-lbl">Còn lại: từ ngày l đến ngày r</div><div class="rl" style="' + cols + '"><div class="bar res" style="grid-column:' + l + ' / ' + (r + 1) + '">' + (p[r] - p[l - 1]) + '</div></div>';
+      $('#ruler').innerHTML = h;
+      $('#rulerEq').textContent = 'pre[' + r + '] − pre[' + (l - 1) + '] = ' + p[r] + ' − ' + p[l - 1] + ' = ' + (p[r] - p[l - 1]);
+      const direct = a.slice(l, r + 1).join(' + ');
+      $('#rulerMsg').innerHTML = 'Kiểm tra bằng cách cộng thẳng: ' + direct + ' = <b>' + (p[r] - p[l - 1]) + '</b>. Khớp! Dù đoạn dài bao nhiêu, ta cũng chỉ cần <b>một phép trừ</b>.' +
+        (l === 1 ? ' Khi l = 1, phần thừa là <code>pre[0] = 0</code>, nên đáp án chính là <code>pre[r]</code>.' : '');
+    }
+    $('#lSlider').addEventListener('input', update);
+    $('#rSlider').addEventListener('input', update);
+    update.call(null);
+  })();
+
+  // ---------- 5. Savings book ----------
+  const SAVE0 = { a: DAYS.slice(), qs: [[3, 8], [1, 4], [6, 6]] };
+  let SAVE = { a: SAVE0.a.slice(), qs: SAVE0.qs.map(x => x.slice()) };
+  function buildSave(){
+    const a = SAVE.a, n = a.length - 1, qs = SAVE.qs, S = [];
+    const pre = Array(n + 1).fill(null), ans = [];
+    const snap = o => S.push(Object.assign({ a, pre: pre.slice(), ans: ans.slice(), cur: -1, srcP: [], srcA: -1, rng: null }, o));
+    snap({ line: 1, msg: 'Dãy <code>a</code> ghi số tiền của ' + n + ' ngày. Thêm một số 0 ở đầu để ngày 1 nằm ở <code>a[1]</code>. Ô a[0] để trống, không dùng.' });
+    pre[0] = 0;
+    snap({ line: 3, cur: 0, msg: 'Tạo bảng <code>pre</code> gồm ' + (n + 1) + ' ô. <code>pre[0] = 0</code> vì chưa cộng ngày nào. Các ô còn lại sẽ điền dần.' });
+    for (let i = 1; i <= n; i++){
+      pre[i] = pre[i - 1] + a[i];
+      snap({ line: 5, cur: i, srcP: [i - 1], srcA: i, msg: 'Ngày ' + i + ': lấy ô bên trái cộng thêm số tiền của ngày ' + i + '. <code>pre[' + i + '] = pre[' + (i - 1) + '] + a[' + i + '] = ' + pre[i - 1] + ' + ' + a[i] + ' = ' + pre[i] + '</code>.' });
+    }
+    snap({ line: 4, msg: 'Xong bảng <code>pre</code> sau đúng <b>' + n + ' phép cộng</b>. Từ giờ không cần cộng nữa. Bây giờ trả lời các câu hỏi của mẹ.' });
+    for (const [l, r] of qs){
+      const v = pre[r] - pre[l - 1];
+      ans.push('[' + l + ', ' + r + '] → ' + v);
+      snap({ line: 7, rng: [l, r], srcP: [r, l - 1], msg: 'Mẹ hỏi từ ngày <b>' + l + '</b> đến ngày <b>' + r + '</b>. Lấy <code>pre[' + r + '] = ' + pre[r] + '</code> (ngày 1..' + r + ') trừ phần thừa <code>pre[' + (l - 1) + '] = ' + pre[l - 1] + '</code>' + (l === 1 ? ' (không có gì để bỏ)' : ' (ngày 1..' + (l - 1) + ')') + '. Đáp án: ' + pre[r] + ' − ' + pre[l - 1] + ' = <b>' + v + '</b>.' });
+    }
+    snap({ line: 7, msg: '🎉 Trả lời ' + qs.length + ' câu hỏi chỉ bằng ' + qs.length + ' phép trừ. Câu hỏi đoạn dài hay ngắn đều nhanh như nhau.' });
+    return S;
+  }
+  function renderSave(s){
+    const n = s.a.length - 1;
+    let h = '<span class="nm">a =</span>';
+    for (let i = 0; i <= n; i++){
+      let cls = 'cellx';
+      if (i === 0) cls += ' pad';
+      else if (i === s.srcA) cls += ' src';
+      else if (s.rng && i >= s.rng[0] && i <= s.rng[1]) cls += ' rng';
+      h += '<div class="' + cls + '"><small>[' + i + ']</small><b>' + (i === 0 ? '·' : s.a[i]) + '</b></div>';
+    }
+    $('#saveA').innerHTML = h;
+    h = '<span class="nm">pre =</span>';
+    for (let i = 0; i <= n; i++){
+      let cls = 'cellx';
+      if (i === s.cur) cls += ' cur'; else if (s.srcP.includes(i)) cls += ' src'; else if (s.pre[i] !== null) cls += ' done';
+      h += '<div class="' + cls + '"><small>[' + i + ']</small><b>' + (s.pre[i] === null ? '?' : s.pre[i]) + '</b></div>';
+    }
+    $('#saveP').innerHTML = h;
+    follow($('#saveWrap'));
+    $('#saveInfo').innerHTML = s.ans.length ? 'Đáp án: ' + s.ans.map(x => '<span>' + x + '</span>').join(' · ') : '';
+  }
+  const simSave = makeSim($('#simSave'), {
+    build: buildSave, render: renderSave,
+    code: () => [
+      'a = [0] + [' + SAVE.a.slice(1).join(', ') + ']',
+      'n = len(a) - 1',
+      'pre = [0] * (n + 1)   # pre[0] = 0',
+      'for i in range(1, n + 1):',
+      '    pre[i] = pre[i - 1] + a[i]',
+      'for l, r in [' + SAVE.qs.map(q => '(' + q[0] + ', ' + q[1] + ')').join(', ') + ']:',
+      '    print(pre[r] - pre[l - 1])'
+    ]
+  });
+  $('#saveRandom').onclick = () => {
+    const n = rnd(7, 10), a = [0];
+    for (let i = 1; i <= n; i++) a.push(rnd(0, 9));
+    const qs = [];
+    for (let t = 0; t < 3; t++){ const l = rnd(1, n); qs.push([l, rnd(l, n)]); }
+    SAVE = { a, qs }; simSave.rebuild();
+  };
+  $('#saveReset').onclick = () => { SAVE = { a: SAVE0.a.slice(), qs: SAVE0.qs.map(x => x.slice()) }; simSave.rebuild(); };
+
+  // ---------- 6. Best k-day window ----------
+  const WIN = [0, 4, -2, 5, 1, -3, 6, 2, -1, 3, -4];
+  function buildWin(){
+    const k = +$('#kSlider').value, a = WIN, n = a.length - 1, p = prefix(a), S = [];
+    let best = null, bestL = 0;
+    const snap = o => S.push(Object.assign({ p, k, win: null, srcP: [], best, bestL }, o));
+    snap({ line: 3, msg: 'Điểm thi đua của ' + n + ' ngày, có ngày bị trừ điểm. Trước hết dựng bảng <code>pre</code> giống ví dụ 1. Cần tìm <b>' + k + ' ngày liên tiếp</b> có tổng lớn nhất.' });
+    best = p[k] - p[0]; bestL = 1;
+    snap({ line: 4, win: [1, k], srcP: [k, 0], best, bestL, msg: 'Đoạn đầu tiên: ngày 1 đến ngày ' + k + '. Tổng = <code>pre[' + k + '] − pre[0] = ' + p[k] + ' − 0 = ' + best + '</code>. Tạm coi đây là đoạn tốt nhất: <code>best = ' + best + '</code>.' });
+    for (let r = k + 1; r <= n; r++){
+      const l = r - k + 1, t = p[r] - p[r - k];
+      const head = 'Đoạn ngày ' + l + ' đến ' + r + ': <code>pre[' + r + '] − pre[' + (r - k) + '] = ' + p[r] + ' − ' + par(p[r - k]) + ' = ' + t + '</code>. ';
+      if (t > best){
+        best = t; bestL = l;
+        snap({ line: 8, win: [l, r], srcP: [r, r - k], best, bestL, msg: head + 'Lớn hơn đoạn tốt nhất cũ, nên <b>cập nhật best = ' + t + '</b>.' });
+      } else {
+        snap({ line: 7, win: [l, r], srcP: [r, r - k], best, bestL, msg: head + 'Không lớn hơn best = ' + best + ', giữ nguyên.' });
+      }
+    }
+    snap({ line: 9, msg: '🎉 Tuần thi đua tốt nhất: ngày <b>' + bestL + '</b> đến ngày <b>' + (bestL + k - 1) + '</b>, tổng <b>' + best + '</b> điểm. Đã thử ' + (n - k + 1) + ' đoạn, mỗi đoạn chỉ một phép trừ.' });
+    return S;
+  }
+  function renderWin(s){
+    const a = WIN, n = a.length - 1;
+    let h = '<span class="nm">a =</span>';
+    for (let i = 0; i <= n; i++){
+      let cls = 'cellx';
+      if (i === 0) cls += ' pad';
+      else if (s.win && i >= s.win[0] && i <= s.win[1]) cls += ' rng';
+      if (s.best !== null && i >= s.bestL && i < s.bestL + s.k) cls += ' best';
+      h += '<div class="' + cls + '"><small>[' + i + ']</small><b>' + (i === 0 ? '·' : a[i]) + '</b></div>';
+    }
+    $('#winA').innerHTML = h;
+    h = '<span class="nm">pre =</span>';
+    for (let i = 0; i <= n; i++){
+      const cls = 'cellx' + (s.srcP.includes(i) ? ' src' : '');
+      h += '<div class="' + cls + '"><small>[' + i + ']</small><b>' + s.p[i] + '</b></div>';
+    }
+    $('#winP').innerHTML = h;
+    follow($('#winWrap'));
+    $('#winInfo').innerHTML = s.best === null ? '' :
+      '<span>Đang xét: <b>' + (s.win ? (s.p[s.win[1]] - s.p[s.win[0] - 1]) : '—') + '</b></span><span>Tốt nhất: <b>' + s.best + '</b> (ngày ' + s.bestL + '..' + (s.bestL + s.k - 1) + ')</span>';
+  }
+  const simWin = makeSim($('#simWin'), {
+    build: buildWin, render: renderWin,
+    code: () => {
+      const k = +$('#kSlider').value;
+      return [
+        'pre = [0] * (n + 1)',
+        'for i in range(1, n + 1):',
+        '    pre[i] = pre[i - 1] + a[i]',
+        'best = pre[' + k + '] - pre[0]   # ngày 1..' + k,
+        'for r in range(' + (k + 1) + ', n + 1):',
+        '    tong = pre[r] - pre[r - ' + k + ']',
+        '    if tong > best:',
+        '        best = tong',
+        'print(best)'
+      ];
+    }
+  });
+  $('#kSlider').addEventListener('input', () => { $('#kVal').textContent = $('#kSlider').value; simWin.rebuild(); });
+
+  // ---------- 7. Watering plants ----------
+  const POT_N = 8;
+  const POT0 = [[2, 5, 3], [4, 8, 2], [1, 3, 1]];
+  let POT = POT0.map(x => x.slice());
+  function buildPot(){
+    const n = POT_N, cmds = POT, S = [];
+    const d = Array(n + 2).fill(0), mark = Array(n + 2).fill(false), w = Array(n + 1).fill(null);
+    const finalW = (() => { const t = Array(n + 2).fill(0); for (const [l, r, x] of cmds) for (let i = l; i <= r; i++) t[i] += x; return t; })();
+    const maxW = Math.max(1, ...finalW);
+    const snap = o => S.push(Object.assign({ d: d.slice(), mark: mark.slice(), w: w.slice(), curD: -1, srcD: -1, curP: -1, srcP: -1, cmd: -1, maxW, cmds }, o));
+    snap({ line: 2, msg: 'Có ' + n + ' chậu cây chưa có nước. Tạo mảng <code>d</code> gồm ' + (n + 2) + ' ô (từ 0 đến ' + (n + 1) + '), toàn số 0. Ô <code>d[' + (n + 1) + ']</code> dành cho lệnh tưới đến chậu cuối.' });
+    cmds.forEach(([l, r, x], c) => {
+      d[l] += x; mark[l] = true;
+      snap({ line: 4, cmd: c, curD: l, msg: 'Lệnh ' + (c + 1) + ': tưới <b>' + x + ' ml</b> cho chậu ' + l + ' đến ' + r + '. Ghi <b>+' + x + '</b> vào <code>d[' + l + ']</code>: từ chậu ' + l + ' trở đi được thêm ' + x + ' ml.' });
+      d[r + 1] -= x; mark[r + 1] = true;
+      snap({ line: 5, cmd: c, curD: r + 1, msg: 'Ghi <b>−' + x + '</b> vào <code>d[' + (r + 1) + ']</code>: từ ô ' + (r + 1) + ' trở đi hết được thêm. Lệnh này chỉ sửa <b>2 ô</b>, dù đoạn dài ' + (r - l + 1) + ' chậu.' });
+    });
+    w[0] = 0;
+    snap({ line: 6, msg: 'Đã ghi xong mọi lệnh. Bây giờ đi từ trái sang phải, <b>cộng dồn</b> mảng <code>d</code> để biết lượng nước từng chậu.' });
+    for (let i = 1; i <= n; i++){
+      w[i] = w[i - 1] + d[i];
+      snap({ line: 8, curP: i, srcD: i, srcP: i - 1, msg: 'Chậu ' + i + ': <code>nuoc[' + i + '] = nuoc[' + (i - 1) + '] + d[' + i + '] = ' + w[i - 1] + ' + ' + par(d[i]) + ' = ' + w[i] + '</code> ml.' + (d[i] > 0 ? ' Dấu cộng: có lệnh bắt đầu tưới từ đây.' : d[i] < 0 ? ' Dấu trừ: có lệnh đã kết thúc.' : '') });
+    }
+    const ok = w.slice(1).every((v, i) => v === finalW[i + 1]);
+    snap({ line: 9, msg: '🎉 Lượng nước: <b>' + w.slice(1).join(', ') + '</b>. ' + (ok ? 'Đúng bằng kết quả khi tưới từng chậu một.' : '') + ' Mỗi lệnh chỉ 2 phép tính, cộng dồn thêm ' + n + ' phép cộng.' });
+    return S;
+  }
+  function renderPot(s){
+    const n = POT_N;
+    $('#potCmds').innerHTML = s.cmds.map(([l, r, x], c) => '<span class="cmd' + (c === s.cmd ? ' on' : '') + '">Lệnh ' + (c + 1) + ': +' + x + ' ml, chậu ' + l + '–' + r + '</span>').join('');
+    let h = '';
+    for (let i = 1; i <= n; i++){
+      const v = s.w[i], hpct = v === null ? 0 : Math.round(v / s.maxW * 100);
+      h += '<div class="pot' + (i === s.curP ? ' cur' : '') + (v !== null && v === s.maxW ? ' full' : '') + '"><span class="plant" aria-hidden="true">' + (v ? '🌿' : '🌱') + '</span>' +
+           '<div class="glass">' + (v ? '<div class="water" style="height:' + hpct + '%"></div>' : '') + '</div><span class="val">' + (v === null ? '?' : v) + '</span><span class="lbl">' + i + '</span></div>';
+    }
+    $('#pots').innerHTML = h;
+    h = '<span class="nm">d =</span>';
+    for (let i = 1; i <= n + 1; i++){
+      let cls = 'cellx';
+      if (i === s.curD) cls += ' cur'; else if (i === s.srcD) cls += ' src'; else if (s.mark[i]) cls += ' done';
+      h += '<div class="' + cls + '"><small>[' + i + ']</small><b>' + (s.d[i] ? sgn(s.d[i]) : '0') + '</b></div>';
+    }
+    $('#potD').innerHTML = h;
+    follow($('#potD').parentElement);
+  }
+  const simPot = makeSim($('#simPot'), {
+    build: buildPot, render: renderPot,
+    code: () => [
+      'n = ' + POT_N,
+      'd = [0] * (n + 2)     # thêm ô n + 1',
+      'for l, r, x in [' + POT.map(c => '(' + c.join(', ') + ')').join(', ') + ']:',
+      '    d[l] += x         # bắt đầu tưới',
+      '    d[r + 1] -= x     # hết tưới',
+      'nuoc = [0] * (n + 1)',
+      'for i in range(1, n + 1):',
+      '    nuoc[i] = nuoc[i - 1] + d[i]',
+      'print(nuoc[1:])'
+    ]
+  });
+  $('#potRandom').onclick = () => {
+    POT = [];
+    for (let t = 0; t < 3; t++){ const l = rnd(1, POT_N); POT.push([l, rnd(l, POT_N), rnd(1, 4)]); }
+    simPot.rebuild();
+  };
+  $('#potReset').onclick = () => { POT = POT0.map(x => x.slice()); simPot.rebuild(); };
+
+  // ---------- 8. Exam template ----------
+  renderCode($('#codeExam'), [
+    'import sys',
+    'input = sys.stdin.readline        # đọc nhanh',
+    '',
+    'n, q = map(int, input().split())',
+    'a = [0] + list(map(int, input().split()))',
+    'pre = [0] * (n + 1)',
+    'for i in range(1, n + 1):',
+    '    pre[i] = pre[i - 1] + a[i]',
+    'out = []',
+    'for _ in range(q):',
+    '    l, r = map(int, input().split())',
+    '    out.append(pre[r] - pre[l - 1])',
+    "print('\\n'.join(map(str, out)))   # in một lần"
+  ]);
+})();
+</script>
+<script>
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+</script>
+</body>
+</html>

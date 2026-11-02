@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mảng đếm và vị trí cuối</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 1.1 */
+.votes{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:5px; max-width:360px; }
+.vote{ aspect-ratio:1; display:grid; place-items:center; font-size:22px; border-radius:10px; background:var(--surface-2); border:2px solid transparent; transition:opacity .2s, border-color .2s, background .2s; }
+.vote.seen{ opacity:.35; }
+.vote.cur{ border-color:var(--accent); background:var(--accent-soft); opacity:1; }
+.guess{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.guess .btn{ font-size:20px; min-width:52px; }
+.guess .btn.on{ background:var(--path-soft); border-color:var(--path); }
+.tally{ display:flex; gap:10px; align-items:flex-end; height:170px; margin-top:16px; padding:0 2px; }
+.tcol{ flex:1 1 0; max-width:56px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:3px; }
+.tcol .cnt{ font-weight:800; font-size:16px; }
+.tcol .bar{ width:100%; border-radius:8px 8px 3px 3px; background:var(--surface); border:2px solid var(--line); min-height:4px; transition:height .25s, background .25s, border-color .25s; }
+.tcol .bar.cur{ background:var(--accent); border-color:var(--accent); }
+.tcol .bar.done{ background:var(--done-soft); border-color:var(--done); }
+.tcol .bar.best{ background:var(--done); border-color:var(--done); }
+.tcol .lb{ font-size:20px; line-height:1.2; }
+.tcol .lb.mono{ font-family:var(--mono); font-size:12.5px; color:var(--muted); font-weight:600; }
+.tcol.cur .lb.mono{ color:var(--accent); }
+.rowwrap{ position:relative; padding-top:50px; }
+.arcs{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; overflow:visible; }
+.arcs path{ fill:none; stroke:var(--muted); stroke-width:2; stroke-dasharray:4 4; opacity:.6; }
+.arcs text{ font-weight:800; font-size:12.5px; font-family:inherit; fill:var(--muted); }
+.arcs .cur path{ stroke:var(--src); stroke-width:3.5; stroke-dasharray:none; opacity:1; }
+.arcs .cur text{ fill:var(--src); }
+.arcs .best path{ stroke:var(--path); stroke-width:3.5; stroke-dasharray:none; opacity:1; }
+.arcs .best text{ fill:var(--path); }
+.arcs .bad path{ stroke:var(--accent); stroke-width:3.5; stroke-dasharray:none; opacity:1; }
+.arcs .bad text{ fill:var(--accent); }
+.arcs .ok path{ stroke:var(--src); stroke-width:3; stroke-dasharray:none; opacity:1; }
+.arcs .ok text{ fill:var(--src); }
+.book{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; align-items:center; min-height:34px; }
+.book .t{ font-weight:700; font-size:14px; color:var(--muted); margin-right:2px; }
+.chip{ font-family:var(--mono); font-size:13.5px; font-weight:600; padding:3px 9px; border-radius:999px; border:2px solid var(--line); background:var(--surface); transition:background .25s, border-color .25s; }
+.chip.cur{ border-color:var(--accent); background:var(--accent-soft); }
+.chip.src{ border-color:var(--src); background:var(--src-soft); }
+.cellx.path{ background:var(--path-soft); border-color:var(--path); }
+.cellx.bad{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.dim{ opacity:.45; }
+.krow{ display:flex; align-items:center; gap:12px; font-weight:600; flex-wrap:wrap; margin-bottom:6px; }
+.verdict{ font-size:1.05rem; font-weight:700; margin-top:10px; }
+.verdict b{ color:var(--accent); }
+.drawer{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:600px){ .drawer{ grid-template-columns:1fr; } }
+.drawer .panel{ margin:0; }
+.drawer .ic{ font-size:30px; }
+@media (max-width:520px){ .vote{ font-size:18px; } .tally{ gap:6px; height:150px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Mảng một chiều</span>
+  <h1>Mảng đếm và vị trí cuối</h1>
+  <p class="slogan">Đừng đếm đi đếm lại. Mỗi số tự bỏ một viên bi vào ngăn của mình.</p>
+  <p class="lead">Kỹ thuật đơn giản nhất mà hay gặp nhất trong đề chuyên: đi qua dãy <b>một lần</b>, vừa đi vừa ghi sổ. Ghi “đã gặp bao nhiêu lần” là mảng đếm, ghi “gặp lần gần nhất ở đâu” là sổ vị trí cuối.</p>
+  <div class="notebook" aria-label="Dãy số và số lần xuất hiện của mỗi số">
+    <div class="nb-row" id="nbA"></div>
+    <div class="nb-row" id="nbD"></div>
+    <p class="nb-note">Hàng trên là dãy số. Hàng dưới là mảng đếm: số 1 xuất hiện 2 lần, số 3 xuất hiện 3 lần.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#bau-chon">1. Bầu chọn</a>
+    <a href="#mang-dem">2. Mảng đếm</a>
+    <a href="#tu-dien">3. Số quá lớn?</a>
+    <a href="#vi-tri-cuoi">4. Vị trí cuối</a>
+    <a href="#de-that">5. Đề thật</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="bau-chon">
+  <h2><span class="num">1</span>Lớp em thích món nào nhất?</h2>
+  <p>Cả lớp bỏ phiếu chọn món tráng miệng cho buổi liên hoan. Đây là 28 phiếu. Nhìn nhanh và đoán xem món nào được chọn nhiều nhất?</p>
+  <div class="panel">
+    <div class="votes" id="votes"></div>
+    <div class="guess" id="guess"></div>
+    <div class="controls">
+      <button class="btn primary" id="countGo">Đếm từng phiếu</button>
+      <button class="btn" id="countReset">Làm lại</button>
+    </div>
+    <div class="tally" id="voteTally"></div>
+    <div class="explain" id="voteMsg"></div>
+  </div>
+  <p>Nhìn bằng mắt rất dễ nhầm. Cách chắc chắn: đi qua từng phiếu <b>đúng một lần</b>, mỗi phiếu thì cộng 1 vào cột của món đó. Máy tính làm y như vậy.</p>
+  <div class="remember">Ghi nhớ: đếm tần suất = đi qua dãy một lần, mỗi phần tử cộng 1 vào “ngăn” của nó.</div>
+</section>
+
+<!-- 2 -->
+<section id="mang-dem">
+  <h2><span class="num">2</span>Mảng đếm: giá trị chính là số ngăn</h2>
+  <p>Khi các số nhỏ (ví dụ mặt xúc xắc từ 1 đến 6), ta làm một dãy ngăn <code>dem</code> và dùng <b>chính giá trị</b> làm số thứ tự ngăn: gặp số 5 thì cộng vào <code>dem[5]</code>. Không cần tìm kiếm gì cả.</p>
+
+  <div class="sim" id="simCnt">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="cntRandom">🎲 Gieo lại</button>
+      <button class="btn" id="cntReset">Dãy mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap" id="cntWrap"><div class="arr" id="cntA"></div></div>
+          <div class="tally" id="cntT"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Số đang xét và ngăn của nó</span><span><i class="lg-done"></i>Đã đếm</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao là <code>[0] * 7</code> mà không phải <code>[0] * 6</code>?</b> Dãy có 7 ngăn đánh số 0 đến 6, nên có ngăn số 6. Ngăn số 0 bỏ không. Muốn đếm số từ 0 đến M thì cần <code>M + 1</code> ngăn.</div>
+  <p>Đếm xong, muốn hỏi “số 5 xuất hiện mấy lần?” chỉ cần đọc <code>dem[5]</code>, không phải đếm lại. Hỏi bao nhiêu lần cũng nhanh.</p>
+</section>
+
+<!-- 3 -->
+<section id="tu-dien">
+  <h2><span class="num">3</span>Nếu các số rất lớn hoặc âm thì sao?</h2>
+  <p>Đề thường cho giá trị tới 10⁹, thậm chí âm. Làm một tỉ ngăn thì máy không đủ bộ nhớ, còn ngăn số âm thì không có. Kéo thanh trượt để xem:</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap"><span>Giá trị lớn nhất M = 10<sup id="eVal"></sup></span>
+      <input type="range" id="eSlider" min="2" max="9" value="5" aria-label="Số mũ của giá trị lớn nhất">
+    </label>
+    <div class="stats">
+      <div class="stat" id="memList"><div class="k">Mảng đếm <code>[0] * (M + 1)</code></div><div class="v" id="listV"></div><div class="t" id="listT"></div></div>
+      <div class="stat good"><div class="k">Từ điển <code>{}</code>, dãy có 10⁵ số</div><div class="v" id="dictV"></div><div class="t">chỉ ghi những số thật sự xuất hiện</div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Ước lượng thô: mỗi ngăn của danh sách Python tốn khoảng 8 byte, mỗi mục từ điển khoảng 100 byte. Bộ nhớ đề cho thường từ 256 MB đến 1 GB.</p>
+  </div>
+  <div class="drawer">
+    <div class="panel sign">
+      <div class="ic" aria-hidden="true">🗄️</div>
+      <h4>Mảng đếm = tủ có ngăn đánh số</h4>
+      <p>Nhanh, gọn. Dùng khi giá trị nhỏ (tới khoảng 10⁶–10⁷) và không âm.</p>
+    </div>
+    <div class="panel sign">
+      <div class="ic" aria-hidden="true">📒</div>
+      <h4>Từ điển = sổ ghi tên</h4>
+      <p>Chỉ ghi số nào gặp. Dùng khi giá trị lớn, âm, hoặc là chữ.</p>
+    </div>
+  </div>
+  <div class="code" id="codeDict"></div>
+</section>
+
+<!-- 4 -->
+<section id="vi-tri-cuoi">
+  <h2><span class="num">4</span>Sổ vị trí cuối: hai số bằng nhau gần nhất</h2>
+  <p>Bài toán: tìm hai số <b>bằng nhau</b> đứng <b>gần nhau nhất</b> trong dãy. Thử mọi cặp thì mất khoảng n × n bước. Hãy tự hỏi: khi đứng ở số 5, muốn biết “số 5 gần nhất phía trước ở đâu”, ta có cần nhìn lại cả dãy không?</p>
+  <p>Không cần! Chỉ cần một cuốn sổ ghi <b>vị trí gặp mỗi số lần gần nhất</b>. Đến một số, tra sổ, đo khoảng cách, rồi sửa sổ thành vị trí hiện tại.</p>
+
+  <div class="sim" id="simLast">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="lastRandom">🎲 Dãy mới</button>
+      <button class="btn" id="lastReset">Dãy mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap rowwrap" id="lastWrap">
+            <svg class="arcs" id="lastArcs" aria-hidden="true"></svg>
+            <div class="arr" id="lastA"></div>
+          </div>
+          <div class="book" id="lastBook"></div>
+          <div class="info" id="lastInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Số đang xét</span><span><i class="lg-src"></i>Lần gặp gần nhất (tra trong sổ)</span><span><i class="lg-path"></i>Cặp gần nhất đến giờ</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao chỉ cần lần gặp gần nhất?</b> Với số đang đứng, mọi lần gặp xa hơn đều cho khoảng cách dài hơn. Cặp gần nhất luôn là hai lần gặp <b>liền nhau</b> của cùng một số.</div>
+</section>
+
+<!-- 5 -->
+<section id="de-that">
+  <h2><span class="num">5</span>Đề thật</h2>
+  <h3>KHTN 2025 · KCNN: Hai giá trị bằng nhau</h3>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Cho dãy N số (N ≤ 10⁵, |aᵢ| ≤ 10⁹). Tìm khoảng cách chỉ số nhỏ nhất giữa hai số bằng nhau, không có thì in −1. <b>80% số điểm</b>: N ≤ 1000 và |aᵢ| ≤ 10⁵.</p>
+  </div>
+  <p>Đây chính là mô phỏng ở mục 4. Ví dụ của đề: dãy 7 2 3 2 7 có cặp số 2 cách nhau 2, cặp số 7 cách nhau 4, đáp án 2.</p>
+  <div class="tip"><b>Chiến lược lấy điểm:</b> thử mọi cặp (hai vòng for) đã đủ 80% vì N ≤ 1000. Muốn trọn điểm thì dùng sổ vị trí cuối. Vì aᵢ tới 10⁹ và có số âm, sổ phải là <b>từ điển</b>, không phải mảng.</div>
+  <p><a href="../luyen-de/index.html#bai=khtn-2025-kcnn">Mở đề KCNN trong ngân hàng đề ↗</a></p>
+
+  <h3>TP.HCM 2024 · TUYETCHIEU: Tuyệt chiêu</h3>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Dãy n lượt chơi, lượt i dùng tuyệt chiêu mã aᵢ. Dùng tuyệt chiêu ở lượt i thì chỉ được dùng lại <b>từ lượt i + k trở đi</b>. In mã nhỏ nhất bị vi phạm, không có thì −1. n ≤ 10⁶, aᵢ ≤ 10⁶; 60% số điểm có n ≤ 1000.</p>
+  </div>
+  <p>Lại là sổ vị trí cuối! Lần dùng lại vi phạm khi khoảng cách tới lần dùng trước <b>nhỏ hơn k</b>. Kéo k để xem các cung chuyển đỏ:</p>
+  <div class="panel">
+    <div class="krow">k = <input type="range" id="tcK" min="1" max="5" value="3" aria-label="Chọn k"> <b id="tcKv">3</b></div>
+    <div class="viz">
+      <div class="arr-wrap rowwrap" id="tcWrap">
+        <svg class="arcs" id="tcArcs" aria-hidden="true"></svg>
+        <div class="arr" id="tcA"></div>
+      </div>
+    </div>
+    <p class="code-cap" style="margin:8px 0 0">Số nhỏ phía trên mỗi ô là số thứ tự lượt chơi (ví dụ 1 của đề, k = 3).</p>
+    <div class="verdict" id="tcOut"></div>
+  </div>
+  <div class="tip"><b>Mẹo:</b> aᵢ ≤ 10⁶ nên dùng được mảng <code>[0] * 1000001</code>. Đánh số lượt từ 1 để số 0 trong mảng nghĩa là “chưa dùng bao giờ”. Cẩn thận: khoảng cách <b>bằng</b> k là hợp lệ, chỉ <b>nhỏ hơn</b> k mới vi phạm.</div>
+  <p><a href="../luyen-de/index.html#bai=hcm-2024-tuyetchieu">Mở đề Tuyệt chiêu trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <h3>Khi nào nghĩ tới sổ ghi chép?</h3>
+  <ul>
+    <li>Đề hỏi “bao nhiêu lần”, “xuất hiện nhiều nhất”, “có lặp lại không”: dùng <b>mảng đếm</b> hoặc từ điển đếm.</li>
+    <li>Đề hỏi “gần nhất”, “lần trước”, “cách nhau bao xa”: dùng <b>sổ vị trí cuối</b>.</li>
+    <li>Cách thử mọi cặp làm n × n bước; sổ ghi chép chỉ làm n bước.</li>
+  </ul>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Giá trị</th><th>Dùng</th><th>Ví dụ</th></tr></thead>
+      <tbody>
+        <tr><td>Nhỏ, không âm (≤ khoảng 10⁶)</td><td><code>dem = [0] * (M + 1)</code></td><td>Tuyệt chiêu (mã ≤ 10⁶)</td></tr>
+        <tr><td>Lớn, âm, hoặc là chữ</td><td><code>dem = {}</code></td><td>KCNN (|aᵢ| ≤ 10⁹)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Thiếu một ngăn</b>: số tới M cần <code>[0] * (M + 1)</code>.</li>
+    <li><b>Kiểm tra “đã gặp chưa” bằng <code>if cuoi[x]:</code></b>: sai khi vị trí cũ là 0. Với từ điển dùng <code>if x in cuoi:</code>; với mảng thì đánh số từ 1.</li>
+    <li><b>Sửa sổ trước khi tra</b>: phải tính khoảng cách xong rồi mới ghi vị trí mới.</li>
+    <li><b>Nhầm “nhỏ hơn” với “nhỏ hơn hoặc bằng”</b>: đọc kỹ đề, thử với ví dụ có khoảng cách đúng bằng k.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Điểm thi phổ biến nhất <span class="level lv1">Dễ</span></h4>
+    <p>Cho điểm thi (số nguyên 0 đến 10) của n học sinh. In ra điểm có nhiều bạn đạt nhất; nếu bằng nhau in điểm cao hơn.</p>
+    <details><summary>Gợi ý</summary><p>Mảng đếm 11 ngăn. Duyệt điểm từ 10 xuống 0 để ưu tiên điểm cao.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Số không lặp lại đầu tiên <span class="level lv1">Dễ</span></h4>
+    <p>In số đầu tiên trong dãy chỉ xuất hiện đúng một lần. Không có thì in −1.</p>
+    <details><summary>Gợi ý</summary><p>Đi hai lượt: lượt đầu đếm, lượt sau tìm số đầu tiên có số lần bằng 1.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Đếm cặp bắt tay <span class="level lv2">Vừa</span></h4>
+    <p>Đếm số cặp (i, j) với i &lt; j và aᵢ = aⱼ. n ≤ 10⁵.</p>
+    <details><summary>Gợi ý</summary><p>Đến số x, nó ghép được với tất cả các số x đã gặp trước đó. Cộng <code>dem[x]</code> vào đáp án <b>trước</b> khi tăng <code>dem[x]</code>.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. KCNN: Hai giá trị bằng nhau <span class="level lv4">Đề thật</span></h4>
+    <p>KHTN 2025. Làm cách thử mọi cặp trước, rồi đổi sang sổ vị trí cuối bằng từ điển.</p>
+    <details><summary>Gợi ý</summary><p>Đúng mô phỏng mục 4. Ban đầu đáp án là −1; nhớ xử lý trường hợp chưa có cặp nào.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khtn-2025-kcnn">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Tuyệt chiêu <span class="level lv4">Đề thật</span></h4>
+    <p>TP.HCM 2024. n tới 10⁶ nên đọc dữ liệu nhanh bằng <code>sys.stdin</code>.</p>
+    <details><summary>Gợi ý</summary><p>Mảng vị trí cuối theo mã. Vi phạm khi <code>i - cuoi[a] &lt; k</code>; giữ mã vi phạm nhỏ nhất.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=hcm-2024-tuyetchieu">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 1: Mảng một chiều. Bài tiếp theo: <a href="tong-tien-to.html">Tổng tiền tố</a>. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  // Vẽ các cung nối hai ô trong cùng một hàng (cung cao hơn khi xa hơn)
+  function drawArcs(wrap, svg, cells, list){
+    svg.setAttribute('width', wrap.scrollWidth); svg.setAttribute('height', wrap.offsetHeight);
+    const wr = wrap.getBoundingClientRect(), bx = wr.left - wrap.scrollLeft, by = wr.top;
+    let h = '';
+    for (const a of list){
+      const A = cells[a.from].getBoundingClientRect(), B = cells[a.to].getBoundingClientRect();
+      const x1 = A.left - bx + A.width / 2, x2 = B.left - bx + B.width / 2, y = A.top - by - 3;
+      const up = Math.min(54, 18 + Math.abs(a.to - a.from) * 7), mx = (x1 + x2) / 2;
+      h += '<g class="' + (a.cls || '') + '"><path d="M' + x1 + ' ' + y + ' Q' + mx + ' ' + (y - up * 1.6) + ' ' + x2 + ' ' + y + '"/>' +
+        (a.label ? '<text x="' + mx + '" y="' + (y - up * 0.8 - 4) + '" text-anchor="middle">' + a.label + '</text>' : '') + '</g>';
+    }
+    svg.innerHTML = h;
+  }
+
+  // ---------- Hero ----------
+  (function(){
+    const a = [3, 1, 3, 2, 1, 3];
+    $('#nbA').innerHTML = '<span class="nm">a</span>' + a.map((v, i) => '<div class="nb-cell nb-a" style="animation-delay:' + (i * 0.08) + 's">' + v + '</div>').join('');
+    const d = [0, 2, 1, 3];
+    $('#nbD').innerHTML = '<span class="nm">dem</span>' + d.map((v, i) => '<div class="nb-cell ' + (i === 0 ? 'nb-a' : v === 3 ? 'nb-p last' : 'nb-p') + '" style="animation-delay:' + (0.6 + i * 0.08) + 's;flex-direction:column;line-height:1"><small style="font-size:10px;font-weight:600;opacity:.7">[' + i + ']</small>' + v + '</div>').join('');
+  })();
+
+  // ---------- 1. Bầu chọn ----------
+  (function(){
+    const F = ['🍎', '🍌', '🍇', '🍉', '🍓'];
+    const V = [3,1,4,0,3,2,1,4,3,0,1,4,2,3,1,0,4,3,2,1,3,0,4,1,2,3,0,4];
+    let guess = -1, timer = null, k = -1;
+    const cnt = () => { const c = [0,0,0,0,0]; for (let t = 0; t <= k; t++) c[V[t]]++; return c; };
+    function render(){
+      $('#votes').innerHTML = V.map((v, t) => '<div class="vote' + (t === k ? ' cur' : t < k ? ' seen' : '') + '">' + F[v] + '</div>').join('');
+      $('#guess').innerHTML = '<span style="align-self:center;font-weight:600">Em đoán:</span>' + F.map((f, i) => '<button class="btn' + (i === guess ? ' on' : '') + '" data-g="' + i + '" aria-label="Đoán ' + f + '">' + f + '</button>').join('');
+      const c = cnt(), mx = Math.max(...c), done = k === V.length - 1;
+      $('#voteTally').innerHTML = F.map((f, i) => '<div class="tcol"><span class="cnt">' + c[i] + '</span><div class="bar' + (done && c[i] === mx ? ' best' : k >= 0 && V[k] === i && !done ? ' cur' : c[i] ? ' done' : '') + '" style="height:' + (c[i] * 15) + 'px"></div><span class="lb">' + f + '</span></div>').join('');
+      if (done){
+        const win = c.indexOf(mx);
+        $('#voteMsg').innerHTML = 'Kết quả: ' + F.map((f, i) => f + ' ' + c[i]).join(' · ') + '. Món thắng là <b>' + F[win] + '</b> với ' + mx + ' phiếu' +
+          (guess < 0 ? '.' : guess === win ? '. Em đoán đúng! 🎉' : '. Em đoán ' + F[guess] + ' (' + c[guess] + ' phiếu): chênh nhau rất ít nên nhìn bằng mắt khó phân biệt.');
+      } else if (k >= 0) $('#voteMsg').innerHTML = 'Phiếu thứ ' + (k + 1) + ' là ' + F[V[k]] + ': cột ' + F[V[k]] + ' tăng thêm 1.';
+      else $('#voteMsg').innerHTML = guess < 0 ? 'Chạm vào một món để đoán, rồi bấm “Đếm từng phiếu”.' : 'Em đoán ' + F[guess] + '. Bấm “Đếm từng phiếu” để kiểm tra.';
+    }
+    $('#guess').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (!b || timer) return; guess = +b.dataset.g; render(); });
+    $('#countGo').onclick = () => {
+      if (timer) return;
+      k = -1; render();
+      timer = setInterval(() => { k++; render(); if (k === V.length - 1){ clearInterval(timer); timer = null; } }, 220);
+    };
+    $('#countReset').onclick = () => { if (timer){ clearInterval(timer); timer = null; } k = -1; guess = -1; render(); };
+    render();
+  })();
+
+  // ---------- 2. Mảng đếm ----------
+  const DICE0 = [3, 1, 4, 1, 5, 6, 2, 6, 5, 3, 5];
+  let DICE = DICE0.slice();
+  function buildCnt(){
+    const a = DICE, S = [], dem = Array(7).fill(0);
+    const snap = o => S.push(Object.assign({ dem: dem.slice(), cur: -1, best: false }, o));
+    snap({ line: 2, msg: 'Gieo xúc xắc ' + a.length + ' lần được dãy trên. Tạo 7 ngăn <code>dem[0..6]</code>, ngăn nào cũng bằng 0. Ngăn số 0 không dùng tới.' });
+    a.forEach((x, i) => {
+      dem[x]++;
+      snap({ line: 4, cur: i, msg: 'Số thứ ' + (i + 1) + ' là <b>' + x + '</b>: nhảy thẳng tới ngăn <code>dem[' + x + ']</code> và cộng 1, thành ' + dem[x] + '. Không phải tìm kiếm gì, vì số ' + x + ' chính là số thứ tự ngăn.' });
+    });
+    const mx = Math.max(...dem), win = [];
+    dem.forEach((v, i) => { if (v === mx) win.push(i); });
+    snap({ line: 5, best: true, msg: '✅ Đi hết dãy một lần là xong. Mặt xuất hiện nhiều nhất: <b>' + win.join(', ') + '</b> (' + mx + ' lần). Muốn biết mặt nào xuất hiện mấy lần, chỉ cần đọc ngăn tương ứng.' });
+    return S;
+  }
+  function renderCnt(s){
+    const a = DICE;
+    $('#cntA').innerHTML = '<span class="nm">a =</span>' + a.map((v, i) => '<div class="cellx' + (i === s.cur ? ' cur' : i < s.cur || s.best ? ' done' : '') + '"><small>' + (i + 1) + '</small><b>' + v + '</b></div>').join('');
+    const mx = Math.max(...s.dem.slice(1)), end = Math.max(...[1,2,3,4,5,6].map(v => a.filter(x => x === v).length));
+    const unit = Math.min(26, Math.floor(110 / end));
+    $('#cntT').style.height = (unit * end + 50) + 'px';
+    let h = '';
+    for (let v = 1; v <= 6; v++){
+      const c = s.dem[v], isCur = s.cur >= 0 && a[s.cur] === v;
+      h += '<div class="tcol' + (isCur ? ' cur' : '') + '"><span class="cnt">' + c + '</span><div class="bar' + (s.best && c === mx ? ' best' : isCur ? ' cur' : c ? ' done' : '') + '" style="height:' + (c * unit) + 'px"></div><span class="lb mono">dem[' + v + ']</span></div>';
+    }
+    $('#cntT').innerHTML = h;
+    follow($('#cntWrap'));
+  }
+  const simCnt = makeSim($('#simCnt'), {
+    build: buildCnt, render: renderCnt,
+    code: () => [
+      'a = [' + DICE.join(', ') + ']',
+      'dem = [0] * 7        # 7 ngăn: dem[0]..dem[6]',
+      'for x in a:',
+      '    dem[x] += 1      # số x bỏ vào ngăn x',
+      'print(dem[1:])'
+    ]
+  });
+  $('#cntRandom').onclick = () => { DICE = Array.from({ length: rnd(9, 12) }, () => rnd(1, 6)); simCnt.rebuild(); };
+  $('#cntReset').onclick = () => { DICE = DICE0.slice(); simCnt.rebuild(); };
+
+  // ---------- 3. Từ điển ----------
+  (function(){
+    const size = b => b < 1e6 ? fmt(Math.round(b / 1e3)) + ' KB' : b < 1e9 ? fmt(Math.round(b / 1e6)) + ' MB' : (b / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' GB';
+    function update(){
+      const e = +$('#eSlider').value, M = Math.pow(10, e), b = (M + 1) * 8;
+      $('#eVal').textContent = e;
+      $('#listV').textContent = size(b);
+      $('#listT').textContent = fmt(M + 1) + ' ngăn' + (b > 1e9 ? ' · quá bộ nhớ!' : b > 2.5e8 ? ' · rất sát giới hạn' : ' · ổn');
+      $('#memList').className = 'stat ' + (b > 2.5e8 ? 'bad' : 'good');
+      $('#dictV').textContent = 'khoảng ' + size(1e5 * 100);
+    }
+    $('#eSlider').addEventListener('input', update);
+    update();
+    renderCode($('#codeDict'), [
+      'dem = {}',
+      'for x in a:',
+      '    dem[x] = dem.get(x, 0) + 1   # chưa có thì coi là 0',
+      'print(dem.get(-7, 0))          # số -7 xuất hiện mấy lần?'
+    ]);
+  })();
+
+  // ---------- 4. Vị trí cuối ----------
+  const LAST0 = [7, 2, 3, 7, 5, 3, 2, 5, 5];
+  let LAST = LAST0.slice();
+  function buildLast(){
+    const a = LAST, S = [], cuoi = new Map(), pairs = [];
+    let best = -1, bestPair = null;
+    const snap = o => S.push(Object.assign({ book: Array.from(cuoi.entries()), cur: -1, src: -1, pairs: pairs.slice(), best, bestPair, look: null }, o));
+    snap({ line: 2, msg: 'Sổ <code>cuoi</code> đang trống. Đáp án tạm <code>best = -1</code> nghĩa là chưa thấy cặp nào bằng nhau.' });
+    a.forEach((x, i) => {
+      if (cuoi.has(x)){
+        const j = cuoi.get(x), d = i - j, better = best === -1 || d < best;
+        if (better){ best = d; bestPair = [j, i]; }
+        pairs.push([j, i]);
+        cuoi.set(x, i);
+        snap({ line: better ? 8 : 6, cur: i, src: j, look: x, msg: 'Vị trí ' + i + ' là số <b>' + x + '</b>. Tra sổ: số ' + x + ' gặp gần nhất ở vị trí <b>' + j + '</b>. Khoảng cách ' + i + ' − ' + j + ' = <b>' + d + '</b>. ' +
+          (better ? 'Gần hơn đáp án cũ, nên <code>best = ' + d + '</code>.' : 'Không gần hơn ' + best + ', giữ nguyên.') + ' Sửa sổ: ' + x + ' → ' + i + '.' });
+      } else {
+        cuoi.set(x, i);
+        snap({ line: 9, cur: i, look: x, msg: 'Vị trí ' + i + ' là số <b>' + x + '</b>. Tra sổ: chưa có số ' + x + '. Ghi vào sổ: ' + x + ' → ' + i + '.' });
+      }
+    });
+    snap({ line: 10, msg: best === -1 ? 'Không có hai số nào bằng nhau, in <b>−1</b>.' : '✅ Đáp án <b>' + best + '</b>: số ' + a[bestPair[0]] + ' ở vị trí ' + bestPair[0] + ' và ' + bestPair[1] + '. Chỉ đi qua dãy <b>một lần</b>, mỗi số tra sổ một lần.' });
+    return S;
+  }
+  function renderLast(s){
+    const a = LAST, bp = s.bestPair && s.cur < 0 ? s.bestPair : null;
+    $('#lastA').innerHTML = '<span class="nm">a =</span>' + a.map((v, i) => '<div class="cellx' + (bp && bp.includes(i) ? ' path' : i === s.cur ? ' cur' : i === s.src ? ' src' : i < s.cur ? ' done' : '') + '"><small>[' + i + ']</small><b>' + v + '</b></div>').join('');
+    $('#lastBook').innerHTML = '<span class="t">Sổ cuoi:</span>' + (s.book.length ? s.book.map(([x, i]) => '<span class="chip' + (x === s.look ? (s.src >= 0 ? ' src' : ' cur') : '') + '">' + x + ' → ' + i + '</span>').join('') : '<span style="color:var(--muted);font-size:14px">trống</span>');
+    $('#lastInfo').innerHTML = '<span>best = <b>' + s.best + '</b></span>';
+    follow($('#lastWrap'));
+    const cells = $('#lastA').querySelectorAll('.cellx');
+    drawArcs($('#lastWrap'), $('#lastArcs'), cells, s.pairs.map(([j, i]) => ({
+      from: j, to: i, label: String(i - j),
+      cls: s.cur === i ? 'cur' : (s.bestPair && s.bestPair[0] === j && s.bestPair[1] === i ? 'best' : '')
+    })));
+  }
+  const simLast = makeSim($('#simLast'), {
+    build: buildLast, render: renderLast,
+    code: () => [
+      'a = [' + LAST.join(', ') + ']',
+      'cuoi = {}        # cuoi[x]: vị trí gặp x gần nhất',
+      'best = -1',
+      'for i in range(len(a)):',
+      '    x = a[i]',
+      '    if x in cuoi:',
+      '        d = i - cuoi[x]',
+      '        if best == -1 or d < best: best = d',
+      '    cuoi[x] = i      # sửa sổ sau khi đã so',
+      'print(best)'
+    ]
+  });
+  $('#lastRandom').onclick = () => { LAST = Array.from({ length: rnd(8, 10) }, () => rnd(1, 6)); simLast.rebuild(); };
+  $('#lastReset').onclick = () => { LAST = LAST0.slice(); simLast.rebuild(); };
+
+  // ---------- 5. Tuyệt chiêu ----------
+  (function(){
+    const A = [9, 9, 3, 1, 4, 1];
+    function render(){
+      const k = +$('#tcK').value;
+      $('#tcKv').textContent = k;
+      const last = {}, arcs = [], bad = new Set();
+      A.forEach((x, t) => {
+        const i = t + 1;
+        if (last[x]){ const d = i - last[x], v = d < k; arcs.push({ from: last[x] - 1, to: t, label: d + (v ? ' < ' + k : ' ≥ ' + k), cls: v ? 'bad' : 'ok' }); if (v) bad.add(t); }
+        last[x] = i;
+      });
+      $('#tcA').innerHTML = '<span class="nm">mã =</span>' + A.map((v, t) => '<div class="cellx' + (bad.has(t) ? ' bad' : '') + '"><small>' + (t + 1) + '</small><b>' + v + '</b></div>').join('');
+      drawArcs($('#tcWrap'), $('#tcArcs'), $('#tcA').querySelectorAll('.cellx'), arcs);
+      const codes = [...new Set([...bad].map(t => A[t]))].sort((x, y) => x - y);
+      $('#tcOut').innerHTML = codes.length ? 'Mã vi phạm: ' + codes.join(', ') + '. In mã nhỏ nhất: <b>' + codes[0] + '</b>' : 'Không có vi phạm, in <b>−1</b>';
+    }
+    $('#tcK').addEventListener('input', render);
+    render();
+    window.addEventListener('resize', render);
+  })();
+})();
+</script>
+</body>
+</html>

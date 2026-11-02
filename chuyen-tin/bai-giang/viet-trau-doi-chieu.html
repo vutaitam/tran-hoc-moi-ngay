@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viết trâu và đối chiếu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 0.3 */
+.cands{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); }
+.cand{ background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:10px 12px; }
+.cand h4{ margin:0 0 6px; font-size:15px; }
+.cand .f{ font-family:var(--mono); font-size:13.5px; background:var(--surface-2); border-radius:8px; padding:6px 8px; overflow-wrap:anywhere; }
+.cand .r{ margin-top:8px; font-weight:700; font-size:14px; min-height:1.4em; }
+.cand.ok{ border-color:var(--src); }
+.chipsel{ display:flex; flex-wrap:wrap; gap:6px; }
+.chipsel .btn{ font-size:14px; padding:6px 12px; }
+.chipsel .btn.on{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.flow{ display:grid; gap:6px; justify-items:center; }
+.frow{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.fbox{ background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:8px 14px; text-align:center; font-weight:700; font-size:14.5px; min-width:120px; }
+.fbox .e{ font-size:24px; display:block; }
+.fbox small{ display:block; font-weight:500; color:var(--muted); font-size:12.5px; }
+.fbox.ok{ border-color:var(--src); background:var(--src-soft); }
+.fbox.no{ border-color:var(--accent); background:var(--accent-soft); }
+.farr{ font-size:20px; color:var(--muted); line-height:1; }
+.belt{ display:flex; flex-wrap:wrap; gap:6px; min-height:72px; align-content:flex-start; }
+.tc{ width:74px; border:2px solid var(--line); border-radius:10px; background:var(--surface); padding:4px 4px; text-align:center; font-size:12px; line-height:1.35; animation:pop .3s both; }
+.tc .in{ font-family:var(--mono); font-weight:700; font-size:12.5px; }
+.tc.ok{ border-color:var(--src); }
+.tc.no{ border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 3px var(--accent-soft); }
+.tc.sample{ border-style:dashed; }
+.runinfo{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-weight:700; font-size:15px; }
+.rooms{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.room{ border:2px solid var(--line); border-radius:10px; padding:3px 5px; background:var(--surface); display:flex; gap:2px; }
+.room.priv{ border-style:dashed; }
+.seat{ width:22px; height:22px; border-radius:6px; background:var(--surface-2); display:grid; place-items:center; font-size:14px; }
+.seat.lock{ font-size:10px; opacity:.6; }
+.fail-box{ margin-top:12px; background:var(--surface); border:2px solid var(--accent); border-radius:12px; padding:10px 12px; }
+.fail-box h4{ margin:0; font-size:15px; }
+.hm{ display:grid; gap:3px; justify-content:start; }
+.hm .hc, .hm .hh, .hm .hr{ width:25px; height:25px; display:grid; place-items:center; font-size:12px; font-weight:700; }
+.hm .hh, .hm .hr{ color:var(--muted); font-family:var(--mono); }
+.hm .hr{ width:34px; justify-content:start; }
+.hm .hc{ border-radius:6px; background:var(--surface); border:2px solid var(--line); cursor:pointer; padding:0; font:inherit; font-size:12px; color:var(--ink); transition:background .2s, border-color .2s; }
+.hm .hc.ok{ background:var(--src-soft); border-color:var(--src); }
+.hm .hc.no{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.hm .hc.best{ box-shadow:0 0 0 3px var(--done); }
+.hm .hc.sel{ outline:3px solid var(--path); outline-offset:1px; }
+.hm-cap{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+@media (max-width:520px){ .tc{ width:64px; font-size:11px; } .fbox{ min-width:100px; font-size:13.5px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Nền tảng làm bài</span>
+  <h1>Viết trâu và đối chiếu</h1>
+  <p class="slogan">Đừng tự hỏi “code mình đúng chưa?”. Hãy để máy tự hỏi 1000 lần.</p>
+  <p class="lead">Chạy đúng ví dụ của đề chưa có nghĩa là đúng. Bài này dạy một kỹ thuật dân thi đấu dùng thường xuyên: viết thêm một lời giải chậm nhưng chắc chắn đúng, rồi cho máy tự sinh test để so hai lời giải với nhau.</p>
+  <div class="notebook" aria-label="Các test được so sánh, test thứ năm làm lộ lỗi">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Test 1 đến 4 khớp. Test 5 hai lời giải cho kết quả khác nhau, và ta đã có một test làm lộ lỗi.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#ba-ban">1. Ba bạn, một ví dụ</a>
+    <a href="#y-tuong">2. Ý tưởng</a>
+    <a href="#may">3. Máy đối chiếu</a>
+    <a href="#ban-do">4. Bản đồ lỗi</a>
+    <a href="#code">5. Viết thành code</a>
+    <a href="#de-that">6. Đề thật Khánh Hòa</a>
+    <a href="#tong-ket">7. Tổng kết</a>
+    <a href="#bai-tap">8. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="ba-ban">
+  <h2><span class="num">1</span>Ba bạn, một ví dụ</h2>
+  <p>Đề <b>Đặt phòng</b> (Khánh Hòa 2024): a bạn muốn ở phòng riêng, b bạn ghép tùy ý, mỗi phòng tối đa 3 người. Cần ít nhất bao nhiêu phòng? Ví dụ của đề: <code>a = 1, b = 4</code> → <b>3</b>.</p>
+  <p>Ba bạn Lan, Minh, Hà nghĩ ra ba công thức khác nhau. Bấm để chạy ví dụ của đề:</p>
+  <div class="cands" id="cands"></div>
+  <div class="controls"><button class="btn primary" id="runSample">Chạy ví dụ của đề</button></div>
+  <div class="explain" id="sampleMsg">Theo em, công thức nào đúng?</div>
+</section>
+
+<!-- 2 -->
+<section id="y-tuong">
+  <h2><span class="num">2</span>Ý tưởng: thêm một lời giải “trâu”</h2>
+  <p>Lời giải <b>trâu</b> là cách làm chậm nhưng thẳng thắn, gần như làm bằng tay, nên rất khó sai. Với bài Đặt phòng, đó là vòng lặp cho từng bạn vào phòng (bài 0.1). Sau đó để máy làm phần còn lại:</p>
+  <div class="panel flow">
+    <div class="fbox"><span class="e">🎲</span>Sinh một test nhỏ<small>số ngẫu nhiên, nhỏ</small></div>
+    <div class="farr">↓</div>
+    <div class="frow"><div class="fbox"><span class="e">🐢</span>Lời giải trâu<small>chậm, chắc đúng</small></div><div class="fbox"><span class="e">🚀</span>Lời giải nhanh<small>cần kiểm tra</small></div></div>
+    <div class="farr">↓</div>
+    <div class="fbox"><span class="e">⚖️</span>So hai kết quả</div>
+    <div class="farr">↓</div>
+    <div class="frow"><div class="fbox ok">✅ Giống<small>quay lại sinh test mới</small></div><div class="fbox no">❌ Khác<small>dừng, in test đó ra</small></div></div>
+  </div>
+  <div class="tip"><b>Vì sao test nhỏ?</b> Test nhỏ thì lời giải trâu chạy nhanh, và khi tìm ra test sai em <b>tính tay được</b> để hiểu vì sao sai. Lỗi thường lộ ra rất sớm ở những số nhỏ như 0, 1, 2, 3.</div>
+</section>
+
+<!-- 3 -->
+<section id="may">
+  <h2><span class="num">3</span>Máy đối chiếu</h2>
+  <p>Chọn công thức của một bạn, rồi cho máy chạy. Test đầu tiên luôn là ví dụ của đề (viền đứt), các test sau là ngẫu nhiên với a từ 0 đến 5, b từ 0 đến 10.</p>
+  <div class="sim" id="machine">
+    <div class="sim-head">
+      <span class="title">Máy</span>
+      <div class="chipsel" id="selA"></div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="belt" id="belt"></div>
+          <div class="runinfo" id="runInfo"></div>
+          <div id="failBox"></div>
+        </div>
+        <div class="explain" id="mMsg"></div>
+        <div class="controls">
+          <button class="btn" id="mOne">Chạy 1 test</button>
+          <button class="btn primary" id="mRun">Chạy đến khi sai</button>
+          <button class="btn" id="mReset">Làm lại</button>
+        </div>
+        <div class="legend"><span><i class="lg-src"></i>Hai kết quả giống nhau</span><span><i class="lg-cur"></i>Khác nhau: test làm lộ lỗi</span></div>
+      </div>
+      <div class="code" id="mCode"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="ban-do">
+  <h2><span class="num">4</span>Bản đồ lỗi: tìm test sai nhỏ nhất</h2>
+  <p>Test sai máy tìm được có thể hơi lớn, như a = 5, b = 9. Muốn hiểu lỗi, hãy tìm test sai <b>nhỏ nhất</b>. Cách đơn giản: thay vì ngẫu nhiên, cho máy <b>thử lần lượt mọi test nhỏ</b> và tô màu từng ô. Mỗi hàng là một giá trị a, mỗi cột là một giá trị b.</p>
+  <div class="sim" id="mapSim">
+    <div class="sim-head">
+      <span class="title">Bản đồ</span>
+      <div class="chipsel" id="selB"></div>
+    </div>
+    <div class="viz">
+      <div class="arr-wrap"><div class="hm" id="hm"></div></div>
+      <div class="hm-cap">Chạm vào một ô để xem kết quả hai lời giải.</div>
+    </div>
+    <div class="explain" id="hmMsg"></div>
+    <div class="controls"><button class="btn primary" id="hmScan">Quét bản đồ</button></div>
+    <div class="legend"><span><i class="lg-src"></i>Khớp</span><span><i class="lg-cur"></i>Sai</span><span><i class="lg-done"></i>Test sai nhỏ nhất</span></div>
+  </div>
+  <div class="tip"><b>Đọc bản đồ:</b> các ô đỏ xếp thành <b>cột</b> nghĩa là lỗi chỉ phụ thuộc b, không phụ thuộc a. Nhìn xem đó là những cột nào: số b ấy chia 3 dư bao nhiêu? Vậy lỗi nằm ở phần nào của công thức?</div>
+</section>
+
+<!-- 5 -->
+<section id="code">
+  <h2><span class="num">5</span>Viết thành code</h2>
+  <p>Cả máy đối chiếu chỉ là một file Python ngắn. Ghép phần tính của bài vào hai hàm <code>trau</code> và <code>nhanh</code> (khung ở bài 0.2 đã tách sẵn hàm <code>giai</code>):</p>
+  <div class="code" id="codeFull"></div>
+  <div class="recipe">
+    <div class="panel"><h4><span class="step-n">1</span>Viết trâu trước</h4><p>Cách trâu cũng là bài nộp lấy điểm subtask nhỏ. Viết thật đơn giản, đừng tối ưu.</p></div>
+    <div class="panel"><h4><span class="step-n">2</span>Viết cách nhanh</h4><p>Đặt trong một hàm khác, cùng đầu vào, cùng kiểu kết quả.</p></div>
+    <div class="panel"><h4><span class="step-n">3</span>Sinh test nhỏ</h4><p>Số nhỏ, có cả <b>0</b> và giá trị biên. Khoảng giá trị hẹp để dễ có số bằng nhau.</p></div>
+    <div class="panel"><h4><span class="step-n">4</span>Khớp rồi mới nộp</h4><p>Nộp cách nhanh. Nhớ <b>bỏ phần đối chiếu</b>, chỉ giữ đọc dữ liệu, tính, in đáp án.</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="de-that">
+  <h2><span class="num">6</span>Đề thật: Dãy con k phần tử (Khánh Hòa 2024)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Cho n số và k. Tìm đoạn <b>k số liên tiếp</b> có (1) tổng lớn nhất; nếu bằng nhau thì (2) nhiều số chẵn nhất; nếu vẫn bằng thì (3) bắt đầu sớm nhất. In vị trí đầu và cuối (đếm từ 1). n ≤ 10⁶; <b>50% số điểm: n ≤ 1000</b>.</p>
+  </div>
+  <p>Ba luật chọn chồng lên nhau là chỗ rất dễ sai. Ví dụ với <code>a = [3, 1, 2, 2, 0, 4]</code>, <code>k = 2</code>:</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Đoạn</th><th>Các số</th><th>Tổng</th><th>Số chẵn</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>1–2</td><td>3, 1</td><td><b>4</b></td><td>0</td><td>tổng lớn nhất nhưng ít số chẵn</td></tr>
+        <tr><td>2–3</td><td>1, 2</td><td>3</td><td>1</td><td></td></tr>
+        <tr><td>3–4</td><td>2, 2</td><td><b>4</b></td><td><b>2</b></td><td>✅ chọn: bắt đầu sớm hơn 5–6</td></tr>
+        <tr><td>4–5</td><td>2, 0</td><td>2</td><td>2</td><td></td></tr>
+        <tr><td>5–6</td><td>0, 4</td><td><b>4</b></td><td><b>2</b></td><td>hòa với 3–4 nhưng bắt đầu muộn hơn</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Đáp án: <b>3 4</b>. Lời giải trâu thử mọi đoạn và so <b>cặp (tổng, số chẵn)</b>; Python so cặp đúng thứ tự luật (1) rồi (2). Dùng dấu <code>&gt;</code> (không phải <code>&gt;=</code>) để giữ đoạn sớm nhất, đúng luật (3):</p>
+  <div class="code" id="codeK"></div>
+  <div class="tip"><b>Mẹo sinh test cho bài này:</b> lấy số trong khoảng hẹp như −3 đến 3 để <b>thường xuyên có tổng bằng nhau</b>. Nếu sinh số từ −10⁹ đến 10⁹, gần như không bao giờ có hai tổng bằng nhau và luật (2), (3) không bao giờ được kiểm tra.</div>
+  <p><a href="../luyen-de/index.html#bai=khanhhoa-2024-bai3">Mở đề Dãy con k phần tử trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 7 -->
+<section id="tong-ket">
+  <h2><span class="num">7</span>Tổng kết</h2>
+  <ul>
+    <li>Trâu + nhanh + sinh test nhỏ + so sánh = bắt được lỗi mà ví dụ của đề bỏ sót.</li>
+    <li>Tìm được test sai thì <b>thu nhỏ</b> nó, rồi tính tay để hiểu lỗi.</li>
+    <li>Lời giải trâu còn là bài nộp lấy điểm subtask nhỏ, viết nó không bao giờ phí.</li>
+  </ul>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Trâu cũng sai:</b> trâu phải thật đơn giản, đúng theo đề từng chữ. Nếu trâu phức tạp, hai lời giải có thể sai giống nhau.</li>
+    <li><b>Sinh test không có số 0 hoặc giá trị biên:</b> dùng <code>random.randint(0, ...)</code>, đừng quên n nhỏ nhất.</li>
+    <li><b>Khoảng giá trị quá rộng:</b> các trường hợp bằng nhau không bao giờ xuất hiện.</li>
+    <li><b>Nộp nhầm file còn phần đối chiếu:</b> chương trình in thêm chữ hoặc chạy mãi.</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="bai-tap">
+  <h2><span class="num">8</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Đặt phòng <span class="level lv4">Đề thật</span></h4>
+    <p>Tự gõ lại file đối chiếu ở mục 5, thử với cả ba công thức. Máy có tìm ra lỗi của Lan và Minh không?</p>
+    <details><summary>Gợi ý</summary><p>Thêm dòng <code>print(lan, 'test khớp')</code> để biết máy đã chạy bao nhiêu test trước khi gặp lỗi.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khanhhoa-2024-bai1">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Dãy con k phần tử <span class="level lv4">Đề thật</span></h4>
+    <p>Viết cách nhanh (cửa sổ trượt: bỏ số đầu, thêm số cuối), rồi đối chiếu với lời giải trâu ở mục 6.</p>
+    <details><summary>Gợi ý</summary><p>Giữ cả tổng và số lượng số chẵn trong cửa sổ, cập nhật khi trượt. Sinh n từ 1 đến 6, k từ 1 đến n, số từ −3 đến 3.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khanhhoa-2024-bai3">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Cộng dãy <span class="level lv2">Vừa</span></h4>
+    <p>Sư phạm 2023: sau mỗi lần cộng x vào mọi phần tử, in tổng giá trị tuyệt đối. Viết trâu (cộng thật vào từng số rồi tính tổng) trước khi nghĩ cách nhanh.</p>
+    <details><summary>Gợi ý</summary><p>Trâu chạy được với n, q ≤ 5000 (50% số điểm). Cách nhanh cần sắp xếp và tổng tiền tố, đối chiếu với trâu trên dãy dài 5–6 số.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2023-cong-day">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Tự gài bẫy <span class="level lv1">Dễ</span></h4>
+    <p>Lấy một lời giải đúng em đã làm, cố ý sửa một dấu (<code>&lt;</code> thành <code>&lt;=</code>, hoặc bỏ <code>+ 1</code>). Máy đối chiếu tìm ra lỗi sau bao nhiêu test?</p>
+    <details><summary>Gợi ý</summary><p>Nếu máy không tìm ra, có thể test sinh ra chưa đủ đa dạng: thử thu hẹp khoảng giá trị hoặc thêm trường hợp n = 1.</p></details>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 0: Nền tảng làm bài. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  // ---------- Dữ liệu chung ----------
+  const trau = (a, b) => { let phong = a, cho = 0; for (let t = 0; t < b; t++){ if (cho === 0){ phong++; cho = 3; } cho--; } return phong; };
+  const CANDS = [
+    { who: 'Lan', f: 'a + b // 3 + 1', fn: (a, b) => a + Math.floor(b / 3) + 1 },
+    { who: 'Minh', f: 'a + b // 3 + (1 if b % 3 == 1 else 0)', fn: (a, b) => a + Math.floor(b / 3) + (b % 3 === 1 ? 1 : 0) },
+    { who: 'Hà', f: 'a + (b + 2) // 3', fn: (a, b) => a + Math.floor((b + 2) / 3) }
+  ];
+  let CI = 0;
+  const listeners = [];
+  function setCand(i){ CI = i; listeners.forEach(f => f()); }
+  function chips(el){
+    const draw = () => { el.innerHTML = CANDS.map((c, i) => '<button class="btn' + (i === CI ? ' on' : '') + '" data-i="' + i + '">' + c.who + '</button>').join(''); };
+    el.addEventListener('click', e => { const b = e.target.closest('.btn'); if (b) setCand(+b.dataset.i); });
+    listeners.push(draw); draw();
+  }
+
+  // ---------- Hero ----------
+  $('#nbRow').innerHTML = '<span class="nm">test</span>' + ['✓', '✓', '✓', '✓', '✗'].map((v, i) => '<div class="nb-cell ' + (i === 4 ? 'nb-p last' : 'nb-a') + '" style="animation-delay:' + (i * 0.15) + 's">' + v + '</div>').join('');
+
+  // ---------- 1. Ba bạn ----------
+  (function(){
+    let ran = false;
+    function render(){
+      $('#cands').innerHTML = CANDS.map(c => '<div class="cand' + (ran ? ' ok' : '') + '"><h4>Cách của ' + c.who + '</h4><div class="f">' + esc(c.f) + '</div><div class="r">' + (ran ? '✅ a = 1, b = 4 → ' + c.fn(1, 4) : '') + '</div></div>').join('');
+    }
+    $('#runSample').onclick = () => { ran = true; render(); $('#sampleMsg').innerHTML = 'Cả ba đều ra <b>3</b>, đúng ví dụ của đề! Nhưng thật ra <b>chỉ một</b> công thức đúng với mọi a, b. Thử thêm vài test bằng tay thì lâu và dễ bỏ sót. Hãy để máy làm (mục 2 và 3).'; };
+    render();
+  })();
+
+  // ---------- 3. Máy đối chiếu ----------
+  (function(){
+    let tests = [], timer = null, fail = null;
+    const LINES = c => [
+      'import random',
+      'def trau(a, b): ...        # xếp từng bạn (bài 0.1)',
+      'def nhanh(a, b):',
+      '    return ' + c.f,
+      'for lan in range(1000):',
+      '    a = random.randint(0, 5)',
+      '    b = random.randint(0, 10)',
+      '    if trau(a, b) != nhanh(a, b):',
+      "        print('SAI:', a, b)",
+      '        break'
+    ];
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } $('#mRun').textContent = 'Chạy đến khi sai'; }
+    function reset(){ stop(); tests = []; fail = null; renderCode($('#mCode'), LINES(CANDS[CI])); render(); }
+    function one(){
+      if (fail || tests.length >= 1000) return false;
+      const [a, b] = tests.length === 0 ? [1, 4] : [rnd(0, 5), rnd(0, 10)];
+      const t = trau(a, b), n = CANDS[CI].fn(a, b);
+      tests.push({ a, b, t, n });
+      if (t !== n) fail = tests[tests.length - 1];
+      return true;
+    }
+    function rooms(a, b){
+      let h = '';
+      for (let i = 0; i < a; i++) h += '<div class="room priv"><span class="seat">🧑</span><span class="seat lock">🔒</span><span class="seat lock">🔒</span></div>';
+      for (let r = 0; r < Math.ceil(b / 3); r++){ h += '<div class="room">'; for (let s = 0; s < 3; s++) h += '<span class="seat">' + (r * 3 + s < b ? '🙂' : '') + '</span>'; h += '</div>'; }
+      return h || '<span style="color:var(--muted);font-size:14px">Không có ai, không cần phòng nào</span>';
+    }
+    function render(){
+      const c = CANDS[CI], show = tests.slice(-12);
+      $('#belt').innerHTML = show.length ? show.map(x => '<div class="tc' + (x.t === x.n ? ' ok' : ' no') + (x === tests[0] ? ' sample' : '') + '"><div class="in">a=' + x.a + ' b=' + x.b + '</div>🐢' + x.t + ' 🚀' + x.n + '<br>' + (x.t === x.n ? '✅' : '❌') + '</div>').join('') : '<span style="color:var(--muted);font-size:14px">Chưa chạy test nào</span>';
+      $('#runInfo').innerHTML = '<span>Đã chạy: ' + tests.length + ' test</span><span>Đang kiểm tra: cách của ' + c.who + '</span>';
+      setLine($('#mCode'), fail ? 9 : 0);
+      if (fail){
+        $('#failBox').innerHTML = '<div class="fail-box"><h4>Test làm lộ lỗi: a = ' + fail.a + ', b = ' + fail.b + '</h4><div class="rooms">' + rooms(fail.a, fail.b) + '</div><p style="margin:8px 0 0;font-size:14.5px">Xếp bằng tay: cần <b>' + fail.t + '</b> phòng. Công thức của ' + c.who + ' ra <b>' + fail.n + '</b>.</p></div>';
+        $('#mMsg').innerHTML = '❌ Sau <b>' + tests.length + ' test</b>, máy tìm ra test làm lộ lỗi. Ví dụ của đề không phát hiện được, nhưng máy chỉ cần vài giây. Test này còn hơi lớn: mục 4 tìm test sai nhỏ nhất.';
+      } else {
+        $('#failBox').innerHTML = '';
+        $('#mMsg').innerHTML = !tests.length ? 'Bấm “Chạy 1 test” để xem từng test, hoặc “Chạy đến khi sai”.'
+          : tests.length >= 1000 ? '✅ Khớp cả <b>1000 test</b>. Chưa phải chứng minh, nhưng em có thể yên tâm hơn rất nhiều khi nộp cách của ' + c.who + '.'
+          : 'Khớp ' + tests.length + ' test. Tiếp tục…';
+      }
+    }
+    $('#mOne').onclick = () => { stop(); one(); render(); };
+    $('#mRun').onclick = () => {
+      if (timer){ stop(); return; }
+      $('#mRun').textContent = 'Tạm dừng';
+      timer = setInterval(() => {
+        const batch = tests.length < 24 ? 1 : 40;            // 24 test đầu chạy chậm để xem, sau đó chạy nhanh
+        for (let i = 0; i < batch; i++) if (!one()) break;
+        render();
+        if (fail || tests.length >= 1000) stop();
+      }, 140);
+    };
+    $('#mReset').onclick = reset;
+    chips($('#selA'));
+    listeners.push(reset);
+    reset();
+  })();
+
+  // ---------- 4. Bản đồ lỗi ----------
+  (function(){
+    const AM = 4, BM = 8;
+    let shown = new Set(), timer = null, sel = null, done = false;
+    function smallest(){
+      let best = null;
+      for (let a = 0; a <= AM; a++) for (let b = 0; b <= BM; b++)
+        if (trau(a, b) !== CANDS[CI].fn(a, b) && (!best || a + b < best[0] + best[1] || (a + b === best[0] + best[1] && a < best[0]))) best = [a, b];
+      return best;
+    }
+    function render(){
+      const c = CANDS[CI], sm = done ? smallest() : null;
+      let h = '<span class="hr" style="white-space:nowrap">a\\b</span>';
+      for (let b = 0; b <= BM; b++) h += '<span class="hh">' + b + '</span>';
+      for (let a = 0; a <= AM; a++){
+        h += '<span class="hr">a=' + a + '</span>';
+        for (let b = 0; b <= BM; b++){
+          const k = a + ',' + b, ok = trau(a, b) === c.fn(a, b);
+          const cls = shown.has(k) ? (ok ? ' ok' : ' no') : '';
+          h += '<button class="hc' + cls + (sm && sm[0] === a && sm[1] === b ? ' best' : '') + (sel === k ? ' sel' : '') + '" data-k="' + k + '" aria-label="a = ' + a + ', b = ' + b + '">' + (shown.has(k) ? (ok ? '✓' : '✗') : '') + '</button>';
+        }
+      }
+      const hm = $('#hm');
+      hm.style.gridTemplateColumns = '34px repeat(' + (BM + 1) + ', 25px)';
+      hm.innerHTML = h;
+      if (sel){
+        const [a, b] = sel.split(',').map(Number), t = trau(a, b), n = c.fn(a, b);
+        $('#hmMsg').innerHTML = 'a = ' + a + ', b = ' + b + ': xếp bằng tay cần <b>' + t + '</b> phòng, công thức của ' + c.who + ' ra <b>' + n + '</b>. ' + (t === n ? '✅ Khớp.' : '❌ Sai.');
+      } else if (done){
+        const bad = []; for (let b = 0; b <= BM; b++) if (trau(0, b) !== c.fn(0, b)) bad.push(b);
+        $('#hmMsg').innerHTML = sm
+          ? 'Test sai nhỏ nhất (viền vàng): <b>a = ' + sm[0] + ', b = ' + sm[1] + '</b>. Tính tay: cần ' + trau(sm[0], sm[1]) + ' phòng, công thức ra ' + c.fn(sm[0], sm[1]) + '. Các cột đỏ: b = ' + bad.join(', ') + '.'
+          : '✅ Cả ' + ((AM + 1) * (BM + 1)) + ' ô đều khớp. Cách của ' + c.who + ' đúng với mọi test nhỏ.';
+      } else $('#hmMsg').innerHTML = 'Bấm “Quét bản đồ” để thử lần lượt mọi cặp a từ 0 đến ' + AM + ', b từ 0 đến ' + BM + '.';
+    }
+    function reset(){ if (timer){ clearInterval(timer); timer = null; } shown = new Set(); sel = null; done = false; render(); }
+    $('#hmScan').onclick = () => {
+      reset();
+      const order = []; for (let a = 0; a <= AM; a++) for (let b = 0; b <= BM; b++) order.push(a + ',' + b);
+      let i = 0;
+      timer = setInterval(() => { shown.add(order[i++]); if (i >= order.length){ clearInterval(timer); timer = null; done = true; } render(); }, 35);
+    };
+    $('#hm').addEventListener('click', e => { const b = e.target.closest('.hc'); if (!b) return; sel = b.dataset.k; shown.add(sel); render(); });
+    chips($('#selB'));
+    listeners.push(reset);
+    reset();
+  })();
+
+  // ---------- 5, 6. Code ----------
+  renderCode($('#codeFull'), [
+    'import random',
+    '',
+    'def trau(a, b):            # chậm mà chắc: xếp từng bạn',
+    '    phong, cho = a, 0',
+    '    for _ in range(b):',
+    '        if cho == 0:',
+    '            phong += 1',
+    '            cho = 3',
+    '        cho -= 1',
+    '    return phong',
+    '',
+    'def nhanh(a, b):           # cách cần kiểm tra',
+    '    return a + b // 3 + 1',
+    '',
+    'sai = False',
+    'for lan in range(1000):',
+    '    a = random.randint(0, 5)',
+    '    b = random.randint(0, 10)',
+    '    if trau(a, b) != nhanh(a, b):',
+    "        print('SAI:', a, b, trau(a, b), nhanh(a, b))",
+    '        sai = True',
+    '        break',
+    'if not sai:',
+    "    print('Khớp cả 1000 test')"
+  ]);
+  renderCode($('#codeK'), [
+    'def trau(a, k):',
+    '    tot = None                  # (điểm, vị trí đầu)',
+    '    for i in range(len(a) - k + 1):',
+    '        doan = a[i:i + k]',
+    '        diem = (sum(doan), sum(x % 2 == 0 for x in doan))',
+    '        if tot is None or diem > tot[0]:',
+    '            tot = (diem, i)',
+    '    return tot[1] + 1, tot[1] + k',
+    '',
+    '# sinh test nhỏ, khoảng giá trị hẹp',
+    'n = random.randint(1, 6)',
+    'k = random.randint(1, n)',
+    'a = [random.randint(-3, 3) for _ in range(n)]'
+  ]);
+})();
+</script>
+</body>
+</html>

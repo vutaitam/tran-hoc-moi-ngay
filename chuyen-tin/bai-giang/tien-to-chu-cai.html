@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiền tố chữ cái, số lớn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 4.3 */
+.txt{ font:inherit; font-family:var(--mono); font-size:17px; flex:1 1 160px; min-width:0; padding:9px 12px; border:2px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); }
+.txt:focus{ border-color:var(--accent); outline:none; }
+.inrow{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+.cellx.ch b{ font-family:var(--mono); }
+.cellx.hit{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.cellx.hit small{ color:var(--accent-ink); }
+.cellx.out{ opacity:.45; }
+.cellx.hd{ border-color:transparent; background:transparent; padding-top:0; padding-bottom:0; }
+.cellx.hd.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.z b{ color:var(--muted); font-weight:500; }
+.letters{ display:flex; gap:6px; flex-wrap:wrap; }
+.lb{ font:inherit; font-family:var(--mono); font-weight:700; font-size:16px; min-width:40px; padding:5px 0; border-radius:10px; border:2px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; }
+.lb.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.sliders{ display:grid; gap:8px; margin:12px 0; }
+.sliders label{ display:flex; align-items:center; gap:10px; font-weight:600; }
+.sliders input{ flex:1; }
+.circle{ display:block; width:100%; max-width:330px; margin:0 auto; }
+.circle .dot{ fill:var(--surface); stroke:var(--line); stroke-width:2; }
+.circle .dot.on{ fill:var(--done-soft); stroke:var(--done); }
+.circle .dot.far{ fill:var(--accent); stroke:var(--accent); }
+.circle text{ font-family:var(--mono); font-size:13px; font-weight:700; fill:var(--muted); text-anchor:middle; dominant-baseline:central; }
+.circle text.on{ fill:var(--ink); } .circle text.far{ fill:var(--accent-ink); }
+.circle .ring{ fill:none; stroke:var(--line); stroke-width:2; stroke-dasharray:3 5; }
+.circle .chord{ stroke:var(--path); stroke-width:4; stroke-linecap:round; }
+.circle .arc{ fill:none; stroke:var(--accent); stroke-width:5; stroke-linecap:round; opacity:.55; }
+.circle .big{ font-family:inherit; font-size:34px; font-weight:800; fill:var(--ink); }
+.circle .cap{ font-family:inherit; font-size:12px; font-weight:600; fill:var(--muted); }
+.addgrid{ display:inline-grid; gap:4px; font-family:var(--mono); }
+.addgrid .r{ display:flex; gap:4px; align-items:center; }
+.addgrid .lab{ width:44px; font-size:13px; color:var(--muted); font-weight:700; }
+.dg{ width:34px; height:38px; display:grid; place-items:center; border-radius:8px; font-size:19px; font-weight:700; border:2px solid transparent; transition:background .25s, border-color .25s; }
+.dg.box{ border-color:var(--line); background:var(--surface); }
+.dg.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.dg.new{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.dg.done{ background:var(--done-soft); border-color:var(--done); }
+.dg.carry{ height:24px; font-size:14px; color:var(--accent); }
+.dg.carry.on{ animation:pop .35s both; }
+.addline{ height:3px; background:var(--ink); border-radius:2px; margin:2px 0 2px 48px; }
+.cmp{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.cmp .stat .v{ font-size:1.25rem; }
+@media (max-width:520px){ .mx .cellx{ width:30px; padding:3px 0; } .mx .arr{ gap:3px; } .dg{ width:28px; height:34px; font-size:17px; } .addgrid .lab{ width:38px; } .addline{ margin-left:42px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Xâu ký tự</span>
+  <h1>Tiền tố chữ cái và số lớn dạng xâu</h1>
+  <p class="slogan">Đếm trước một lần, trả lời mỗi câu hỏi bằng một phép trừ.</p>
+  <p class="lead">Khi đề hỏi rất nhiều lần “đoạn này có bao nhiêu chữ c?”, ta dựng sẵn 26 hàng cộng dồn. Phần sau của bài: cộng và so sánh những con số dài hàng nghìn chữ số, lưu dưới dạng xâu.</p>
+  <div class="notebook" aria-label="Xâu abracadabra, đoạn từ 3 đến 8 có 3 chữ a">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Đoạn từ vị trí 3 đến 8 (khung tím) có 3 chữ <b>a</b> (ô hồng). Nếu phải trả lời 100.000 câu hỏi như vậy thì sao?</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#bai-toan">1. Hỏi nhiều lần</a>
+    <a href="#y-tuong">2. 26 hàng cộng dồn</a>
+    <a href="#mo-phong">3. Mô phỏng</a>
+    <a href="#de-that">4. Đề thật HSG9 Hà Nội</a>
+    <a href="#so-lon">5. Số lớn dạng xâu</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="bai-toan">
+  <h2><span class="num">1</span>Một câu hỏi thì dễ, nghìn câu thì sao?</h2>
+  <p>Chọn một chữ cái và kéo hai đầu đoạn. Cách tự nhiên là đi qua từng chữ trong đoạn và đếm:</p>
+  <div class="panel">
+    <div class="letters" id="qLetters"></div>
+    <div class="sliders">
+      <label>l = <b id="qLv"></b><input type="range" id="qL" min="1" max="11" value="3" aria-label="Đầu đoạn l"></label>
+      <label>r = <b id="qRv"></b><input type="range" id="qR" min="1" max="11" value="8" aria-label="Cuối đoạn r"></label>
+    </div>
+    <div class="arr-wrap mx"><div class="arr" id="qRow"></div></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Số chữ cần tìm trong đoạn</div><div class="v" id="qAns"></div></div>
+      <div class="stat bad"><div class="k">Số bước đếm từng chữ</div><div class="v" id="qCost"></div></div>
+    </div>
+  </div>
+  <p>Mỗi câu hỏi tốn tới n bước. Với n = 10⁵ chữ và Q = 10⁵ câu hỏi, tổng cộng có thể tới <b>10¹⁰ bước</b>, hàng chục phút. Phải tìm cách trả lời mỗi câu thật nhanh.</p>
+</section>
+
+<!-- 2 -->
+<section id="y-tuong">
+  <h2><span class="num">2</span>Ý tưởng: 26 hàng cộng dồn</h2>
+  <p>Nhớ lại bài <a href="tong-tien-to.html">tổng tiền tố</a>: muốn biết tổng một đoạn, lấy “cộng dồn tới r” trừ “cộng dồn tới l − 1”. Ở đây ta đếm chữ, và mỗi chữ cái có một hàng cộng dồn riêng:</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Ý nghĩa</h4>
+      <p><code>pre[c][i]</code> = số chữ c trong <b>i chữ đầu tiên</b> của xâu.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Dựng bảng</h4>
+      <p>Cột i chép cột i − 1, rồi cộng 1 vào đúng hàng của chữ thứ i.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Trả lời</h4>
+      <p>Đoạn [l, r] có <code>pre[c][r] − pre[c][l-1]</code> chữ c. Chỉ <b>một phép trừ</b>.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Cái giá</h4>
+      <p>Bảng có 26 × (n + 1) ô, dựng mất khoảng 26 × n bước, nhưng chỉ dựng <b>một lần</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="mo-phong">
+  <h2><span class="num">3</span>Mô phỏng: dựng bảng rồi hỏi</h2>
+  <p>Bảng thật có 26 hàng; ở đây chỉ vẽ hàng của các chữ có trong xâu cho gọn (các hàng khác toàn số 0). Sau khi dựng xong, mô phỏng trả lời ba câu hỏi.</p>
+  <div class="sim" id="simPre">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="pRandom">🎲 Xâu khác</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap mx" id="pWrap"></div>
+          <div class="info" id="pInfo"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Ô vừa cộng 1 / ô pre[c][r]</span><span><i class="lg-src"></i>Ô chép từ cột trước / ô pre[c][l-1]</span><span><i class="lg-path"></i>Đoạn [l, r]</span><span><i class="lg-done"></i>Đã dựng</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao là l − 1?</b> <code>pre[c][r]</code> đếm chữ c trong r chữ đầu, <code>pre[c][l-1]</code> đếm trong l − 1 chữ đầu. Trừ đi là còn đúng các chữ từ vị trí l đến r. Lấy <code>pre[c][l]</code> là đếm thiếu chữ ở vị trí l.</div>
+</section>
+
+<!-- 4 -->
+<section id="de-that">
+  <h2><span class="num">4</span>Đề thật: Khoảng cách (HSG9 Hà Nội 2026)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">26 chữ cái xếp thành vòng tròn a, b, …, z rồi quay lại a. Khoảng cách hai chữ là số bước ngắn nhất trên vòng (a với c là 2, a với z là 1). Khoảng cách của một xâu là khoảng cách <b>lớn nhất</b> giữa hai chữ bất kỳ trong xâu. Cho xâu S (N ≤ 10⁵) và Q ≤ 10⁵ câu hỏi [L, R], tính khoảng cách của đoạn đó.</p>
+  </div>
+  <p>Quan sát then chốt: khoảng cách chỉ phụ thuộc vào <b>những chữ cái nào có mặt</b> trong đoạn, không phụ thuộc vị trí hay số lần. Có mặt hay không thì bảng tiền tố trả lời ngay: <code>pre[c][R] − pre[c][L-1] &gt; 0</code>. Kéo thử:</p>
+  <div class="panel">
+    <div class="inrow"><input class="txt" id="kcIn" value="abcyzz" maxlength="20" aria-label="Xâu S" autocomplete="off" spellcheck="false"></div>
+    <div class="sliders">
+      <label>L = <b id="kcLv"></b><input type="range" id="kcL" min="1" max="6" value="2" aria-label="L"></label>
+      <label>R = <b id="kcRv"></b><input type="range" id="kcR" min="1" max="6" value="5" aria-label="R"></label>
+    </div>
+    <div class="arr-wrap mx"><div class="arr" id="kcRow"></div></div>
+    <svg class="circle" id="kcSvg" viewBox="0 0 320 320" role="img" aria-label="Vòng tròn 26 chữ cái"></svg>
+    <div class="explain" id="kcMsg"></div>
+  </div>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Khoảng cách hai chữ</h4>
+      <p>Với số thứ tự x, y: <code>d = abs(x - y)</code>, rồi <code>min(d, 26 - d)</code> vì có thể đi vòng ngược lại.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Chữ nào có mặt</h4>
+      <p>26 phép trừ trên bảng tiền tố, không phụ thuộc đoạn dài hay ngắn.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Cặp xa nhất</h4>
+      <p>Xét mọi cặp chữ có mặt: nhiều nhất 26 × 26 cặp, cũng không phụ thuộc N.</p>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Mẹo thêm</h4>
+      <p>Khoảng cách không quá 13. Thử d = 13, 12, … và dừng ngay khi thấy một cặp cách d.</p>
+    </div>
+  </div>
+  <h3>Lấy điểm theo từng nhóm test</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Nhóm</th><th>Điều kiện</th><th>Cách làm</th></tr></thead>
+      <tbody>
+        <tr><td>50%</td><td>Q = 1, N ≤ 1000</td><td>Xét mọi cặp vị trí trong đoạn, khoảng 5 × 10⁵ cặp</td></tr>
+        <tr><td>+20%</td><td>Q = 1</td><td>Duyệt đoạn một lần, đánh dấu chữ có mặt (26 ngăn), rồi xét cặp chữ</td></tr>
+        <tr><td>+30%</td><td>Q, N tới 10⁵</td><td>Bảng tiền tố 26 hàng như mục 3, mỗi câu hỏi chỉ tốn vài trăm bước</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tip"><b>Lưu ý cho Python:</b> 10⁵ câu hỏi × vài trăm bước vẫn là vài chục triệu phép, Python có thể hơi chậm ở nhóm test lớn nhất. Hãy đọc dữ liệu nhanh bằng <code>sys.stdin</code> và dùng mẹo dừng sớm ở bước 4. Lời giải mẫu trong ngân hàng đề còn dùng thêm một mẹo với các bit của số nguyên để xét khoảng cách nhanh hơn.</div>
+  <p><a href="../luyen-de/index.html#bai=hanoi-hsg9-2026-khoangcach">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 5 -->
+<section id="so-lon">
+  <h2><span class="num">5</span>Số lớn dạng xâu</h2>
+  <p>Có đề cho số dài hàng nghìn chữ số. Python cộng được số nguyên lớn tùy ý, vậy tại sao còn phải học cộng bằng tay? Vì có ba cái bẫy:</p>
+  <ul>
+    <li>Từ Python 3.11, <code>int(s)</code> <b>báo lỗi</b> nếu xâu dài hơn 4300 chữ số (trừ khi gọi <code>sys.set_int_max_str_digits(0)</code>).</li>
+    <li>Nhiều đề hỏi về <b>chữ số</b> (tổng chữ số, chữ số thứ k…), làm trực tiếp trên xâu lại nhanh hơn.</li>
+    <li>So sánh hai số dạng xâu bằng dấu <code>&lt;</code> cho kết quả <b>sai</b>, xem ngay dưới đây.</li>
+  </ul>
+
+  <h3>Bẫy so sánh</h3>
+  <p>Python so hai xâu như tra từ điển: so chữ đầu tiên trước. Thử gõ hai số:</p>
+  <div class="panel">
+    <div class="inrow">
+      <input class="txt" id="cA" value="9" inputmode="numeric" aria-label="Số a" autocomplete="off">
+      <input class="txt" id="cB" value="10" inputmode="numeric" aria-label="Số b" autocomplete="off">
+    </div>
+    <div class="cmp">
+      <div class="stat" id="cStr"><div class="k">So như xâu: a &lt; b ?</div><div class="v"></div></div>
+      <div class="stat" id="cNum"><div class="k">So như số: a &lt; b ?</div><div class="v"></div></div>
+    </div>
+    <div class="explain" id="cMsg"></div>
+  </div>
+  <div class="remember">Quy tắc so hai số dạng xâu (không có số 0 ở đầu): số nào <b>dài hơn</b> thì lớn hơn; dài bằng nhau mới so như xâu. Trong Python: <code>(len(a), a) &lt; (len(b), b)</code>.</div>
+
+  <h3>Cộng như đặt tính</h3>
+  <p>Giống hệt cách em đặt tính ở tiểu học: cộng từ phải sang trái, viết hàng đơn vị, <b>nhớ</b> hàng chục sang cột bên trái.</p>
+  <div class="sim" id="simAdd">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="aRandom">🎲 Số khác</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz" style="overflow-x:auto">
+          <div class="addgrid" id="addGrid"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Cột đang cộng</span><span><i class="lg-done"></i>Chữ số kết quả</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao cần <code>reversed</code>?</b> Ta tính hàng đơn vị trước nên danh sách kết quả đang ghi ngược. Và đừng quên vòng lặp còn chạy khi <code>nho</code> khác 0: 999 + 1 phải ra 1000, có thêm một chữ số.</div>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Câu hỏi</th><th>Không chuẩn bị</th><th>Có bảng tiền tố 26 hàng</th></tr></thead>
+      <tbody>
+        <tr><td>Đoạn [l, r] có mấy chữ c?</td><td>r − l + 1 bước</td><td>1 phép trừ</td></tr>
+        <tr><td>Đoạn có những chữ nào?</td><td>r − l + 1 bước</td><td>26 phép trừ</td></tr>
+        <tr><td>Đoạn xáo thành đối xứng được không?</td><td>r − l + 1 bước</td><td>26 phép trừ, đếm chữ lẻ</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Lệch chỉ số</b>: đề đánh số từ 1, xâu Python từ 0. Với cách ở mục 3, chữ thứ i là <code>s[i-1]</code>, câu hỏi dùng <code>pre[c][r] - pre[c][l-1]</code>.</li>
+    <li><b>Bảng quá lớn</b>: với n = 10⁶, bảng có 26 triệu ô, quá nặng cho Python. Khi đó lưu danh sách vị trí của từng chữ và tìm kiếm nhị phân, hoặc chỉ dựng hàng của chữ đề hỏi.</li>
+    <li><b>So số dạng xâu bằng <code>&lt;</code></b>: <code>'9' &lt; '10'</code> là False. So độ dài trước.</li>
+    <li><b>Quên số nhớ cuối cùng</b> khi cộng: 999 + 1 thành 000.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Đếm nguyên âm trong đoạn <span class="level lv1">Dễ</span></h4>
+    <p>Cho xâu dài 10⁵ và 10⁵ câu hỏi [l, r]: đoạn có bao nhiêu nguyên âm (a, e, i, o, u)?</p>
+    <details><summary>Gợi ý</summary><p>Chỉ cần <b>một</b> hàng cộng dồn: <code>pre[i]</code> = số nguyên âm trong i chữ đầu.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. So sánh hai số lớn <span class="level lv1">Dễ</span></h4>
+    <p>Cho hai số nguyên dương dài tới 10⁵ chữ số. In ra <code>&lt;</code>, <code>=</code> hoặc <code>&gt;</code>. Không dùng <code>int()</code>.</p>
+    <details><summary>Gợi ý</summary><p>So độ dài trước. Bằng nhau thì so như xâu. Cẩn thận nếu đề cho số có chữ số 0 ở đầu: bỏ chúng đi trước bằng <code>lstrip('0')</code>.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Đoạn xáo thành đối xứng <span class="level lv2">Vừa</span></h4>
+    <p>Mỗi câu hỏi [l, r]: có xáo trộn đoạn đó thành một xâu đối xứng được không?</p>
+    <details><summary>Gợi ý</summary><p>Ghép bài 4.2 và bài này: được khi có <b>nhiều nhất một</b> chữ xuất hiện lẻ lần trong đoạn. Số lần của mỗi chữ trong đoạn lấy từ bảng tiền tố.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Trừ hai số lớn <span class="level lv2">Vừa</span></h4>
+    <p>Cho a ≥ b dạng xâu, in a − b. Ví dụ 1000 − 1 = 999.</p>
+    <details><summary>Gợi ý</summary><p>Như cộng, nhưng thay “nhớ” bằng “mượn”: nếu chữ số bị trừ nhỏ hơn thì cộng thêm 10 và mượn 1 ở cột bên trái. Cuối cùng bỏ các số 0 ở đầu kết quả.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Khoảng cách <span class="level lv4">Đề thật</span></h4>
+    <p>HSG9 Hà Nội 2026. Làm lần lượt theo bảng nhóm test ở mục 4: chắc 50% trước rồi mới nâng cấp.</p>
+    <details><summary>Gợi ý</summary><p>Kiểm tra bằng ví dụ của đề: xâu <code>abcyzz</code>, đoạn [2, 5] ra 4, đoạn [5, 6] ra 0. Đoạn chỉ có một loại chữ thì khoảng cách bằng 0.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=hanoi-hsg9-2026-khoangcach">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 4: Xâu ký tự. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  const AB = 'abcdefghijklmnopqrstuvwxyz';
+  const clean = (v, n) => v.toLowerCase().replace(/[^a-z]/g, '').slice(0, n);
+  const HS = 'abracadabra';
+
+  // ---------- Hero ----------
+  $('#nbRow').innerHTML = HS.split('').map((c, i) => '<div class="nb-cell ' + (i >= 2 && i <= 7 ? (c === 'a' ? 'nb-p last' : 'nb-p') : 'nb-a') + '" style="animation-delay:' + (i * 0.07) + 's">' + c + '</div>').join('');
+
+  // ---------- 1. Hỏi nhiều lần ----------
+  (function(){
+    let ch = 'a';
+    const letters = [...new Set(HS)].sort();
+    function render(){
+      let l = +$('#qL').value, r = +$('#qR').value;
+      if (l > r){ if (document.activeElement === $('#qL')) { r = l; $('#qR').value = r; } else { l = r; $('#qL').value = l; } }
+      $('#qLv').textContent = l; $('#qRv').textContent = r;
+      $('#qLetters').innerHTML = letters.map(c => '<button class="lb' + (c === ch ? ' on' : '') + '" data-c="' + c + '">' + c + '</button>').join('');
+      let h = '<span class="nm">s =</span>', cnt = 0;
+      for (let i = 1; i <= HS.length; i++){
+        const inR = i >= l && i <= r, hit = inR && HS[i - 1] === ch;
+        if (hit) cnt++;
+        h += '<div class="cellx ch' + (hit ? ' hit' : inR ? ' rng' : ' out') + '"><small>' + i + '</small><b>' + HS[i - 1] + '</b></div>';
+      }
+      $('#qRow').innerHTML = h;
+      $('#qAns').textContent = cnt + ' chữ ' + ch;
+      $('#qCost').textContent = (r - l + 1) + ' bước';
+    }
+    $('#qLetters').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b){ ch = b.dataset.c; render(); } });
+    $('#qL').addEventListener('input', render); $('#qR').addEventListener('input', render);
+    render();
+  })();
+
+  // ---------- 3. Bảng tiền tố ----------
+  const PW = ['abracadabra', 'banana', 'mississippi', 'chuyentin', 'hocmoingay'];
+  let PS = HS, PQ = [[3, 8, 'a'], [2, 10, 'b'], [5, 7, 'r']];
+  function randQ(s){
+    const n = s.length, letters = [...new Set(s)], q = [];
+    for (let t = 0; t < 3; t++){ const l = rnd(1, n - 2), r = rnd(l + 1, n); q.push([l, r, letters[rnd(0, letters.length - 1)]]); }
+    return q;
+  }
+  function buildPre(){
+    const s = PS, n = s.length, rows = [...new Set(s)].sort(), S = [];
+    const pre = {}; rows.forEach(c => pre[c] = Array(n + 1).fill(null)); rows.forEach(c => pre[c][0] = 0);
+    const snap = o => S.push(Object.assign({ pre: JSON.parse(JSON.stringify(pre)), rows, col: -1, hitRow: null, q: null }, o));
+    snap({ line: 3, col: 0, msg: 'Cột 0 (chưa lấy chữ nào) toàn số 0. Xâu có ' + rows.length + ' loại chữ: ' + rows.join(', ') + '. Hàng của 26 − ' + rows.length + ' chữ còn lại luôn bằng 0 nên không vẽ.' });
+    for (let i = 1; i <= n; i++){
+      rows.forEach(c => pre[c][i] = pre[c][i - 1]);
+      const c = s[i - 1]; pre[c][i]++;
+      snap({ line: 7, col: i, hitRow: c, msg: 'Chữ thứ ' + i + ' là <b>' + c + '</b>. Cột ' + i + ' chép cột ' + (i - 1) + ', rồi hàng <b>' + c + '</b> cộng thêm 1: <code>pre[' + c + '][' + i + '] = ' + pre[c][i] + '</code>.' });
+    }
+    snap({ line: 7, col: n, msg: '✅ Dựng xong bảng: ' + rows.length + ' hàng × ' + (n + 1) + ' cột (bảng thật có 26 hàng). Giờ trả lời câu hỏi chỉ bằng phép trừ.' });
+    PQ.forEach(([l, r, c]) => {
+      const a = pre[c][r], b = pre[c][l - 1];
+      snap({ line: 10, col: -1, q: [l, r, c], msg: 'Câu hỏi: đoạn <b>[' + l + ', ' + r + ']</b> có mấy chữ <b>' + c + '</b>? <code>pre[' + c + '][' + r + '] − pre[' + c + '][' + (l - 1) + '] = ' + a + ' − ' + b + ' = ' + (a - b) + '</code>. ' + (a - b ? 'Đếm tay để kiểm tra nhé!' : 'Không có chữ ' + c + ' nào trong đoạn.') });
+    });
+    return S;
+  }
+  function renderPre(s){
+    const n = PS.length, q = s.q;
+    let h = '<div class="arr"><span class="nm">i</span>';
+    for (let i = 0; i <= n; i++) h += '<div class="cellx hd' + (q && i >= q[0] && i <= q[1] ? ' rng' : '') + '"><small>' + i + '</small><b>' + (i ? PS[i - 1] : '·') + '</b></div>';
+    h += '</div>';
+    s.rows.forEach(c => {
+      h += '<div class="arr"><span class="nm">' + c + '</span>';
+      for (let i = 0; i <= n; i++){
+        const v = s.pre[c][i];
+        let cls = v === null ? '' : ' done';
+        if (v === 0) cls += ' z';
+        if (s.col === i && v !== null) cls = c === s.hitRow ? ' cur' : ' src';
+        if (q && c === q[2] && i === q[1]) cls = ' cur';
+        else if (q && c === q[2] && i === q[0] - 1) cls = ' src';
+        else if (q && c !== q[2]) cls += ' pad';
+        h += '<div class="cellx' + cls + '"><b>' + (v === null ? '' : v) + '</b></div>';
+      }
+      h += '</div>';
+    });
+    $('#pWrap').innerHTML = h;
+    $('#pInfo').innerHTML = q ? '<span>Đoạn [' + q[0] + ', ' + q[1] + '], chữ ' + q[2] + ': <b>' + (s.pre[q[2]][q[1]] - s.pre[q[2]][q[0] - 1]) + '</b></span>' : '<span>Đã dựng tới cột <b>' + Math.max(0, s.col) + '</b></span>';
+    follow($('#pWrap'));
+  }
+  const simPre = makeSim($('#simPre'), {
+    build: buildPre, render: renderPre,
+    code: () => [
+      's = \'' + PS + '\'',
+      'n = len(s)',
+      'pre = [[0] * (n + 1) for _ in range(26)]',
+      'for i in range(1, n + 1):',
+      '    for c in range(26):',
+      '        pre[c][i] = pre[c][i-1]      # chép cột trước',
+      '    pre[ord(s[i-1]) - ord(\'a\')][i] += 1',
+      '# đoạn [l, r] có mấy chữ ch?',
+      'c = ord(ch) - ord(\'a\')',
+      'print(pre[c][r] - pre[c][l-1])'
+    ]
+  });
+  $('#pRandom').onclick = () => { let w; do { w = PW[rnd(0, PW.length - 1)]; } while (w === PS); PS = w; PQ = randQ(w); simPre.rebuild(); };
+
+  // ---------- 4. Khoảng cách ----------
+  (function(){
+    const cx = 160, cy = 160, R = 128, P = k => { const a = -Math.PI / 2 + k * 2 * Math.PI / 26; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+    const dist = (x, y) => { const d = Math.abs(x - y); return Math.min(d, 26 - d); };
+    function render(fromInput){
+      const s = clean($('#kcIn').value, 20) || 'a', n = s.length;
+      ['#kcL', '#kcR'].forEach(id => $(id).max = n);
+      if (fromInput){ $('#kcL').value = Math.min(+$('#kcL').value, n); $('#kcR').value = Math.min(+$('#kcR').value, n); }
+      let L = +$('#kcL').value, R2 = +$('#kcR').value;
+      if (L > R2){ if (document.activeElement === $('#kcL')) { R2 = L; $('#kcR').value = R2; } else { L = R2; $('#kcL').value = L; } }
+      $('#kcLv').textContent = L; $('#kcRv').textContent = R2;
+      let h = '<span class="nm">S =</span>';
+      for (let i = 1; i <= n; i++) h += '<div class="cellx ch' + (i >= L && i <= R2 ? ' rng' : ' out') + '"><small>' + i + '</small><b>' + s[i - 1] + '</b></div>';
+      $('#kcRow').innerHTML = h;
+      const has = Array(26).fill(false); for (let i = L; i <= R2; i++) has[s.charCodeAt(i - 1) - 97] = true;
+      let best = 0, bx = -1, by = -1;
+      for (let x = 0; x < 26; x++) if (has[x]) for (let y = x + 1; y < 26; y++) if (has[y] && dist(x, y) > best){ best = dist(x, y); bx = x; by = y; }
+      let g = '<circle class="ring" cx="' + cx + '" cy="' + cy + '" r="' + R + '"/>';
+      if (bx >= 0){
+        const [x1, y1] = P(bx), [x2, y2] = P(by);
+        g += '<line class="chord" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+        // cung ngắn hơn giữa hai chữ: đây là đường đi tính khoảng cách
+        const forward = (by - bx) <= 13, sweep = forward ? 1 : 0;
+        g += '<path class="arc" d="M' + x1 + ' ' + y1 + ' A' + R + ' ' + R + ' 0 0 ' + sweep + ' ' + x2 + ' ' + y2 + '"/>';
+      }
+      for (let k = 0; k < 26; k++){
+        const [x, y] = P(k), cls = (k === bx || k === by) ? 'far' : has[k] ? 'on' : '';
+        g += '<circle class="dot ' + cls + '" cx="' + x + '" cy="' + y + '" r="13"/><text class="' + cls + '" x="' + x + '" y="' + y + '">' + AB[k] + '</text>';
+      }
+      g += '<text class="big" x="' + cx + '" y="' + (cy - 6) + '">' + best + '</text><text class="cap" x="' + cx + '" y="' + (cy + 24) + '">khoảng cách</text>';
+      $('#kcSvg').innerHTML = g;
+      const present = has.map((v, k) => v ? AB[k] : '').filter(x => x);
+      $('#kcMsg').innerHTML = 'Đoạn [' + L + ', ' + R2 + '] = <code>' + s.slice(L - 1, R2) + '</code> có các chữ: <b>' + present.join(', ') + '</b> (ô vàng trên vòng). ' +
+        (bx < 0 ? 'Chỉ có một loại chữ nên khoảng cách bằng <b>0</b>.'
+          : 'Cặp xa nhất là <b>' + AB[bx] + '</b> và <b>' + AB[by] + '</b> (ô hồng): <code>abs(' + bx + ' - ' + by + ') = ' + (by - bx) + '</code>, <code>min(' + (by - bx) + ', ' + (26 - by + bx) + ') = ' + best + '</code>. Cung hồng là đường ngắn nhất trên vòng.');
+    }
+    $('#kcIn').addEventListener('input', () => render(true));
+    $('#kcL').addEventListener('input', () => render(false)); $('#kcR').addEventListener('input', () => render(false));
+    render(true);
+  })();
+
+  // ---------- 5a. So sánh ----------
+  (function(){
+    function upd(){
+      const a = $('#cA').value.replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0', b = $('#cB').value.replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
+      const strLt = a < b, numLt = a.length !== b.length ? a.length < b.length : a < b;
+      const put = (id, v, good) => { const el = $(id); el.className = 'stat ' + (good ? 'good' : 'bad'); el.querySelector('.v').textContent = v ? 'True' : 'False'; };
+      put('#cStr', strLt, strLt === numLt); put('#cNum', numLt, true);
+      $('#cMsg').innerHTML = strLt === numLt
+        ? 'Lần này hai cách cho cùng kết quả. Thử a = <b>9</b>, b = <b>10</b> hoặc a = <b>200</b>, b = <b>1999</b>.'
+        : '<b>Sai rồi!</b> So như xâu, Python nhìn chữ đầu tiên: <code>\'' + a[0] + '\'</code> với <code>\'' + b[0] + '\'</code>' + (a[0] === b[0] ? ' (bằng nhau, xét tiếp các chữ sau)' : '') + '. Nhưng ' + a + ' có ' + a.length + ' chữ số còn ' + b + ' có ' + b.length + ' chữ số, nên phải so độ dài trước.';
+    }
+    $('#cA').addEventListener('input', upd); $('#cB').addEventListener('input', upd);
+    upd();
+  })();
+
+  // ---------- 5b. Cộng như đặt tính ----------
+  let AA = '95871', BB = '4629';
+  function buildAdd(){
+    const a = AA, b = BB, W = Math.max(a.length, b.length) + 1, S = [];
+    const res = Array(W).fill(''), car = Array(W).fill('');
+    const snap = o => S.push(Object.assign({ res: res.slice(), car: car.slice(), col: -1, fresh: false }, o));
+    snap({ line: 2, msg: 'Đặt hai số thẳng hàng bên phải: ' + a + ' + ' + b + '. Bắt đầu từ chữ số cuối, <code>nho = 0</code>.' });
+    let i = a.length - 1, j = b.length - 1, nho = 0, col = W - 1;
+    while (i >= 0 || j >= 0 || nho){
+      const x = i >= 0 ? +a[i] : 0, y = j >= 0 ? +b[j] : 0, t = x + y + nho;
+      res[col] = String(t % 10);
+      const was = nho; nho = Math.floor(t / 10);
+      if (nho && col > 0) car[col - 1] = '1';
+      snap({ line: 8, col, fresh: true, msg: 'Cột ' + (W - col === 1 ? 'đơn vị' : 'thứ ' + (W - col) + ' từ phải') + ': <code>' + x + ' + ' + y + ' + ' + was + ' (nhớ) = ' + t + '</code>. Viết <b>' + (t % 10) + '</b>' + (nho ? ', nhớ <b>1</b> sang cột bên trái.' : ', không nhớ.') + (i < 0 && j < 0 ? ' Hai số đã hết chữ số, chỉ còn số nhớ.' : '') });
+      i--; j--; col--;
+    }
+    const out = res.join('');
+    snap({ line: 11, msg: '✅ Kết quả <b>' + out + '</b>. Kiểm tra: ' + a + ' + ' + b + ' = ' + (BigInt(a) + BigInt(b)).toString() + '.' });
+    return S;
+  }
+  function renderAdd(s){
+    const a = AA, b = BB, W = Math.max(a.length, b.length) + 1;
+    const pad = (x) => Array(W - x.length).fill('').concat(x.split(''));
+    const A = pad(a), B = pad(b);
+    const rowOf = (lab, arr, kind) => '<div class="r"><span class="lab">' + lab + '</span>' + arr.map((d, c) => {
+      let cls = 'dg';
+      if (kind === 'car') cls += ' carry' + (d ? ' on' : '');
+      else if (kind === 'res') cls += d === '' ? '' : (c === s.col && s.fresh ? ' new' : ' done');
+      else cls += d === '' ? '' : ' box' + (c === s.col ? ' cur' : '');
+      return '<span class="' + cls + '">' + (kind === 'car' && d ? '+' + d : d) + '</span>';
+    }).join('') + '</div>';
+    $('#addGrid').innerHTML = rowOf('nhớ', s.car, 'car') + rowOf('a', A, 'num') + rowOf('+ b', B, 'num') + '<div class="addline"></div>' + rowOf('kq', s.res, 'res');
+  }
+  const simAdd = makeSim($('#simAdd'), {
+    build: buildAdd, render: renderAdd,
+    code: () => [
+      'a, b = \'' + AA + '\', \'' + BB + '\'',
+      'i, j, nho = len(a) - 1, len(b) - 1, 0',
+      'kq = []',
+      'while i >= 0 or j >= 0 or nho:',
+      '    x = int(a[i]) if i >= 0 else 0',
+      '    y = int(b[j]) if j >= 0 else 0',
+      '    t = x + y + nho',
+      '    kq.append(str(t % 10))     # viết hàng đơn vị',
+      '    nho = t // 10              # nhớ sang trái',
+      '    i, j = i - 1, j - 1',
+      'print(\'\'.join(reversed(kq)))'
+    ]
+  });
+  $('#aRandom').onclick = () => {
+    const num = len => String(rnd(1, 9)) + Array.from({ length: len - 1 }, () => rnd(0, 9)).join('');
+    AA = num(rnd(4, 6)); BB = num(rnd(2, 5)); simAdd.rebuild();
+  };
+})();
+</script>
+</body>
+</html>

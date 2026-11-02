@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Số nguyên tố và sàng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 2.3 */
+.pgrid{ display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; }
+.pc{ border:2px solid var(--line); background:var(--surface); border-radius:9px; text-align:center; padding:3px 0 2px; line-height:1.15; transition:background .25s, border-color .25s, opacity .25s; }
+.pc b{ display:block; font-size:16px; }
+.pc small{ display:block; font-size:10.5px; color:var(--muted); min-height:1.2em; font-weight:700; }
+.pc.x{ opacity:.38; }
+.pc.x b{ text-decoration:line-through; }
+.pc.new{ background:var(--accent-soft); border-color:var(--accent); opacity:1; }
+.pc.new small{ color:var(--accent); }
+.pc.cur{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.pc.cur small{ color:var(--accent-ink); }
+.pc.pr{ background:var(--src-soft); border-color:var(--src); }
+.pc.fin{ background:var(--path-soft); border-color:var(--path); }
+.pc.one{ opacity:.25; border-style:dashed; }
+.hero-grid .pc{ animation:pop .4s both; }
+.hero-grid .pc b{ font-size:15px; }
+.rects{ display:flex; flex-wrap:wrap; gap:14px 18px; margin-top:14px; align-items:flex-end; min-height:60px; }
+.rc{ display:flex; flex-direction:column; align-items:flex-start; gap:4px; font-size:13px; font-weight:700; color:var(--muted); }
+.rc svg rect{ fill:var(--src-soft); stroke:var(--src); stroke-width:1; }
+.rc.only svg rect{ fill:var(--path-soft); stroke:var(--path); }
+.verdict{ font-weight:800; font-size:1.05rem; margin-top:10px; }
+.verdict.p{ color:var(--path); } .verdict.c{ color:var(--src); }
+.tree{ display:flex; justify-content:center; }
+.tree svg{ max-width:100%; height:auto; overflow:visible; }
+.tree .ln{ stroke:var(--muted); stroke-width:2; }
+.tree .cmp rect{ fill:var(--done-soft); stroke:var(--done); stroke-width:2; }
+.tree .cmp.cur rect{ fill:var(--accent); stroke:var(--accent); }
+.tree .cmp.cur text{ fill:var(--accent-ink); }
+.tree .lf circle{ fill:var(--src-soft); stroke:var(--src); stroke-width:2; }
+.tree .lf.new circle{ fill:var(--src); }
+.tree .lf.new text{ fill:#fff; }
+.tree .lf.last circle{ fill:var(--path-soft); stroke:var(--path); }
+.tree text{ font-size:14px; font-weight:800; font-family:inherit; fill:var(--ink); }
+.tree text.lab{ font-size:12px; fill:var(--muted); font-weight:700; }
+.trybar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-weight:700; margin-bottom:8px; min-height:34px; }
+.chip{ display:inline-grid; place-items:center; min-width:34px; height:30px; padding:0 8px; border-radius:999px; font-weight:800; font-size:15px; background:var(--surface); border:2px solid var(--line); }
+.chip.s{ background:var(--src-soft); border-color:var(--src); }
+.chip.a{ background:var(--accent-soft); border-color:var(--accent); }
+.result{ font-family:var(--mono); font-weight:700; font-size:16px; margin-top:8px; min-height:1.5em; }
+.nsel{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-weight:600; }
+.cards{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:6px; }
+.cd{ font:inherit; color:var(--ink); border:2px solid var(--line); border-radius:12px; padding:6px 0 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; line-height:1.15; background:var(--surface); transition:transform .2s, box-shadow .2s; }
+.cd b{ font-size:18px; }
+.cd small{ font-size:11px; color:var(--muted); font-weight:700; }
+.cd.on{ transform:translateY(-4px); box-shadow:0 0 0 3px var(--accent); }
+.g1{ background:var(--done-soft); border-color:var(--done); }
+.g2{ background:var(--src-soft); border-color:var(--src); }
+.g3{ background:var(--path-soft); border-color:var(--path); }
+.g5{ background:var(--accent-soft); border-color:var(--accent); }
+.g6{ background:var(--surface-2); border-color:var(--muted); }
+.pairout{ margin-top:12px; font-weight:700; font-size:1.05rem; min-height:1.6em; }
+.pairout .ok{ color:var(--src); } .pairout .no{ color:var(--accent); }
+.groups{ display:grid; gap:6px; margin-top:12px; font-size:14px; }
+.groups .row{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.groups .row > span:first-child{ min-width:82px; color:var(--muted); font-weight:700; }
+@media (max-width:520px){ .pc b{ font-size:14px; } .pc small{ font-size:9.5px; } .cd b{ font-size:16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Số học</span>
+  <h1>Số nguyên tố, sàng và phân tích thừa số</h1>
+  <p class="slogan">Gạch bỏ bội, phần còn sống sót là số nguyên tố.</p>
+  <p class="lead">Số nguyên tố là “viên gạch” tạo nên mọi số. Học cách tìm hết số nguyên tố đến vài triệu chỉ bằng cách gạch bỏ, rồi tách một số thành tích các số nguyên tố, và dùng nó giải một đề Sư phạm.</p>
+  <div class="notebook" aria-label="Các số nguyên tố từ 1 đến 30">
+    <div class="pgrid hero-grid" id="heroGrid"></div>
+    <p class="nb-note">Từ 1 đến 30 có 10 số nguyên tố (ô tím). Chúng nằm rải rác, không theo một công thức đơn giản nào.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#la-gi">1. Số nguyên tố là gì?</a>
+    <a href="#sang">2. Sàng</a>
+    <a href="#nhanh">3. Nhanh cỡ nào?</a>
+    <a href="#phan-tich">4. Phân tích thừa số</a>
+    <a href="#de-that">5. Đề thật Sư phạm</a>
+    <a href="#tong-ket">6. Tổng kết</a>
+    <a href="#bai-tap">7. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="la-gi">
+  <h2><span class="num">1</span>Số chỉ xếp được một hàng</h2>
+  <p>Nhớ lại bài 2.1: xếp n ô vuông thành hình chữ nhật đặc thì mỗi cách xếp ứng với một cặp ước. Có những số <b>chỉ xếp được đúng một kiểu</b>: một hàng dài. Đó là các <b>số nguyên tố</b>: lớn hơn 1 và chỉ có hai ước là 1 và chính nó.</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">n = <b id="rN"></b>
+      <input type="range" id="rS" min="2" max="36" value="12" aria-label="Chọn n">
+    </label>
+    <div class="rects" id="rects"></div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+  <p>Kiểm tra một số n có nguyên tố không: thử chia cho d từ 2 tới khi <code>d * d &gt; n</code> (lý do giống hệt bài 2.1, ước đi thành cặp).</p>
+  <div class="code" id="codeIsPrime"></div>
+  <div class="remember">Ghi nhớ: <b>1 không phải số nguyên tố</b> (chỉ có 1 ước). 2 là số nguyên tố chẵn duy nhất.</div>
+</section>
+
+<!-- 2 -->
+<section id="sang">
+  <h2><span class="num">2</span>Sàng Eratosthenes: gạch bỏ bội</h2>
+  <p>Cần <b>mọi</b> số nguyên tố đến N thì kiểm tra từng số rất phí. Cách thông minh hơn: lấy số nguyên tố nhỏ nhất còn lại, <b>gạch hết các bội của nó</b>, lặp lại. Số nào không bị gạch là số nguyên tố. Số nhỏ dưới mỗi ô bị gạch cho biết ai gạch nó đầu tiên.</p>
+
+  <div class="sim" id="simSieve">
+    <div class="sim-head"><span class="title">Mô phỏng</span><span style="font-size:14px;color:var(--muted)">N = 60</span></div>
+    <div class="sim-body">
+      <div>
+        <div class="viz"><div class="pgrid" id="sieveGrid"></div></div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Số nguyên tố đang dùng</span><span><i class="lg-src"></i>Đã biết là nguyên tố</span><span><i style="background:var(--accent-soft);border-color:var(--accent)"></i>Vừa bị gạch</span><span><i class="lg-path"></i>Kết quả</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Hai mẹo trong code:</b> (1) gạch từ <code>p * p</code> chứ không từ <code>2 * p</code>, vì các bội nhỏ hơn như 2p, 3p đã bị số nguyên tố nhỏ hơn gạch rồi. (2) chỉ cần p tới khi <code>p * p &gt; N</code>: số nào còn sót sau đó đều là số nguyên tố.</div>
+</section>
+
+<!-- 3 -->
+<section id="nhanh">
+  <h2><span class="num">3</span>Nhanh cỡ nào?</h2>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">N = 10<sup id="eV"></sup>
+      <input type="range" id="eS" min="3" max="7" value="6" aria-label="Chọn số mũ">
+    </label>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Kiểm tra từng số đến √</div><div class="v" id="o1"></div><div class="t" id="t1"></div></div>
+      <div class="stat good"><div class="k">Sàng</div><div class="v" id="o2"></div><div class="t" id="t2"></div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Ước lượng thô cho trường hợp xấu, giả sử Python làm khoảng 10 triệu phép tính mỗi giây. Sàng tốn khoảng 3 × N phép.</p>
+  </div>
+  <p>Sàng đến 10⁶ trong Python chạy dưới 1 giây; đến 10⁷ thì vài giây và tốn bộ nhớ, khi đó nên dùng <code>bytearray</code> thay cho list.</p>
+</section>
+
+<!-- 4 -->
+<section id="phan-tich">
+  <h2><span class="num">4</span>Phân tích thừa số: cây chia đôi</h2>
+  <p>Mọi số lớn hơn 1 đều viết được <b>duy nhất</b> thành tích các số nguyên tố, ví dụ 360 = 2 × 2 × 2 × 3 × 3 × 5. Cách tìm: thử chia cho d = 2, 3, 4, …; chia được thì tách d ra thành một lá, chia tiếp phần còn lại cho đến khi hết chia được.</p>
+
+  <div class="sim" id="simFac">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <div class="nsel" id="facBtns"></div>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="trybar" id="facTry"></div>
+          <div class="tree" id="facTree"></div>
+          <div class="result" id="facRes"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Số đang chia</span><span><i class="lg-src"></i>Lá: thừa số nguyên tố</span><span><i class="lg-path"></i>Phần còn lại là số nguyên tố</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Đừng quên dòng <code>if n &gt; 1</code>!</b> Chọn 97 hoặc 1001 ở trên: vòng lặp dừng khi d × d &gt; n, nhưng phần còn lại (97, hay 13) vẫn là một thừa số nguyên tố cần ghi. Quên dòng này là lỗi rất hay gặp.</div>
+  <p>Biết phân tích còn tính được <b>số ước</b> mà không cần liệt kê: 360 = 2³ × 3² × 5¹ có (3 + 1) × (2 + 1) × (1 + 1) = <b>24 ước</b>, vì mỗi ước chọn số mũ của 2 từ 0 đến 3, của 3 từ 0 đến 2, của 5 từ 0 đến 1.</p>
+</section>
+
+<!-- 5 -->
+<section id="de-that">
+  <h2><span class="num">5</span>Đề thật: Số chính phương (Sư phạm 2025)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Cho n ≤ 10⁵. Đếm các cặp (i, j) với i, j ≤ n sao cho <b>i × j là số chính phương</b> (bình phương của một số tự nhiên). <b>60% số điểm: n ≤ 5000.</b></p>
+  </div>
+  <p>Chìa khoá: phân tích thừa số rồi <b>bỏ đi từng cặp thừa số giống nhau</b>. Phần còn lại gọi là “phần lẻ”. Ví dụ 12 = 2 × 2 × 3 có phần lẻ 3; 18 = 2 × 3 × 3 có phần lẻ 2; 8 = 2 × 2 × 2 có phần lẻ 2. <b>Tích hai số là số chính phương khi và chỉ khi hai số có cùng phần lẻ.</b></p>
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: chạm hai số</h3>
+    <p style="margin-top:0;font-size:15px">Các số cùng màu có cùng phần lẻ (số nhỏ bên dưới). Ô xám là số đứng một mình trong nhóm.</p>
+    <div class="cards" id="cards"></div>
+    <div class="pairout" id="pairOut"></div>
+    <div class="groups" id="groups"></div>
+  </div>
+  <p>Vậy chỉ cần đếm mỗi nhóm có <b>c</b> số. Cách đếm cặp trong nhóm tuỳ cách hiểu đề:</p>
+  <div class="tip"><b>Đề và ví dụ vênh nhau!</b> Câu chữ ghi i &lt; j, nhưng ví dụ n = 4 ra 6 và liệt kê cả (1, 1), (4, 1): tức là đếm <b>cặp có thứ tự, cho phép i = j</b>, mỗi nhóm góp <b>c × c</b>. Với n = 4: nhóm {1, 4}, {2}, {3} cho 4 + 1 + 1 = 6, khớp ví dụ. Theo đúng câu chữ i &lt; j thì mỗi nhóm góp c × (c − 1) / 2. Lời giải dưới đây theo ví dụ của đề.</div>
+  <p>Với n đến 10⁵, dùng sàng ghi <b>ước nguyên tố nhỏ nhất</b> <code>spf[x]</code> (chính là số nhỏ dưới mỗi ô bị gạch ở mục 2). Nhờ nó, phân tích mỗi số chỉ mất vài phép chia.</p>
+  <div class="code" id="codeSq"></div>
+  <p><a href="../luyen-de/index.html#bai=csp-2025-so-chinh-phuong">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 6 -->
+<section id="tong-ket">
+  <h2><span class="num">6</span>Tổng kết</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Việc</th><th>Cách</th><th>Số phép tính</th></tr></thead>
+      <tbody>
+        <tr><td>Kiểm tra 1 số nguyên tố</td><td>thử d đến √n</td><td>khoảng √n</td></tr>
+        <tr><td>Mọi số nguyên tố đến N</td><td>sàng Eratosthenes</td><td>khoảng 3 × N</td></tr>
+        <tr><td>Phân tích 1 số</td><td>chia thử d đến √n, nhớ <code>if n &gt; 1</code></td><td>khoảng √n</td></tr>
+        <tr><td>Phân tích rất nhiều số ≤ N</td><td>sàng ước nguyên tố nhỏ nhất <code>spf</code></td><td>khoảng 3 × N, rồi vài phép mỗi số</td></tr>
+        <tr><td>Số ước</td><td>tích (số mũ + 1)</td><td>sau khi phân tích</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Coi 1 là số nguyên tố</b>: nhớ đặt <code>la_nt[0] = la_nt[1] = False</code>.</li>
+    <li><b>Quên <code>if n &gt; 1</code></b> sau vòng phân tích: mất thừa số nguyên tố lớn cuối cùng.</li>
+    <li><b>Mảng sàng thiếu một ô</b>: cần <code>N + 1</code> ô để có chỉ số N.</li>
+    <li><b>Kiểm tra số chính phương bằng căn số thực</b>: dùng <code>r = math.isqrt(x)</code> rồi so <code>r * r == x</code>.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="bai-tap">
+  <h2><span class="num">7</span>Bài tập tự luyện</h2>
+  <div class="ex-item">
+    <h4>Bài 1. Đếm số nguyên tố <span class="level lv1">Dễ</span></h4>
+    <p>Cho N ≤ 10⁶. Có bao nhiêu số nguyên tố từ 1 đến N? (N = 60 có 17 số.)</p>
+    <details><summary>Gợi ý</summary><p>Sàng một lần rồi đếm các ô còn True.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Cặp số nguyên tố sinh đôi <span class="level lv1">Dễ</span></h4>
+    <p>Đếm các cặp số nguyên tố hơn kém nhau 2 (như 11 và 13) mà cả hai ≤ N.</p>
+    <details><summary>Gợi ý</summary><p>Sàng xong, kiểm tra từng p xem p và p + 2 có cùng là số nguyên tố.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Đếm ước bằng phân tích <span class="level lv2">Vừa</span></h4>
+    <p>Cho n ≤ 10¹². In phân tích dạng <code>2^3 * 3^2 * 5</code> và số ước của n.</p>
+    <details><summary>Gợi ý</summary><p>Dùng mô phỏng mục 4, đếm thêm số mũ mỗi lần chia hết. Số ước = tích (số mũ + 1).</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Tổng ước nguyên tố cho nhiều câu hỏi <span class="level lv2">Vừa</span></h4>
+    <p>Có Q ≤ 10⁵ câu hỏi, mỗi câu cho x ≤ 10⁶, hỏi tổng các ước nguyên tố khác nhau của x.</p>
+    <details><summary>Gợi ý</summary><p>Thử chia đến √x cho từng câu thì chậm. Sàng spf một lần, rồi mỗi câu tách thừa số bằng spf.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Số chính phương <span class="level lv4">Đề thật</span></h4>
+    <p>Sư phạm 2025, bài 1. Đọc kỹ cách đếm trong ví dụ trước khi code.</p>
+    <a class="real" href="../luyen-de/index.html#bai=csp-2025-so-chinh-phuong">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 2: Số học. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  const isPrime = n => { if (n < 2) return false; for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+  const tm = ops => {
+    const s = ops / 1e7;
+    if (s < 0.01) return 'chưa tới 0,01 giây';
+    if (s < 120) return 'khoảng ' + s.toLocaleString('vi-VN', { maximumFractionDigits: s < 1 ? 2 : 0 }) + ' giây';
+    if (s < 7200) return 'khoảng ' + fmt(Math.round(s / 60)) + ' phút';
+    return 'khoảng ' + fmt(Math.round(s / 3600)) + ' giờ';
+  };
+
+  // ---------- Hero ----------
+  $('#heroGrid').innerHTML = Array.from({ length: 30 }, (_, i) => i + 1).map((x, i) =>
+    '<div class="pc' + (isPrime(x) ? ' fin' : x === 1 ? ' one' : '') + '" style="animation-delay:' + (i * 0.02) + 's"><b>' + x + '</b></div>').join('');
+
+  // ---------- 1. Hình chữ nhật ----------
+  (function(){
+    function render(){
+      const n = +$('#rS').value;
+      $('#rN').textContent = n;
+      const ds = []; for (let d = 1; d * d <= n; d++) if (n % d === 0) ds.push(d);
+      const only = ds.length === 1;
+      $('#rects').innerHTML = ds.map(d => {
+        const cols = n / d, s = Math.max(6, Math.min(16, Math.floor(260 / cols)));
+        let r = '';
+        for (let y = 0; y < d; y++) for (let x = 0; x < cols; x++) r += '<rect x="' + (x * s + 1) + '" y="' + (y * s + 1) + '" width="' + (s - 1) + '" height="' + (s - 1) + '" rx="1.5"/>';
+        return '<div class="rc' + (only ? ' only' : '') + '"><svg width="' + (cols * s + 2) + '" height="' + (d * s + 2) + '" aria-hidden="true">' + r + '</svg>' + d + ' × ' + cols + '</div>';
+      }).join('');
+      $('#verdict').className = 'verdict ' + (only ? 'p' : 'c');
+      $('#verdict').textContent = only ? n + ' chỉ xếp được 1 hàng: số nguyên tố ✓' : n + ' xếp được ' + ds.length + ' kiểu: không phải số nguyên tố (gọi là hợp số)';
+    }
+    $('#rS').addEventListener('input', render);
+    render();
+  })();
+  renderCode($('#codeIsPrime'), [
+    'def la_nguyen_to(n):',
+    '    if n < 2:',
+    '        return False',
+    '    d = 2',
+    '    while d * d <= n:',
+    '        if n % d == 0:',
+    '            return False   # có ước khác 1 và n',
+    '        d += 1',
+    '    return True'
+  ]);
+
+  // ---------- 2. Sàng ----------
+  const SN = 60;
+  function buildSieve(){
+    const S = [], by = Array(SN + 1).fill(0), known = new Set();
+    const snap = o => S.push(Object.assign({ by: by.slice(), known: new Set(known), p: 0, fresh: [], fin: false }, o));
+    snap({ line: 3, msg: 'Các số từ 2 đến ' + SN + ', chưa số nào bị gạch. Số 1 không phải số nguyên tố nên đã loại từ đầu.' });
+    for (let p = 2; p * p <= SN; p++){
+      if (by[p]){ snap({ line: 6, p: -p, msg: 'p = ' + p + ' đã bị ' + by[p] + ' gạch, nên ' + p + ' không phải số nguyên tố. <b>Bỏ qua</b>: mọi bội của ' + p + ' cũng đã bị ' + by[p] + ' gạch rồi.' }); continue; }
+      known.add(p);
+      const fresh = [];
+      for (let x = p * p; x <= SN; x += p) if (!by[x]){ by[x] = p; fresh.push(x); }
+      snap({ line: 8, p, fresh, msg: '<b>' + p + '</b> chưa bị gạch nên là số nguyên tố. Gạch các bội của ' + p + ' từ ' + p + ' × ' + p + ' = ' + (p * p) + ': ' + (fresh.length ? 'mới gạch thêm ' + fresh.length + ' số (' + fresh.slice(0, 8).join(', ') + (fresh.length > 8 ? ', …' : '') + ').' : 'không có số mới.') + (p > 2 ? ' Các bội nhỏ hơn như ' + 2 * p + ' đã bị gạch từ trước.' : '') });
+    }
+    const q = Math.floor(Math.sqrt(SN)) + 1;
+    snap({ line: 5, msg: 'p = ' + q + ': ' + q + ' × ' + q + ' = ' + q * q + ' &gt; ' + SN + ', <b>dừng</b>. Số nào chưa bị gạch đến giờ chắc chắn là số nguyên tố (nếu có ước thì đã có ước ≤ √' + SN + ').' });
+    const pr = []; for (let x = 2; x <= SN; x++) if (!by[x]) pr.push(x);
+    snap({ line: 10, fin: true, msg: '🎉 Có <b>' + pr.length + ' số nguyên tố</b> đến ' + SN + ': ' + pr.join(', ') + '. Để ý số nhỏ dưới mỗi ô bị gạch: đó là <b>ước nguyên tố nhỏ nhất</b> của số đó, sẽ dùng lại ở mục 5.' });
+    return S;
+  }
+  function renderSieve(s){
+    const fresh = new Set(s.fresh);
+    let h = '';
+    for (let x = 1; x <= SN; x++){
+      let cls = '', sub = '&nbsp;';
+      if (x === 1) cls = ' one';
+      else if (x === s.p) cls = ' cur';
+      else if (fresh.has(x)){ cls = ' new'; sub = '÷' + s.by[x]; }
+      else if (s.by[x]){ cls = ' x'; sub = '÷' + s.by[x]; }
+      else if (s.fin) cls = ' fin';
+      else if (s.known.has(x)) cls = ' pr';
+      if (x === -s.p) cls += ' cur';
+      h += '<div class="pc' + cls + '"><b>' + x + '</b><small>' + sub + '</small></div>';
+    }
+    $('#sieveGrid').innerHTML = h;
+  }
+  makeSim($('#simSieve'), {
+    build: buildSieve, render: renderSieve,
+    code: () => [
+      'N = ' + SN,
+      'la_nt = [True] * (N + 1)',
+      'la_nt[0] = la_nt[1] = False',
+      'p = 2',
+      'while p * p <= N:',
+      '    if la_nt[p]:                 # p chưa bị gạch',
+      '        for x in range(p * p, N + 1, p):',
+      '            la_nt[x] = False     # gạch bội của p',
+      '    p += 1',
+      'print([x for x in range(N + 1) if la_nt[x]])'
+    ]
+  });
+
+  // ---------- 3. Speed ----------
+  (function(){
+    function update(){
+      const e = +$('#eS').value, N = Math.pow(10, e);
+      $('#eV').textContent = e;
+      const a = N * Math.sqrt(N), b = 3 * N;
+      $('#o1').textContent = fmt(Math.round(a)) + ' phép'; $('#t1').textContent = tm(a);
+      $('#o2').textContent = fmt(b) + ' phép'; $('#t2').textContent = tm(b);
+    }
+    $('#eS').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- 4. Phân tích ----------
+  const FN = [360, 84, 1001, 97, 98];
+  let FI = 0;
+  function buildFac(){
+    const S = [], N0 = FN[FI], leaves = [], chain = [N0];
+    let n = N0, d = 2;
+    const snap = o => S.push(Object.assign({ leaves: leaves.slice(), chain: chain.slice(), d, n, fresh: -1, last: false, done: false }, o));
+    snap({ line: 3, msg: 'Phân tích <b>' + N0 + '</b>. Bắt đầu thử chia cho d = 2.' });
+    while (d * d <= n){
+      if (n % d === 0){
+        while (n % d === 0){
+          leaves.push(d); n = n / d; chain.push(n);
+          snap({ line: 7, fresh: leaves.length - 1, msg: (n * d) + ' chia hết cho <b>' + d + '</b>: tách lá ' + d + ', còn lại ' + (n * d) + ' // ' + d + ' = <b>' + n + '</b>.' });
+        }
+        snap({ line: 5, msg: n + ' không chia hết cho ' + d + ' nữa. Thử d tiếp theo.' + (n > 1 && (d + 1) * (d + 1) > n ? '' : '') });
+      } else {
+        snap({ line: 5, msg: 'd = ' + d + ': ' + n + ' % ' + d + ' = ' + (n % d) + ', không chia hết.' });
+      }
+      d++;
+    }
+    if (n > 1){
+      snap({ line: 9, msg: 'd = ' + d + ': ' + d + ' × ' + d + ' = ' + d * d + ' &gt; ' + n + ', dừng vòng lặp. Nhưng phần còn lại <b>' + n + ' &gt; 1</b>, nên chính ' + n + ' là một thừa số nguyên tố!' });
+      leaves.push(n); chain.push(1);
+      snap({ line: 10, fresh: leaves.length - 1, last: true, msg: 'Ghi thêm lá <b>' + n + '</b>.' });
+    } else snap({ line: 9, msg: 'Phần còn lại là 1: đã tách hết.' });
+    const cnt = {}; leaves.forEach(p => cnt[p] = (cnt[p] || 0) + 1);
+    const nd = Object.values(cnt).reduce((a, b) => a * (b + 1), 1);
+    snap({ line: 11, done: true, last: n > 1, msg: '✅ ' + N0 + ' = ' + Object.entries(cnt).map(([p, k]) => k > 1 ? p + '<sup>' + k + '</sup>' : p).join(' × ') + (leaves.length === 1 ? ': ' + N0 + ' là số nguyên tố.' : '. Số ước: ' + Object.values(cnt).map(k => '(' + k + ' + 1)').join(' × ') + ' = <b>' + nd + '</b>.') });
+    return S;
+  }
+  function renderFac(s){
+    $('#facBtns').innerHTML = FN.map((x, i) => '<button class="btn' + (i === FI ? ' primary' : '') + '" data-i="' + i + '">' + x + '</button>').join('');
+    $('#facTry').innerHTML = s.done ? '' : 'Đang thử chia cho <span class="chip a">d = ' + s.d + '</span>';
+    const L = s.leaves.length, dy = Math.min(46, 260 / Math.max(L, 1)), dx = 34, W = 60 + (L + 1) * dx + 40;
+    let h = '<svg viewBox="0 0 ' + W + ' ' + ((L + 1) * dy + 34) + '" width="' + W + '" aria-hidden="true">';
+    const pos = k => [60 + k * dx + 20, 20 + k * dy];
+    for (let k = 0; k < s.chain.length; k++){
+      const [x, y] = pos(k);
+      if (k < L){
+        const [x2, y2] = pos(k + 1);
+        if (s.chain[k + 1] !== 1) h += '<line class="ln" x1="' + x + '" y1="' + y + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+        h += '<line class="ln" x1="' + x + '" y1="' + y + '" x2="' + (x - 46) + '" y2="' + (y + dy) + '"/>';
+      }
+    }
+    for (let k = 0; k < L; k++){
+      const [x, y] = pos(k);
+      const cls = s.last && k === L - 1 ? ' last' : k === s.fresh ? ' new' : '';
+      h += '<g class="lf' + cls + '"><circle cx="' + (x - 46) + '" cy="' + (y + dy) + '" r="15"/><text x="' + (x - 46) + '" y="' + (y + dy + 5) + '" text-anchor="middle">' + s.leaves[k] + '</text></g>';
+    }
+    for (let k = 0; k < s.chain.length; k++){
+      const v = s.chain[k]; if (v === 1 && k) continue;
+      const [x, y] = pos(k), w = 14 + String(v).length * 10;
+      const cur = k === s.chain.length - 1 && !s.done;
+      h += '<g class="cmp' + (cur ? ' cur' : '') + '"><rect x="' + (x - w / 2) + '" y="' + (y - 14) + '" width="' + w + '" height="28" rx="8"/><text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle">' + v + '</text></g>';
+    }
+    h += '</svg>';
+    $('#facTree').innerHTML = h;
+    $('#facRes').innerHTML = s.leaves.length ? FN[FI] + ' = ' + s.leaves.join(' × ') + (s.done ? '' : ' × …') : '&nbsp;';
+  }
+  const simFac = makeSim($('#simFac'), {
+    build: buildFac, render: renderFac,
+    code: () => [
+      'n = ' + FN[FI],
+      'thua_so = []',
+      'd = 2',
+      'while d * d <= n:',
+      '    while n % d == 0:',
+      '        thua_so.append(d)',
+      '        n //= d',
+      '    d += 1',
+      'if n > 1:                 # phần còn lại',
+      '    thua_so.append(n)     # là số nguyên tố',
+      'print(thua_so)'
+    ]
+  });
+  $('#facBtns').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (!b) return; FI = +b.dataset.i; simFac.rebuild(); });
+
+  // ---------- 5. Số chính phương ----------
+  (function(){
+    const N = 20;
+    const odd = x => { let le = 1; for (let p = 2; p * p <= x; p++){ let k = 0; while (x % p === 0){ x /= p; k++; } if (k % 2) le *= p; } return x > 1 ? le * x : le; };
+    const L = Array.from({ length: N }, (_, i) => odd(i + 1));
+    const cnt = {}; L.forEach(v => cnt[v] = (cnt[v] || 0) + 1);
+    const col = v => cnt[v] === 1 ? 'g6' : 'g' + v;
+    let sel = [];
+    function render(){
+      $('#cards').innerHTML = L.map((v, i) => '<button class="cd ' + col(v) + (sel.includes(i + 1) ? ' on' : '') + '" data-x="' + (i + 1) + '"><b>' + (i + 1) + '</b><small>lẻ ' + v + '</small></button>').join('');
+      if (sel.length === 2){
+        const [a, b] = sel, p = a * b, r = Math.round(Math.sqrt(p)), ok = r * r === p;
+        $('#pairOut').innerHTML = a + ' × ' + b + ' = ' + p + (ok ? ' = ' + r + '² <span class="ok">✓ chính phương</span>' : ' <span class="no">✗ không chính phương</span>') + ' · phần lẻ ' + L[a - 1] + (L[a - 1] === L[b - 1] ? ' = ' : ' ≠ ') + L[b - 1];
+      } else $('#pairOut').innerHTML = sel.length ? 'Chọn thêm một số nữa.' : '<span style="color:var(--muted);font-weight:500">Chạm hai số bất kỳ để xem tích.</span>';
+      const gs = Object.keys(cnt).map(Number).filter(v => cnt[v] > 1).sort((a, b) => a - b);
+      $('#groups').innerHTML = gs.map(v => '<div class="row"><span>Phần lẻ ' + v + ':</span>' + L.map((w, i) => w === v ? '<span class="chip ' + col(v) + '">' + (i + 1) + '</span>' : '').join('') + '<span style="color:var(--muted)">c = ' + cnt[v] + '</span></div>').join('');
+    }
+    $('#cards').addEventListener('click', e => {
+      const b = e.target.closest('.cd'); if (!b) return;
+      const x = +b.dataset.x;
+      sel = sel.length >= 2 ? [x] : sel.concat(x);
+      render();
+    });
+    render();
+  })();
+  renderCode($('#codeSq'), [
+    'n = int(input())',
+    'spf = list(range(n + 1))      # ước nguyên tố nhỏ nhất',
+    'p = 2',
+    'while p * p <= n:',
+    '    if spf[p] == p:            # p là số nguyên tố',
+    '        for x in range(p * p, n + 1, p):',
+    '            if spf[x] == x:',
+    '                spf[x] = p',
+    '    p += 1',
+    'dem = {}',
+    'for x in range(1, n + 1):',
+    '    le, y = 1, x               # le: phần lẻ của x',
+    '    while y > 1:',
+    '        p, k = spf[y], 0',
+    '        while y % p == 0:',
+    '            y //= p',
+    '            k += 1',
+    '        if k % 2 == 1:         # số mũ lẻ thì giữ lại p',
+    '            le *= p',
+    '    dem[le] = dem.get(le, 0) + 1',
+    'print(sum(c * c for c in dem.values()))   # theo ví dụ của đề'
+  ]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quy hoạch động cho người mới bắt đầu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2; --coin:#F5C400; --coin-ink:#3A2E00;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210; --coin:#FFD43B; --coin-ink:#2A2000;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210; --coin:#FFD43B; --coin-ink:#2A2000;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; }
+.notebook .row{ display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; }
+.nb-cell{ display:flex; flex-direction:column; align-items:center; gap:2px; animation:pop .45s both; }
+.nb-cell .box{ width:50px; height:50px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:19px; background:var(--done-soft); border:2px solid var(--done); }
+.nb-cell.last .box{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-cell small{ font-family:var(--mono); font-size:11px; color:var(--muted); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; counter-reset:r; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; position:relative; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+select{ font:inherit; font-size:15px; padding:6px 10px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); }
+.seg{ display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--surface-2); border-radius:999px; padding:4px; }
+.seg button{ border:0; background:transparent; font:inherit; font-size:14px; font-weight:600; color:var(--muted); padding:7px 13px; border-radius:999px; cursor:pointer; }
+.seg button.on{ background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Stairs */
+.stairs{ display:flex; align-items:flex-end; gap:4px; height:236px; padding-top:34px; }
+.st{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+.blk{ width:100%; border:2px solid var(--line); background:var(--surface); border-radius:8px 8px 3px 3px; display:flex; justify-content:center; padding-top:4px; font-weight:800; font-size:15px; transition:background .25s, border-color .25s, height .3s; }
+.blk.done{ background:var(--done-soft); border-color:var(--done); }
+.blk.src{ background:var(--src-soft); border-color:var(--src); }
+.blk.cur{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.kid{ font-size:22px; line-height:1; margin-bottom:3px; }
+.lbl{ font-size:12px; color:var(--muted); margin-top:4px; }
+.axis{ font-size:12.5px; color:var(--muted); text-align:center; margin-top:2px; }
+.arr-wrap{ overflow-x:auto; margin-top:12px; padding-bottom:2px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:center; margin-right:6px; font-size:14px; }
+.cellx{ min-width:42px; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--src); font-weight:700; min-height:1.3em; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+
+/* Coins */
+.chips{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:14px; color:var(--muted); font-weight:600; }
+.chip{ width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:16px; background:var(--done-soft); border:2px solid var(--done); color:var(--ink); transition:transform .2s, box-shadow .2s; }
+.chip.on{ background:var(--coin); color:var(--coin-ink); transform:scale(1.15); box-shadow:0 0 0 4px var(--accent-soft); }
+.compare{ display:grid; gap:12px; grid-template-columns:1fr; margin-top:14px; }
+@media (min-width:640px){ .compare{ grid-template-columns:1fr 1fr; } }
+.compare .panel{ margin:0; }
+.compare h4{ margin:0 0 4px; font-size:1rem; }
+.compare .big{ font-size:1.5rem; font-weight:800; }
+.compare .bad .big{ color:var(--accent); }
+.compare .good .big{ color:var(--src); }
+
+/* Grid */
+.gridviz{ display:grid; gap:6px; max-width:430px; margin:0 auto; }
+.gc{ aspect-ratio:1; border:2px solid var(--line); background:var(--surface); border-radius:12px; position:relative; display:grid; place-items:center; transition:background .25s, border-color .25s; }
+.gc .coin{ position:absolute; top:4px; left:4px; width:22px; height:22px; border-radius:50%; background:var(--coin); color:var(--coin-ink); font-size:12px; font-weight:800; display:grid; place-items:center; }
+.gc .v{ font-size:clamp(15px, 4.6vw, 21px); font-weight:800; }
+.gc .ar{ position:absolute; bottom:1px; right:6px; font-size:13px; color:var(--muted); font-weight:800; }
+.gc .mk{ position:absolute; top:2px; right:4px; font-size:14px; line-height:1.2; }
+.gc.done{ background:var(--done-soft); }
+.gc.src{ background:var(--src-soft); border-color:var(--src); }
+.gc.pick{ box-shadow:inset 0 0 0 3px var(--src); }
+.gc.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.gc.path{ background:var(--path-soft); border-color:var(--path); }
+.gc.path .v{ color:var(--path); }
+
+/* Fibonacci tree */
+.tree{ width:100%; height:auto; display:block; }
+.fe{ stroke:var(--line); stroke-width:2; }
+.fn circle{ fill:var(--surface); stroke:var(--muted); stroke-width:2; transition:fill .25s, stroke .25s; }
+.fn text{ fill:var(--ink); font-size:13px; font-weight:700; font-family:'Be Vietnam Pro', system-ui, sans-serif; text-anchor:middle; dominant-baseline:central; }
+.fn.k3 circle{ fill:var(--accent-soft); stroke:var(--accent); }
+.fn.k2 circle{ fill:var(--src-soft); stroke:var(--src); }
+.fn.k1 circle{ fill:var(--path-soft); stroke:var(--path); }
+.fn.k0 circle{ fill:var(--done-soft); stroke:var(--done); }
+.fn.memo circle{ fill:var(--done-soft); stroke:var(--done); stroke-dasharray:4 3; }
+.fn text.tag{ font-size:11px; fill:var(--muted); font-weight:600; }
+.tree-stats{ font-size:15px; margin-top:8px; }
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.25rem, 5vw, 1.9rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* +1 widget */
+.tokens{ display:flex; flex-wrap:wrap; gap:4px; align-items:center; font-weight:700; font-size:17px; }
+.tk{ min-width:30px; height:34px; border-radius:8px; background:var(--surface-2); display:grid; place-items:center; padding:0 6px; }
+.tk.new{ background:var(--accent); color:var(--accent-ink); animation:pop .35s both; }
+.op{ color:var(--muted); }
+.eq{ font-size:1.7rem; font-weight:800; margin:6px 0 10px; }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell .box{ width:40px; height:40px; font-size:16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Giáo trình Tin học lớp 8, lập trình Python</span>
+  <h1>Quy hoạch động</h1>
+  <p class="slogan">Nhớ lại để khỏi phải tính lại.</p>
+  <p class="lead">Kỹ thuật quan trọng bậc nhất của lập trình thi đấu, giải thích bằng hình ảnh, ví dụ gần gũi và mô phỏng chạy từng bước để các em tự quan sát.</p>
+  <div class="notebook" aria-label="Bảng dp minh hoạ">
+    <div class="row" id="nbRow"></div>
+    <p class="nb-note">Mỗi ô bằng tổng hai ô đứng trước. Vì đã <b>ghi lại</b> hai ô trước, ô mới tính được ngay, không phải làm lại từ đầu.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#gioi-thieu">1. Là gì?</a>
+    <a href="#vi-sao">2. Vì sao cần nhớ?</a>
+    <a href="#cong-thuc">3. Công thức 4 bước</a>
+    <a href="#vd-cau-thang">4. Leo cầu thang</a>
+    <a href="#vd-doi-tien">5. Đổi tiền</a>
+    <a href="#vd-luoi">6. Robot nhặt xu</a>
+    <a href="#tong-ket">7. Tổng kết</a>
+    <a href="#bai-tap">8. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="gioi-thieu">
+  <h2><span class="num">1</span>Quy hoạch động là gì?</h2>
+  <p><b>Quy hoạch động</b> (tiếng Anh: <i>Dynamic Programming</i>, viết tắt <b>DP</b>) là cách giải một bài toán lớn bằng cách chia nó thành các <b>bài toán con</b> nhỏ hơn, giải mỗi bài toán con <b>đúng một lần</b>, ghi kết quả vào một <b>bảng</b> (thường đặt tên là <code>dp</code>), rồi dùng lại các kết quả đã ghi để giải bài toán lớn hơn.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: em có cần đếm lại không?</h3>
+    <div class="tokens" id="tokens"></div>
+    <div class="eq" id="plusEq"></div>
+    <div class="controls" style="margin-top:0">
+      <button class="btn primary" id="plusBtn">Thêm một số 1</button>
+      <button class="btn" id="plusReset">Làm lại</button>
+    </div>
+    <div class="explain" id="plusMsg"></div>
+  </div>
+
+  <p>Bài toán dùng được quy hoạch động thường có hai dấu hiệu:</p>
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🔁</div>
+      <h4>Bài toán con bị lặp lại</h4>
+      <p>Cùng một phép tính nhỏ xuất hiện nhiều lần. Nếu lần nào cũng tính lại từ đầu thì rất lãng phí thời gian.</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🧩</div>
+      <h4>Ghép lời giải nhỏ thành lời giải lớn</h4>
+      <p>Đáp án của bài lớn được tạo ra từ đáp án của các bài nhỏ hơn, giống như xếp các mảnh ghép.</p>
+    </div>
+  </div>
+  <div class="remember">Ghi nhớ: Quy hoạch động = Chia nhỏ + Ghi vào bảng + Dùng lại.</div>
+</section>
+
+<!-- 2 -->
+<section id="vi-sao">
+  <h2><span class="num">2</span>Vì sao cần “nhớ”? Ví dụ dãy Fibonacci</h2>
+  <p>Dãy Fibonacci: <code>F(0) = 0</code>, <code>F(1) = 1</code>, và từ đó mỗi số bằng tổng hai số trước: <code>F(n) = F(n−1) + F(n−2)</code>. Ta được 0, 1, 1, 2, 3, 5, 8, 13…</p>
+  <p>Viết thẳng công thức thành hàm đệ quy thì rất gọn:</p>
+  <div class="code" id="codeFibNaive"></div>
+  <p>Nhưng hãy xem máy tính phải làm những gì để tính <code>fib(5)</code>. Mỗi vòng tròn là một lần gọi hàm:</p>
+
+  <div class="sim">
+    <div class="sim-head">
+      <span class="title">Cây lời gọi hàm của fib(5)</span>
+      <div class="seg" role="group" aria-label="Chế độ xem">
+        <button data-mode="plain" class="on">Bình thường</button>
+        <button data-mode="dup">Tô màu chỗ bị tính lại</button>
+        <button data-mode="memo">Có ghi nhớ</button>
+      </div>
+    </div>
+    <div class="viz"><svg class="tree" id="fibTree" viewBox="0 0 640 320" role="img" aria-label="Cây lời gọi hàm Fibonacci"></svg></div>
+    <div class="explain tree-stats" id="treeStats"></div>
+  </div>
+
+  <h3>Số lần gọi hàm tăng nhanh khủng khiếp</h3>
+  <p>Kéo thanh trượt để chọn n và so sánh hai cách:</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">Tính F(<span id="nVal">30</span>)
+      <input type="range" id="nSlider" min="5" max="45" value="30" aria-label="Chọn n">
+    </label>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Đệ quy không nhớ</div><div class="v" id="callsNaive"></div><div class="t" id="timeNaive"></div></div>
+      <div class="stat good"><div class="k">Quy hoạch động</div><div class="v" id="callsDp"></div><div class="t">gần như tức thì</div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Thời gian ước lượng thô, giả sử Python thực hiện khoảng 5 triệu lời gọi hàm mỗi giây.</p>
+  </div>
+  <p>Cách quy hoạch động: tính lần lượt từ nhỏ đến lớn và ghi vào bảng. Mỗi số chỉ tính <b>một lần</b>:</p>
+  <div class="code" id="codeFibDp"></div>
+</section>
+
+<!-- 3 -->
+<section id="cong-thuc">
+  <h2><span class="num">3</span>Công thức 4 bước giải bài quy hoạch động</h2>
+  <p>Gặp bài nào nghi là quy hoạch động, các em lần lượt trả lời 4 câu hỏi sau. Ví dụ đi kèm là bài leo cầu thang ở mục 4.</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Đặt tên trạng thái</h4>
+      <p>Ô <code>dp[i]</code> nghĩa là gì? Hãy viết thành một câu tiếng Việt thật rõ ràng.</p>
+      <div class="ex"><code>dp[i]</code> = số cách để lên tới bậc thứ i.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Tìm công thức truy hồi</h4>
+      <p>Ô <code>dp[i]</code> được tính từ các ô nhỏ hơn như thế nào? Mẹo: nghĩ về <b>bước cuối cùng</b>.</p>
+      <div class="ex"><code>dp[i] = dp[i−1] + dp[i−2]</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Xác định cơ sở</h4>
+      <p>Những ô nhỏ nhất mà em biết ngay đáp án, không cần dùng công thức.</p>
+      <div class="ex"><code>dp[0] = 1</code>, <code>dp[1] = 1</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Thứ tự tính và đáp án</h4>
+      <p>Tính từ nhỏ đến lớn để khi cần ô nào thì ô đó đã có sẵn. Đáp án nằm ở ô nào?</p>
+      <div class="ex">Cho i chạy từ 2 đến n. Đáp án là <code>dp[n]</code>.</div>
+    </div>
+  </div>
+  <div class="tip"><b>Mẹo “bước cuối cùng”:</b> hãy tự hỏi “Ngay trước khi tới đích, mình vừa đứng ở đâu?”. Mỗi khả năng là một ô nhỏ hơn trong bảng.</div>
+</section>
+
+<!-- 4 -->
+<section id="vd-cau-thang">
+  <h2><span class="num">4</span>Ví dụ 1: Leo cầu thang</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Cầu thang có <b>n</b> bậc. Mỗi lần em bước lên <b>1 bậc</b> hoặc <b>2 bậc</b>. Hỏi có bao nhiêu cách khác nhau để lên tới bậc thứ n?</p>
+  </div>
+  <p>Ví dụ n = 3 có 3 cách: 1+1+1, 1+2, 2+1. Thử đếm tay với n = 10 thì rất dễ sót. Áp dụng 4 bước: <code>dp[i]</code> là số cách lên bậc i. Bước cuối cùng lên bậc i hoặc là từ bậc i−1 (bước 1 bậc), hoặc từ bậc i−2 (bước 2 bậc), nên <code>dp[i] = dp[i−1] + dp[i−2]</code>.</p>
+
+  <div class="sim" id="simStairs">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>Số bậc n = <span id="stairN">6</span> <input type="range" id="stairSlider" min="2" max="10" value="6" aria-label="Số bậc"></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="stairs" id="stairsViz"></div>
+          <div class="axis">bậc thứ</div>
+          <div class="arr-wrap"><div class="arr" id="stairsRow"></div></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang tính</span><span><i class="lg-src"></i>Lấy kết quả từ</span><span><i class="lg-done"></i>Đã ghi vào bảng</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="vd-doi-tien">
+  <h2><span class="num">5</span>Ví dụ 2: Đổi tiền ít xu nhất</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Có các loại đồng xu (mỗi loại có không giới hạn). Cần đổi đúng <b>S</b> đồng sao cho số đồng xu dùng là <b>ít nhất</b>.</p>
+  </div>
+  <p>Nhiều bạn sẽ nghĩ: “Cứ lấy đồng lớn nhất trước là xong!”. Cách đó gọi là <b>tham lam</b>, và nó có thể sai. Với các đồng 1, 3, 4 và S = 6: tham lam lấy 4 + 1 + 1 (3 xu), nhưng 3 + 3 chỉ cần 2 xu.</p>
+  <p>Áp dụng 4 bước: <code>dp[s]</code> là số xu ít nhất để đổi được s đồng. Đồng xu cuối cùng là đồng c nào đó, phần còn lại là s − c đồng, nên <code>dp[s] = min(dp[s − c] + 1)</code> với mọi đồng c không lớn hơn s. Cơ sở: <code>dp[0] = 0</code>.</p>
+
+  <div class="sim" id="simCoin">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <label>Bộ xu <select id="coinSet" aria-label="Bộ xu">
+        <option value="1,3,4">1, 3, 4</option>
+        <option value="1,5,6">1, 5, 6</option>
+        <option value="1,2,5">1, 2, 5</option>
+        <option value="1,7,10">1, 7, 10</option>
+      </select></label>
+      <label>S = <span id="coinS">6</span> <input type="range" id="coinSlider" min="1" max="15" value="6" aria-label="Số tiền S"></label>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="chips">Đang thử đồng: <span id="coinChips" class="chips"></span></div>
+          <div class="arr-wrap"><div class="arr" id="coinRow"></div></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang tính dp[s]</span><span><i class="lg-src"></i>Ô dp[s − c] đang tra</span><span><i class="lg-done"></i>Đã biết</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+    <div class="compare" id="coinCompare"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="vd-luoi">
+  <h2><span class="num">6</span>Ví dụ 3: Robot nhặt xu trên lưới (bảng hai chiều)</h2>
+  <div class="panel problem">
+    <h4>Đề bài</h4>
+    <p style="margin:0">Robot 🤖 đứng ở ô trên cùng bên trái của một lưới, mỗi ô có một số xu. Robot chỉ được đi <b>sang phải</b> hoặc <b>xuống dưới</b>, và phải tới ô dưới cùng bên phải 🏁. Robot nhặt được nhiều xu nhất là bao nhiêu?</p>
+  </div>
+  <p>Lần này bảng <code>dp</code> có hai chiều: <code>dp[i][j]</code> là số xu nhiều nhất nhặt được khi đi tới ô hàng i, cột j. Bước cuối cùng vào ô (i, j) chỉ có thể từ ô <b>bên trên</b> hoặc ô <b>bên trái</b>, nên ta chọn ô lớn hơn rồi cộng số xu của ô hiện tại. Hàng và cột được đánh số từ 0, giống như trong Python.</p>
+
+  <div class="sim" id="simGrid">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="gridRandom">🎲 Tạo lưới mới</button>
+      <button class="btn" id="gridReset">Lưới mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz"><div class="gridviz" id="gridViz"></div></div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang tính</span><span><i class="lg-src"></i>Ô trên / trái (viền đậm: ô được chọn)</span><span><i class="lg-done"></i>Đã tính</span><span><i class="lg-path"></i>Đường đi tốt nhất</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Lần ngược tìm đường:</b> bảng <code>dp</code> chỉ cho biết <i>nhặt được bao nhiêu</i>. Muốn biết <i>đi đường nào</i>, ta ghi thêm mũi tên ↑ hoặc ← ở mỗi ô (ô đó được đến từ đâu), rồi đi ngược từ đích về xuất phát.</div>
+</section>
+
+<!-- 7 -->
+<section id="tong-ket">
+  <h2><span class="num">7</span>Tổng kết</h2>
+  <h3>Khi nào nên nghĩ tới quy hoạch động?</h3>
+  <ul>
+    <li>Đề hỏi <b>“có bao nhiêu cách…”</b>.</li>
+    <li>Đề hỏi <b>ít nhất</b> hoặc <b>nhiều nhất</b> (chi phí nhỏ nhất, điểm lớn nhất…).</li>
+    <li>Bài lớn chia được thành các bài nhỏ <b>cùng dạng</b>, và các bài nhỏ đó bị dùng đi dùng lại.</li>
+  </ul>
+  <h3>Ba ví dụ, cùng một công thức</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Bài</th><th>Trạng thái</th><th>Công thức truy hồi</th><th>Cơ sở</th><th>Đáp án</th></tr></thead>
+      <tbody>
+        <tr><td>Leo cầu thang</td><td><code>dp[i]</code>: số cách lên bậc i</td><td>Cộng: <code>dp[i−1] + dp[i−2]</code></td><td><code>dp[0] = dp[1] = 1</code></td><td><code>dp[n]</code></td></tr>
+        <tr><td>Đổi tiền</td><td><code>dp[s]</code>: ít xu nhất cho s đồng</td><td>Nhỏ nhất: <code>min(dp[s−c] + 1)</code></td><td><code>dp[0] = 0</code></td><td><code>dp[S]</code></td></tr>
+        <tr><td>Robot nhặt xu</td><td><code>dp[i][j]</code>: nhiều xu nhất tới ô (i, j)</td><td>Lớn nhất: <code>a[i][j] + max(trên, trái)</code></td><td><code>dp[0][0] = a[0][0]</code></td><td>Ô góc dưới phải</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Quên cơ sở</b>: không gán <code>dp[0]</code>, cả bảng sẽ sai theo.</li>
+    <li><b>Sai thứ tự tính</b>: dùng một ô khi ô đó chưa được tính.</li>
+    <li><b>Vượt ra ngoài bảng</b>: truy cập <code>dp[i−2]</code> khi i = 1, hoặc tạo bảng thiếu một ô (quên <code>n + 1</code>).</li>
+    <li><b>Chưa kiểm tra bằng tay</b>: luôn tự tính vài ô đầu trên giấy rồi so với chương trình.</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="bai-tap">
+  <h2><span class="num">8</span>Bài tập tự luyện</h2>
+  <p>Gợi ý chỉ mở hướng suy nghĩ. Các em hãy tự trả lời 4 câu hỏi ở mục 3, tính tay vài ô đầu, rồi mới viết code.</p>
+
+  <div class="ex-item">
+    <h4>Bài 1. Bước 1, 2 hoặc 3 bậc <span class="level lv1">Dễ</span></h4>
+    <p>Giống ví dụ 1, nhưng mỗi lần có thể bước 1, 2 hoặc 3 bậc. Đếm số cách lên tới bậc n.</p>
+    <details><summary>Gợi ý</summary><p>Bước cuối cùng bây giờ có mấy khả năng? Vì công thức dùng tới dp[i−3], em cần chuẩn bị sẵn những ô cơ sở nào?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. Cầu thang có bậc hỏng <span class="level lv1">Dễ</span></h4>
+    <p>Một số bậc bị hỏng, không được dẫm lên. Mỗi lần bước 1 hoặc 2 bậc. Đếm số cách lên tới bậc n.</p>
+    <details><summary>Gợi ý</summary><p>Nếu bậc i bị hỏng thì có bao nhiêu cách “đứng” được ở bậc i? Điều đó ảnh hưởng thế nào tới các bậc phía trên?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Chú ếch tiết kiệm sức <span class="level lv2">Vừa</span></h4>
+    <p>Có n hòn đá xếp hàng, hòn thứ i cao h[i]. Ếch đứng ở hòn đầu tiên, mỗi lần nhảy sang hòn kế tiếp hoặc cách một hòn, tốn sức bằng chênh lệch độ cao giữa hai hòn. Tìm tổng sức ít nhất để tới hòn cuối.</p>
+    <details><summary>Gợi ý</summary><p>dp[i] là sức ít nhất để tới hòn i. Ếch tới hòn i từ những hòn nào? Bài này hỏi “ít nhất”, vậy nên dùng phép cộng, min hay max?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Đếm đường đi có chướng ngại <span class="level lv2">Vừa</span></h4>
+    <p>Robot đi trên lưới, chỉ sang phải hoặc xuống dưới, một số ô có tảng đá không đi qua được. Đếm số đường đi từ góc trên trái tới góc dưới phải.</p>
+    <details><summary>Gợi ý</summary><p>So sánh với ví dụ 3: lần này đề hỏi “bao nhiêu cách” chứ không phải “nhiều nhất”. Ô có đá thì dp bằng bao nhiêu?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Dãy con tăng dài nhất <span class="level lv3">Thử thách</span></h4>
+    <p>Cho dãy n số. Chọn ra nhiều số nhất (giữ nguyên thứ tự) sao cho các số được chọn tăng dần. Ví dụ dãy 3, 1, 4, 1, 5, 9, 2, 6 có thể chọn 1, 4, 5, 6.</p>
+    <details><summary>Gợi ý</summary><p>Thử đặt dp[i] là độ dài dãy tăng dài nhất <i>kết thúc đúng tại</i> số thứ i. Số đứng ngay trước a[i] trong dãy đó có thể là những số nào?</p></details>
+  </div>
+</section>
+
+<footer>Tài liệu học tập về quy hoạch động dành cho học sinh lớp 8. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|else|and|or|not|while)\b|\b(print|range|len|max|min|float)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // ---------- Hero notebook ----------
+  (function(){
+    const vals = [1, 1, 2, 3, 5, 8, 13, 21];
+    $('#nbRow').innerHTML = vals.map((v, i) =>
+      '<div class="nb-cell' + (i === vals.length - 1 ? ' last' : '') + '" style="animation-delay:' + (i * 0.12) + 's"><div class="box">' + v + '</div><small>dp[' + i + ']</small></div>'
+    ).join('');
+  })();
+
+  // ---------- +1 widget ----------
+  (function(){
+    let count = 8, added = false;
+    function render(){
+      const show = Math.min(count, 14);
+      let h = '';
+      for (let i = 0; i < show; i++){
+        if (i) h += '<span class="op">+</span>';
+        h += '<span class="tk' + (added && i === show - 1 && count <= 14 ? ' new' : '') + '">1</span>';
+      }
+      if (count > 14) h += '<span class="op">+ … +</span><span class="tk' + (added ? ' new' : '') + '">1</span>';
+      $('#tokens').innerHTML = h;
+      $('#plusEq').textContent = '= ' + count;
+      $('#plusMsg').innerHTML = added
+        ? 'Em trả lời ngay <b>' + count + '</b> mà không cần đếm lại từ đầu, vì em <b>nhớ</b> kết quả trước đó là ' + (count - 1) + ', chỉ cần cộng thêm 1. Đó chính là ý tưởng của quy hoạch động!'
+        : 'Dãy trên có 8 số 1, tổng là 8. Bây giờ hãy bấm nút để thêm một số 1 nữa. Tổng mới là bao nhiêu?';
+    }
+    $('#plusBtn').onclick = () => { count++; added = true; render(); };
+    $('#plusReset').onclick = () => { count = 8; added = false; render(); };
+    render();
+  })();
+
+  // ---------- Fibonacci ----------
+  renderCode($('#codeFibNaive'), [
+    'def fib(n):              # đệ quy, không ghi nhớ',
+    '    if n <= 1:',
+    '        return n',
+    '    return fib(n - 1) + fib(n - 2)'
+  ]);
+  renderCode($('#codeFibDp'), [
+    'def fib_qhd(n):          # quy hoạch động',
+    '    dp = [0] * (n + 1)   # bảng ghi kết quả',
+    '    if n >= 1:',
+    '        dp[1] = 1',
+    '    for i in range(2, n + 1):',
+    '        dp[i] = dp[i - 1] + dp[i - 2]',
+    '    return dp[n]',
+    '',
+    'print(fib_qhd(40))       # 102334155, chạy tức thì'
+  ]);
+
+  const TREE = (function(n){
+    let leaf = 0; const nodes = [];
+    function rec(k, d, parent){
+      const node = { k, d, parent, id: nodes.length };
+      nodes.push(node);
+      if (k > 1){
+        const a = rec(k - 1, d + 1, node.id), b = rec(k - 2, d + 1, node.id);
+        node.x = (nodes[a].x + nodes[b].x) / 2;
+      } else node.x = leaf++;
+      return node.id;
+    }
+    rec(n, 0, -1);
+    return { nodes, leaves: leaf, n };
+  })(5);
+
+  function renderTree(mode){
+    const { nodes, leaves } = TREE;
+    const W = 640, px = 34, stepX = (W - 2 * px) / (leaves - 1);
+    const pos = nd => [px + nd.x * stepX, 30 + nd.d * 62];
+    const st = nodes.map(() => ({ hide: false, memo: false }));
+    if (mode === 'memo'){
+      const seen = new Set();
+      nodes.forEach((nd, i) => {
+        if (nd.parent >= 0 && (st[nd.parent].hide || st[nd.parent].memo)){ st[i].hide = true; return; }
+        if (seen.has(nd.k)) st[i].memo = true; else seen.add(nd.k);
+      });
+    }
+    let e = '', c = '';
+    nodes.forEach((nd, i) => {
+      if (st[i].hide) return;
+      const [x, y] = pos(nd);
+      if (nd.parent >= 0){
+        const [x1, y1] = pos(nodes[nd.parent]);
+        e += '<line class="fe" x1="' + x1 + '" y1="' + y1 + '" x2="' + x + '" y2="' + y + '"/>';
+      }
+      let cls = 'fn';
+      if (mode === 'dup' && nd.k <= 3) cls += ' k' + nd.k;
+      if (st[i].memo) cls += ' memo';
+      c += '<g class="' + cls + '"><circle cx="' + x + '" cy="' + y + '" r="21"/><text x="' + x + '" y="' + y + '">F(' + nd.k + ')</text>' +
+           (st[i].memo ? '<text class="tag" x="' + x + '" y="' + (y + 34) + '">tra bảng</text>' : '') + '</g>';
+    });
+    $('#fibTree').innerHTML = e + c;
+
+    const counts = {};
+    nodes.forEach(nd => counts[nd.k] = (counts[nd.k] || 0) + 1);
+    let msg;
+    if (mode === 'plain'){
+      msg = 'Để tính F(5), máy phải gọi hàm <b>' + nodes.length + ' lần</b>. Nhìn kỹ xem có vòng tròn nào bị lặp lại không?';
+    } else if (mode === 'dup'){
+      msg = 'Cùng một màu là cùng một phép tính bị làm lại: F(3) tính <b>' + counts[3] + ' lần</b>, F(2) tính <b>' + counts[2] + ' lần</b>, F(1) gọi <b>' + counts[1] + ' lần</b>, F(0) gọi <b>' + counts[0] + ' lần</b>. Rất lãng phí!';
+    } else {
+      const memoCount = st.filter(s => s.memo).length;
+      msg = 'Nếu tính xong số nào thì <b>ghi vào bảng</b>, lần sau chỉ cần <b>tra bảng</b> (vòng nét đứt) thay vì tính lại cả nhánh. Mỗi F(k) chỉ phải tính <b>đúng một lần</b>: ' + (TREE.n + 1) + ' lần tính và ' + memoCount + ' lần tra bảng, thay vì ' + nodes.length + ' lần gọi hàm.';
+    }
+    $('#treeStats').innerHTML = msg;
+  }
+  document.querySelectorAll('.seg button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === btn));
+      renderTree(btn.dataset.mode);
+    };
+  });
+  renderTree('plain');
+
+  (function(){
+    const fmtNum = v => v.toLocaleString('vi-VN');
+    function update(){
+      const n = +$('#nSlider').value;
+      $('#nVal').textContent = n;
+      let a = 0, b = 1;
+      for (let i = 0; i < n + 1; i++){ const t = a + b; a = b; b = t; }
+      const calls = 2 * a - 1;
+      $('#callsNaive').textContent = fmtNum(calls) + ' lần gọi';
+      $('#callsDp').textContent = fmtNum(Math.max(n - 1, 0)) + ' phép cộng';
+      const secs = calls / 5e6;
+      let t;
+      if (secs < 0.01) t = 'chưa tới 0,01 giây';
+      else if (secs < 120) t = 'khoảng ' + secs.toLocaleString('vi-VN', { maximumFractionDigits: secs < 1 ? 2 : 0 }) + ' giây';
+      else t = 'khoảng ' + Math.round(secs / 60).toLocaleString('vi-VN') + ' phút';
+      $('#timeNaive').textContent = t;
+    }
+    $('#nSlider').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- Example 1: stairs ----------
+  function stairsAnswer(n){ const d = [1, 1]; for (let i = 2; i <= n; i++) d[i] = d[i - 1] + d[i - 2]; return d[n]; }
+  function buildStairs(){
+    const n = +$('#stairSlider').value;
+    const S = [], dp = Array(n + 1).fill(null);
+    const snap = o => S.push(Object.assign({ dp: dp.slice(), cur: -1, src: [], n }, o));
+    snap({ line: 1, msg: '<b>Đề bài:</b> cầu thang có <b>' + n + '</b> bậc, mỗi lần bước lên <b>1</b> hoặc <b>2</b> bậc. Có bao nhiêu cách lên tới bậc ' + n + '? Bấm “Sau ›” để xem chương trình chạy.' });
+    snap({ line: 2, msg: 'Tạo <b>bảng dp</b> gồm ' + (n + 1) + ' ô, từ bậc 0 (mặt đất) đến bậc ' + n + '. Ô <code>dp[i]</code> sẽ ghi <i>số cách lên tới bậc i</i>. Lúc đầu chưa biết ô nào.' });
+    dp[0] = 1; snap({ line: 3, cur: 0, msg: '<b>Cơ sở:</b> đứng ở mặt đất (bậc 0) có đúng <b>1</b> cách, đó là đứng yên. Ghi <code>dp[0] = 1</code>.' });
+    dp[1] = 1; snap({ line: 4, cur: 1, msg: '<b>Cơ sở:</b> lên bậc 1 chỉ có <b>1</b> cách: bước 1 bậc. Ghi <code>dp[1] = 1</code>.' });
+    for (let i = 2; i <= n; i++){
+      snap({ line: 5, cur: i, src: [i - 1, i - 2], msg: 'Xét <b>bậc ' + i + '</b>. Bước cuối cùng để lên bậc ' + i + ' chỉ có thể là: từ bậc ' + (i - 1) + ' bước 1 bậc, hoặc từ bậc ' + (i - 2) + ' bước 2 bậc. Kết quả của hai bậc này đã có sẵn trong bảng!' });
+      dp[i] = dp[i - 1] + dp[i - 2];
+      snap({ line: 6, cur: i, src: [i - 1, i - 2], msg: '<code>dp[' + i + '] = dp[' + (i - 1) + '] + dp[' + (i - 2) + '] = ' + dp[i - 1] + ' + ' + dp[i - 2] + ' = ' + dp[i] + '</code>. Không cần đếm lại từ đầu, chỉ cần <b>tra bảng</b> rồi cộng.' });
+    }
+    snap({ line: 7, cur: n, msg: '🎉 <b>Đáp án:</b> <code>dp[' + n + '] = ' + dp[n] + '</code>. Có <b>' + dp[n] + '</b> cách lên tới bậc ' + n + '. Em có nhận ra dãy 1, 1, 2, 3, 5, 8… quen thuộc không?' });
+    return S;
+  }
+  function renderStairs(s){
+    const n = s.n; let h = '';
+    for (let i = 0; i <= n; i++){
+      const v = s.dp[i];
+      let cls = 'blk';
+      if (i === s.cur) cls += ' cur'; else if (s.src.includes(i)) cls += ' src'; else if (v !== null) cls += ' done';
+      const ht = 34 + Math.round(i * (148 / n));
+      h += '<div class="st">' + (i === s.cur ? '<span class="kid" aria-hidden="true">🧒</span>' : '') +
+           '<div class="' + cls + '" style="height:' + ht + 'px">' + (v === null ? '?' : v) + '</div><div class="lbl">' + i + '</div></div>';
+    }
+    $('#stairsViz').innerHTML = h;
+    $('#stairsRow').innerHTML = '<span class="nm">dp =</span>' + s.dp.map((v, i) => {
+      let cls = 'cellx';
+      if (i === s.cur) cls += ' cur'; else if (s.src.includes(i)) cls += ' src'; else if (v !== null) cls += ' done';
+      return '<div class="' + cls + '"><small>[' + i + ']</small><b>' + (v === null ? '?' : v) + '</b></div>';
+    }).join('');
+  }
+  const simStairs = makeSim($('#simStairs'), {
+    build: buildStairs, render: renderStairs,
+    code: () => {
+      const n = +$('#stairSlider').value;
+      return [
+        'def leo_cau_thang(n):',
+        '    dp = [0] * (n + 1)      # bảng dp',
+        '    dp[0] = 1               # cơ sở',
+        '    dp[1] = 1               # cơ sở',
+        '    for i in range(2, n + 1):',
+        '        dp[i] = dp[i-1] + dp[i-2]',
+        '    return dp[n]',
+        '',
+        'print(leo_cau_thang(' + n + '))     # ' + stairsAnswer(n)
+      ];
+    }
+  });
+  $('#stairSlider').addEventListener('input', () => { $('#stairN').textContent = $('#stairSlider').value; simStairs.rebuild(); });
+
+  // ---------- Example 2: coin change ----------
+  const fmtInf = v => v === Infinity ? '∞' : v;
+  function coinParams(){ return { coins: $('#coinSet').value.split(',').map(Number), S: +$('#coinSlider').value }; }
+  function solveCoin(coins, S){
+    const dp = Array(S + 1).fill(Infinity), ch = Array(S + 1).fill(null); dp[0] = 0;
+    for (let s = 1; s <= S; s++) for (const c of coins) if (c <= s && dp[s - c] + 1 < dp[s]){ dp[s] = dp[s - c] + 1; ch[s] = c; }
+    const used = []; let x = S; while (x > 0){ used.push(ch[x]); x -= ch[x]; }
+    return { best: dp[S], used };
+  }
+  function buildCoin(){
+    const { coins, S } = coinParams();
+    const st = [], dp = Array(S + 1).fill(Infinity), ch = Array(S + 1).fill(null);
+    const snap = o => st.push(Object.assign({ dp: dp.slice(), ch: ch.slice(), cur: -1, src: -1, coin: null, S, coins }, o));
+    snap({ line: 1, msg: '<b>Đề bài:</b> có các đồng xu ' + coins.join(', ') + ' (mỗi loại không giới hạn). Cần đổi đúng <b>' + S + '</b> đồng với <b>ít xu nhất</b>.' });
+    snap({ line: 3, msg: 'Tạo bảng <code>dp</code> gồm ' + (S + 1) + ' ô. <code>dp[s]</code> = <i>số xu ít nhất để đổi được s đồng</i>. Ban đầu chưa biết nên ghi <b>∞</b> (vô cùng lớn).' });
+    dp[0] = 0; snap({ line: 4, cur: 0, msg: '<b>Cơ sở:</b> đổi 0 đồng thì cần <b>0</b> xu. Ghi <code>dp[0] = 0</code>.' });
+    for (let s = 1; s <= S; s++){
+      for (const c of coins){
+        if (c > s){ snap({ line: 7, cur: s, coin: c, msg: 's = ' + s + ', thử đồng <b>' + c + '</b>: đồng này lớn hơn ' + s + ' nên không dùng được.' }); continue; }
+        const cand = dp[s - c] + 1;
+        if (cand < dp[s]){
+          const old = dp[s]; dp[s] = cand; ch[s] = c;
+          snap({ line: 8, cur: s, src: s - c, coin: c, msg: 's = ' + s + ', thử đồng <b>' + c + '</b>: phần còn lại là ' + (s - c) + ' đồng, cần <code>dp[' + (s - c) + '] = ' + dp[s - c] + '</code> xu. Tổng cộng ' + cand + ' xu, ít hơn ' + fmtInf(old) + ', nên <b>cập nhật dp[' + s + '] = ' + cand + '</b>.' });
+        } else {
+          snap({ line: 7, cur: s, src: s - c, coin: c, msg: 's = ' + s + ', thử đồng <b>' + c + '</b>: phần còn lại ' + (s - c) + ' đồng, tổng cộng ' + cand + ' xu. <b>Không ít hơn</b> ' + dp[s] + ' nên giữ nguyên.' });
+        }
+      }
+    }
+    const used = []; let x = S; while (x > 0){ used.push(ch[x]); x -= ch[x]; }
+    snap({ line: 9, cur: S, msg: '🎉 <b>Đáp án:</b> cần ít nhất <b>' + dp[S] + '</b> xu: ' + used.join(' + ') + ' = ' + S + '. Dòng chữ nhỏ “dùng c” dưới mỗi ô giúp ta lần ngược ra các đồng đã chọn.' });
+    return st;
+  }
+  function renderCoin(s){
+    $('#coinChips').innerHTML = s.coins.map(c => '<span class="chip' + (c === s.coin ? ' on' : '') + '">' + c + '</span>').join('');
+    let h = '<span class="nm">dp =</span>';
+    for (let t = 0; t <= s.S; t++){
+      let cls = 'cellx';
+      if (t === s.cur) cls += ' cur'; else if (t === s.src) cls += ' src'; else if (s.dp[t] !== Infinity) cls += ' done';
+      h += '<div class="' + cls + '"><small>[' + t + ']</small><b>' + fmtInf(s.dp[t]) + '</b><span class="sub">' + (s.ch[t] ? 'dùng ' + s.ch[t] : '&nbsp;') + '</span></div>';
+    }
+    $('#coinRow').innerHTML = h;
+  }
+  function renderCompare(){
+    const { coins, S } = coinParams();
+    const desc = coins.slice().sort((a, b) => b - a);
+    const g = []; let rem = S;
+    for (const c of desc) while (rem >= c){ g.push(c); rem -= c; }
+    const r = solveCoin(coins, S);
+    const worse = g.length > r.best;
+    $('#coinCompare').innerHTML =
+      '<div class="panel ' + (worse ? 'bad' : '') + '"><h4>Tham lam (lấy đồng lớn nhất trước)</h4><div class="big">' + g.length + ' xu</div><div>' + g.join(' + ') + '</div></div>' +
+      '<div class="panel good"><h4>Quy hoạch động</h4><div class="big">' + r.best + ' xu</div><div>' + r.used.join(' + ') + '</div></div>' +
+      '<p style="grid-column:1/-1;margin:0;font-size:15px;color:var(--muted)">' + (worse
+        ? 'Tham lam bị <b>sai</b> ở trường hợp này. Quy hoạch động thử mọi khả năng một cách thông minh nên luôn tìm ra cách tốt nhất.'
+        : 'Lần này tham lam cũng cho kết quả đúng, nhưng không phải lúc nào cũng vậy. Thử bộ xu 1, 3, 4 với S = 6, hoặc 1, 5, 6 với S = 10.') + '</p>';
+  }
+  const simCoin = makeSim($('#simCoin'), {
+    build: buildCoin, render: renderCoin,
+    code: () => {
+      const { coins, S } = coinParams();
+      return [
+        'def doi_tien(coins, S):',
+        "    INF = float('inf')",
+        '    dp = [INF] * (S + 1)        # chưa biết: ∞',
+        '    dp[0] = 0                   # cơ sở',
+        '    for s in range(1, S + 1):',
+        '        for c in coins:',
+        '            if c <= s and dp[s - c] + 1 < dp[s]:',
+        '                dp[s] = dp[s - c] + 1',
+        '    return dp[S]',
+        '',
+        'print(doi_tien([' + coins.join(', ') + '], ' + S + '))    # ' + solveCoin(coins, S).best
+      ];
+    }
+  });
+  renderCompare();
+  $('#coinSlider').addEventListener('input', () => { $('#coinS').textContent = $('#coinSlider').value; simCoin.rebuild(); renderCompare(); });
+  $('#coinSet').addEventListener('change', () => { simCoin.rebuild(); renderCompare(); });
+
+  // ---------- Example 3: grid ----------
+  const GRID0 = [[3,1,0,2,4],[1,5,2,0,1],[2,0,4,3,2],[0,3,1,5,1]];
+  let GRID = GRID0.map(r => r.slice());
+  function buildGrid(){
+    const a = GRID, m = a.length, n = a[0].length, st = [];
+    const dp = a.map(r => r.map(() => null)), from = a.map(r => r.map(() => '')), path = [];
+    const snap = o => st.push(Object.assign({ a, dp: dp.map(r => r.slice()), from: from.map(r => r.slice()), cur: null, src: [], pick: null, path: path.slice(), line: -1 }, o));
+    snap({ line: 1, msg: '<b>Đề bài:</b> robot 🤖 đi từ ô trên trái tới ô 🏁, chỉ <b>sang phải</b> hoặc <b>xuống dưới</b>. Số trong vòng tròn vàng là số xu của ô. Robot nhặt được nhiều xu nhất là bao nhiêu?' });
+    snap({ line: 3, msg: 'Tạo bảng <code>dp</code> cùng kích thước với lưới (' + m + ' hàng, ' + n + ' cột). <code>dp[i][j]</code> = <i>số xu nhiều nhất nhặt được khi đi tới ô (i, j)</i>. Ta tính lần lượt từng hàng, trong mỗi hàng từ trái sang phải.' });
+    for (let i = 0; i < m; i++) for (let j = 0; j < n; j++){
+      const up = i > 0 ? dp[i - 1][j] : null, lf = j > 0 ? dp[i][j - 1] : null;
+      const src = []; if (up !== null) src.push([i - 1, j]); if (lf !== null) src.push([i, j - 1]);
+      let pick = null, msg;
+      if (up === null && lf === null){
+        dp[i][j] = a[i][j];
+        msg = 'Ô xuất phát (0, 0): chưa đi đâu cả, nhặt luôn ' + a[i][j] + ' xu. <code>dp[0][0] = ' + a[i][j] + '</code>.';
+      } else {
+        let best;
+        if (lf === null || (up !== null && up >= lf)){ best = up; pick = [i - 1, j]; from[i][j] = '↑'; }
+        else { best = lf; pick = [i, j - 1]; from[i][j] = '←'; }
+        dp[i][j] = a[i][j] + best;
+        const where = up === null ? 'Ở hàng đầu tiên chỉ có thể đến từ ô <b>bên trái</b> (dp = ' + lf + ').'
+          : lf === null ? 'Ở cột đầu tiên chỉ có thể đến từ ô <b>bên trên</b> (dp = ' + up + ').'
+          : 'Có thể đến từ ô <b>trên</b> (dp = ' + up + ') hoặc ô <b>trái</b> (dp = ' + lf + '). Chọn ô lớn hơn: <b>' + best + '</b>.';
+        msg = 'Ô (' + i + ', ' + j + ') có ' + a[i][j] + ' xu. ' + where + ' <code>dp[' + i + '][' + j + '] = ' + a[i][j] + ' + ' + best + ' = ' + dp[i][j] + '</code>.';
+      }
+      snap({ line: 8, cur: [i, j], src, pick, msg });
+    }
+    snap({ line: 9, cur: [m - 1, n - 1], msg: '🎉 Robot nhặt được nhiều nhất <b>' + dp[m - 1][n - 1] + '</b> xu. Nhưng đi đường nào? Hãy <b>lần ngược</b> theo các mũi tên ↑ ← ghi ở góc mỗi ô.' });
+    let i = m - 1, j = n - 1; path.push([i, j]);
+    snap({ msg: '<b>Lần ngược:</b> bắt đầu từ ô đích (' + i + ', ' + j + '). Mũi tên ở góc ô cho biết robot đã đến ô này từ đâu.' });
+    while (from[i][j]){
+      const ar = from[i][j];
+      if (ar === '↑') i--; else j--;
+      path.push([i, j]);
+      snap({ msg: 'Mũi tên ' + ar + ' chỉ về ô ' + (ar === '↑' ? 'bên trên' : 'bên trái') + ': ô (' + i + ', ' + j + ').' + (i === 0 && j === 0 ? ' Đã về tới ô xuất phát!' : '') });
+    }
+    const coins = path.slice().reverse().map(([x, y]) => a[x][y]);
+    snap({ msg: '✅ Đường đi tốt nhất (màu tím): ' + coins.join(' + ') + ' = <b>' + dp[m - 1][n - 1] + '</b> xu.' });
+    return st;
+  }
+  function renderGrid(s){
+    const a = s.a, m = a.length, n = a[0].length;
+    const box = $('#gridViz');
+    box.style.gridTemplateColumns = 'repeat(' + n + ', minmax(0, 1fr))';
+    const eq = (p, i, j) => p && p[0] === i && p[1] === j;
+    let h = '';
+    for (let i = 0; i < m; i++) for (let j = 0; j < n; j++){
+      let cls = 'gc';
+      const inPath = s.path.some(p => eq(p, i, j));
+      if (inPath) cls += ' path';
+      else if (eq(s.cur, i, j)) cls += ' cur';
+      else if (s.src.some(p => eq(p, i, j))) cls += ' src' + (eq(s.pick, i, j) ? ' pick' : '');
+      else if (s.dp[i][j] !== null) cls += ' done';
+      const mk = (i === 0 && j === 0) ? '🤖' : (i === m - 1 && j === n - 1) ? '🏁' : '';
+      h += '<div class="' + cls + '"><span class="coin">' + a[i][j] + '</span>' + (mk ? '<span class="mk" aria-hidden="true">' + mk + '</span>' : '') +
+           '<span class="v">' + (s.dp[i][j] === null ? '' : s.dp[i][j]) + '</span><span class="ar">' + s.from[i][j] + '</span></div>';
+    }
+    box.innerHTML = h;
+  }
+  const simGrid = makeSim($('#simGrid'), {
+    build: buildGrid, render: renderGrid,
+    code: () => [
+      'def nhat_xu(a):',
+      '    m, n = len(a), len(a[0])',
+      '    dp = [[0] * n for _ in range(m)]',
+      '    for i in range(m):',
+      '        for j in range(n):',
+      '            tren = dp[i-1][j] if i > 0 else 0',
+      '            trai = dp[i][j-1] if j > 0 else 0',
+      '            dp[i][j] = a[i][j] + max(tren, trai)',
+      '    return dp[m-1][n-1]'
+    ]
+  });
+  $('#gridRandom').onclick = () => { GRID = Array.from({ length: 4 }, () => Array.from({ length: 5 }, () => Math.floor(Math.random() * 6))); simGrid.rebuild(); };
+  $('#gridReset').onclick = () => { GRID = GRID0.map(r => r.slice()); simGrid.rebuild(); };
+})();
+</script>
+<script>
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+</script>
+</body>
+</html>

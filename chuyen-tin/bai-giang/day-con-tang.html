@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dãy con tăng dài nhất</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F7FB; --grid:rgba(28,37,65,.055);
+  --surface:#FFFFFF; --surface-2:#EEF2F9;
+  --ink:#1C2541; --muted:#56607A; --line:#D9E0EC;
+  --accent:#D6336C; --accent-soft:#FCE4EC; --accent-ink:#FFFFFF;
+  --src:#0B8A96; --src-soft:#D4F1F3;
+  --done:#E9B800; --done-soft:#FFF5C2;
+  --path:#6A4CF0; --path-soft:#ECE7FF;
+  --code-bg:#17203A; --code-ink:#E6EAF5; --code-muted:#6B7698; --code-on:#28355E;
+  --t-k:#FF8FB1; --t-s:#9BE3A6; --t-n:#FFD86B; --t-c:#8C97BB; --t-b:#7CCBFF;
+  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121829; --grid:rgba(233,237,246,.045);
+    --surface:#1A2236; --surface-2:#232C44;
+    --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+    --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+    --src:#34C6D3; --src-soft:#0F3A40;
+    --done:#FFD43B; --done-soft:#3B3210;
+    --path:#A08CFF; --path-soft:#2C2655;
+    --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121829; --grid:rgba(233,237,246,.045);
+  --surface:#1A2236; --surface-2:#232C44;
+  --ink:#E9EDF6; --muted:#A3ACC2; --line:#33405C;
+  --accent:#FF5C8D; --accent-soft:#4A1B2C; --accent-ink:#1A0710;
+  --src:#34C6D3; --src-soft:#0F3A40;
+  --done:#FFD43B; --done-soft:#3B3210;
+  --path:#A08CFF; --path-soft:#2C2655;
+  --code-bg:#0C1120; --code-ink:#E6EAF5; --code-muted:#5C6687; --code-on:#1F2A48;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  font-family:'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size:17px; line-height:1.7;
+}
+.wrap{ max-width:940px; margin:0 auto; padding:0 20px 72px; }
+a{ color:var(--src); }
+:focus-visible{ outline:3px solid var(--path); outline-offset:2px; }
+
+/* Hero */
+.hero{ padding:48px 0 12px; }
+.kicker{ display:inline-block; font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:6px 14px; border-radius:999px; }
+h1{ font-size:clamp(2.4rem, 9vw, 4rem); line-height:1.04; margin:18px 0 10px; font-weight:800; letter-spacing:-.025em; }
+.hero .slogan{ font-size:clamp(1.15rem, 3.6vw, 1.5rem); font-weight:600; color:var(--muted); margin:0 0 6px; }
+.lead{ font-size:1.05rem; color:var(--muted); max-width:620px; }
+.notebook{ margin:26px 0 8px; background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:18px 18px 14px; overflow-x:auto; }
+.nb-row{ display:flex; gap:6px; align-items:center; min-width:max-content; margin-bottom:6px; }
+.nb-row .nm{ font-family:var(--mono); font-weight:600; width:44px; font-size:14px; color:var(--muted); }
+.nb-cell{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:800; font-size:18px; animation:pop .45s both; }
+.nb-a{ background:var(--surface-2); border:2px solid var(--line); }
+.nb-p{ background:var(--done-soft); border:2px solid var(--done); }
+.nb-p.last{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.nb-note{ font-size:14px; color:var(--muted); margin:10px 0 0; }
+@keyframes pop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none; } }
+nav.toc{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; }
+nav.toc a{ font-size:14px; font-weight:600; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); padding:6px 13px; border-radius:999px; }
+nav.toc a:hover{ border-color:var(--src); }
+
+/* Sections */
+section{ padding:44px 0 6px; }
+h2{ font-size:clamp(1.55rem, 5vw, 2.1rem); line-height:1.2; margin:0 0 16px; display:flex; align-items:center; gap:14px; letter-spacing:-.015em; }
+h2 .num{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-size:18px; }
+h3{ font-size:1.2rem; margin:28px 0 8px; }
+p{ margin:0 0 14px; }
+ul{ margin:0 0 14px; padding-left:1.3em; }
+li{ margin:4px 0; }
+code{ font-family:var(--mono); font-size:.86em; background:var(--surface-2); padding:2px 6px; border-radius:6px; }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin:16px 0; }
+.problem{ border-left:6px solid var(--accent); }
+.problem h4{ margin:0 0 6px; font-size:1rem; color:var(--accent); }
+.two{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .two{ grid-template-columns:1fr 1fr; } }
+.sign .ic{ font-size:28px; line-height:1; }
+.sign h4{ margin:8px 0 4px; font-size:1.05rem; }
+.sign p{ margin:0; color:var(--muted); font-size:15.5px; }
+.remember{ background:var(--done-soft); border:2px dashed var(--done); border-radius:14px; padding:14px 18px; margin:18px 0; font-weight:600; }
+.tip{ background:var(--src-soft); border-radius:14px; padding:14px 18px; margin:18px 0; }
+.recipe{ display:grid; gap:14px; grid-template-columns:1fr; }
+@media (min-width:700px){ .recipe{ grid-template-columns:1fr 1fr; } }
+.recipe .panel{ margin:0; padding-top:20px; }
+.recipe .step-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:var(--accent-ink); font-weight:800; margin-right:8px; flex:none; }
+.recipe h4{ display:flex; align-items:center; margin:0 0 8px; font-size:1.08rem; }
+.recipe p{ font-size:15.5px; color:var(--muted); margin:0 0 10px; }
+.recipe .ex{ font-size:14.5px; background:var(--surface-2); border-radius:10px; padding:8px 12px; }
+
+/* Code */
+.code{ background:var(--code-bg); color:var(--code-ink); border-radius:14px; padding:12px 0; font-family:var(--mono); font-size:13.5px; line-height:1.8; overflow-x:auto; margin:14px 0; }
+.cl{ display:flex; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; transition:background .2s; }
+.cl .no{ flex:none; width:36px; text-align:right; padding-right:12px; color:var(--code-muted); user-select:none; }
+.cl.on{ background:var(--code-on); border-left-color:var(--accent); }
+.t-k{ color:var(--t-k); font-weight:600; } .t-s{ color:var(--t-s); } .t-n{ color:var(--t-n); } .t-c{ color:var(--t-c); font-style:italic; } .t-b{ color:var(--t-b); }
+.code-cap{ font-size:13.5px; color:var(--muted); margin:-6px 0 14px; }
+
+/* Buttons and inputs */
+.btn{ font:inherit; font-size:15px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 15px; min-height:42px; cursor:pointer; }
+.btn:hover:not(:disabled){ border-color:var(--ink); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.38; cursor:default; }
+input[type=range]{ accent-color:var(--accent); width:150px; }
+
+/* Simulator */
+.sim{ background:var(--surface); border:2px solid var(--ink); border-radius:24px; padding:18px; margin:20px 0; }
+.sim-head{ display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; margin-bottom:14px; font-size:15px; }
+.sim-head .title{ font-weight:800; font-size:1.05rem; margin-right:auto; }
+.sim-head label{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.sim-body{ display:grid; gap:16px; grid-template-columns:minmax(0,1fr); }
+@media (min-width:840px){ .sim-body{ grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); } }
+.sim-body .code{ margin:0; align-self:start; }
+.viz{ background:var(--surface-2); border-radius:16px; padding:14px; }
+.explain{ margin-top:12px; background:var(--bg); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; min-height:6.6em; font-size:15.5px; line-height:1.6; }
+.controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+.count{ font-size:14px; color:var(--muted); font-weight:600; margin-left:auto; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:13px; color:var(--muted); }
+.legend i{ display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; border:2px solid; }
+.lg-cur{ background:var(--accent-soft); border-color:var(--accent)!important; }
+.lg-src{ background:var(--src-soft); border-color:var(--src)!important; }
+.lg-done{ background:var(--done-soft); border-color:var(--done)!important; }
+.lg-path{ background:var(--path-soft); border-color:var(--path)!important; }
+
+/* Arrays */
+.arr-wrap{ overflow-x:auto; padding-bottom:2px; }
+.arr-wrap + .arr-wrap{ margin-top:10px; }
+.arr{ display:flex; gap:4px; align-items:stretch; min-width:max-content; }
+.arr + .arr{ margin-top:8px; }
+.arr .nm{ font-family:var(--mono); font-weight:600; align-self:stretch; display:flex; align-items:center; width:52px; font-size:14px; flex:none; position:sticky; left:0; z-index:1; background:var(--surface-2); }
+.cellx{ width:44px; flex:none; border:2px solid var(--line); background:var(--surface); border-radius:10px; padding:4px 6px; text-align:center; display:flex; flex-direction:column; line-height:1.25; transition:background .25s, border-color .25s; }
+.cellx small{ font-size:11px; color:var(--muted); }
+.cellx b{ font-size:17px; }
+.cellx .sub{ font-size:11px; color:var(--accent); font-weight:700; min-height:1.3em; }
+.cellx.pad{ opacity:.45; border-style:dashed; }
+.cellx.done{ background:var(--done-soft); border-color:var(--done); }
+.cellx.src{ background:var(--src-soft); border-color:var(--src); }
+.cellx.cur{ background:var(--accent-soft); border-color:var(--accent); }
+.cellx.rng{ background:var(--path-soft); border-color:var(--path); }
+.cellx.best{ box-shadow:inset 0 0 0 3px var(--done); }
+.info{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:15px; font-weight:600; }
+.info span b{ font-size:1.15rem; }
+
+/* Stats */
+.stats{ display:grid; gap:12px; grid-template-columns:1fr 1fr; margin-top:12px; }
+.stat{ background:var(--surface-2); border-radius:14px; padding:14px; }
+.stat .k{ font-size:13.5px; color:var(--muted); font-weight:600; }
+.stat .v{ font-size:clamp(1.15rem, 5vw, 1.8rem); font-weight:800; line-height:1.2; overflow-wrap:anywhere; }
+.stat .t{ font-size:13.5px; color:var(--muted); }
+.stat.bad .v{ color:var(--accent); } .stat.good .v{ color:var(--src); }
+
+/* Table, exercises */
+.tbl-wrap{ overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+table{ border-collapse:collapse; width:100%; min-width:620px; font-size:15px; }
+th, td{ border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+tr:last-child td{ border-bottom:0; }
+th{ background:var(--surface-2); font-weight:700; }
+.ex-item{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
+.ex-item h4{ margin:0 0 6px; font-size:1.05rem; }
+.ex-item p{ margin:0 0 8px; }
+.ex-item .real{ display:inline-block; font-size:14px; font-weight:700; text-decoration:none; margin-top:4px; }
+.level{ display:inline-block; font-size:12.5px; font-weight:700; padding:2px 10px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+.lv1{ background:var(--src-soft); color:var(--src); } .lv2{ background:var(--done-soft); color:var(--ink); } .lv3{ background:var(--accent-soft); color:var(--accent); } .lv4{ background:var(--path-soft); color:var(--path); }
+details summary{ cursor:pointer; font-weight:700; color:var(--path); }
+details p{ margin:8px 0 0; color:var(--muted); }
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:14px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation:none !important; transition:none !important; }
+}
+@media (max-width:520px){
+  body{ font-size:16.5px; }
+  .sim{ padding:14px; border-radius:20px; }
+  .count{ width:100%; margin-left:0; }
+  .nb-cell{ width:36px; height:36px; font-size:15px; }
+  .rl .cell{ font-size:13px; }
+  .arr .nm{ width:40px; font-size:13px; }
+  .cellx{ width:36px; padding:3px 2px; }
+  .cellx b{ font-size:15px; }
+  .day b{ font-size:16px; }
+  .bar{ font-size:12.5px; padding:5px 7px; }
+}
+
+/* Bài 5.3 */
+.cellx.dim{ opacity:.35; }
+.cellx.pick{ box-shadow:inset 0 0 0 3px var(--src); }
+.cellx.path{ background:var(--path-soft); border-color:var(--path); }
+.cellx.bad{ background:var(--accent-soft); border-color:var(--accent); }
+.climb{ position:relative; }
+.links{ position:absolute; left:0; top:0; z-index:0; pointer-events:none; overflow:visible; }
+.links line{ stroke:var(--muted); stroke-width:2; stroke-dasharray:4 4; opacity:.5; }
+.links line.cur{ stroke:var(--accent); stroke-width:3.5; stroke-dasharray:none; opacity:1; }
+.links line.path{ stroke:var(--path); stroke-width:4; stroke-dasharray:none; opacity:1; }
+.arr.bars{ align-items:flex-end; height:190px; }
+.arr.bars .nm{ align-self:stretch; }
+.bcol{ width:44px; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+.bblk{ width:100%; border:2px solid var(--line); background:var(--surface); border-radius:8px 8px 3px 3px; display:flex; justify-content:center; padding-top:3px; font-weight:800; font-size:16px; transition:background .25s, border-color .25s, opacity .25s; }
+.bblk.done{ background:var(--done-soft); border-color:var(--done); }
+.bblk.src{ background:var(--src-soft); border-color:var(--src); }
+.bblk.pick{ box-shadow:inset 0 0 0 3px var(--src); }
+.bblk.cur{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.bblk.path{ background:var(--path); border-color:var(--path); color:#fff; }
+.bblk.dim{ opacity:.3; }
+.kid{ font-size:22px; line-height:1; margin-bottom:3px; min-height:25px; }
+@media (max-width:520px){ .bcol{ width:36px; } .bblk{ font-size:14px; } }
+.picker{ display:flex; gap:5px; overflow-x:auto; padding:4px 0; }
+.pk{ flex:1 1 0; min-width:30px; font:inherit; font-weight:800; font-size:18px; border:2px solid var(--line); background:var(--surface); color:var(--ink); border-radius:12px; padding:6px 0; cursor:pointer; transition:background .2s, border-color .2s, transform .2s; }
+.pk.on{ background:var(--path-soft); border-color:var(--path); transform:translateY(-4px); }
+.pk.bad{ background:var(--accent-soft); border-color:var(--accent); }
+.pk-cap{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:2px; }
+.chosen{ font-size:1.05rem; font-weight:700; margin:12px 0 0; min-height:1.6em; }
+.badge{ display:inline-block; font-weight:700; padding:4px 12px; border-radius:999px; font-size:15px; margin-top:8px; }
+.badge.ok{ background:var(--src-soft); color:var(--src); } .badge.no{ background:var(--accent-soft); color:var(--accent); }
+.piles{ display:flex; gap:8px; align-items:flex-start; min-height:210px; overflow-x:auto; padding:4px 2px; }
+.pile{ display:flex; flex-direction:column-reverse; align-items:center; gap:4px; min-width:48px; padding:6px 4px 4px; border-radius:12px; border:2px dashed var(--line); }
+.pile.src{ border-color:var(--src); background:var(--src-soft); }
+.pile .lbl{ font-size:11.5px; color:var(--muted); font-weight:700; order:-1; margin-top:2px; }
+.card{ width:40px; height:34px; border-radius:8px; display:grid; place-items:center; font-weight:800; background:var(--surface); border:2px solid var(--line); color:var(--muted); }
+.card.top{ border-color:var(--done); background:var(--done-soft); color:var(--ink); }
+.card.cur{ border-color:var(--accent); background:var(--accent); color:var(--accent-ink); animation:pop .35s both; }
+.incoming{ display:flex; align-items:center; gap:10px; font-weight:700; margin-bottom:10px; min-height:44px; }
+.incoming .card{ width:46px; height:40px; font-size:18px; }
+.mini{ font-family:var(--mono); font-size:14px; }
+@media (max-width:520px){ .pk{ font-size:16px; min-width:26px; } .pile{ min-width:42px; } .card{ width:34px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="kicker">Ôn thi chuyên Tin vào 10 · Quy hoạch động</span>
+  <h1>Dãy con tăng dài nhất</h1>
+  <p class="slogan">Mỗi số tự hỏi: “Mình nên đứng sau ai?”</p>
+  <p class="lead">Bài quy hoạch động kinh điển, xuất hiện trong đề chuyên KHTN 2025. Học cách làm chắc điểm với n vừa phải, rồi một mẹo để chạy nhanh với n rất lớn.</p>
+  <div class="notebook" aria-label="Một dãy số và dãy con tăng dài nhất của nó">
+    <div class="nb-row" id="nbRow"></div>
+    <p class="nb-note">Các ô tô hồng tạo thành một dãy con <b>tăng dần</b>: giữ nguyên thứ tự, không cần đứng liền nhau. Không có dãy con tăng nào dài hơn 4 số.</p>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#bai-toan">1. Bài toán</a>
+    <a href="#vi-sao">2. Thử hết được không?</a>
+    <a href="#cong-thuc">3. Công thức 4 bước</a>
+    <a href="#mo-phong">4. Mô phỏng</a>
+    <a href="#truy-vet">5. Lần ngược</a>
+    <a href="#de-that">6. Đề thật KHTN</a>
+    <a href="#nhanh">7. Cách nhanh</a>
+    <a href="#tong-ket">8. Tổng kết</a>
+    <a href="#bai-tap">9. Bài tập</a>
+  </nav>
+</header>
+
+<!-- 1 -->
+<section id="bai-toan">
+  <h2><span class="num">1</span>Chuỗi tiến bộ dài nhất</h2>
+  <p>Minh có điểm của 10 bài kiểm tra theo thứ tự thời gian. Minh muốn khoe <b>chuỗi tiến bộ dài nhất</b>: chọn ra nhiều bài nhất, giữ nguyên thứ tự, sao cho bài sau điểm <b>cao hơn hẳn</b> bài trước.</p>
+  <p>Một dãy chọn ra như vậy gọi là <b>dãy con tăng</b>. Các số được chọn <b>không cần đứng liền nhau</b>, nhưng không được đổi chỗ.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Thử ngay: chạm để chọn các bài</h3>
+    <div class="picker" id="picker"></div>
+    <div class="pk-cap"><span>bài 1</span><span>bài 10</span></div>
+    <div class="chosen" id="chosen"></div>
+    <div id="pickBadge"></div>
+    <div class="controls">
+      <button class="btn" id="pickClear">Chọn lại</button>
+      <button class="btn" id="pickHint">Dài nhất là bao nhiêu?</button>
+    </div>
+    <div class="explain" id="pickMsg"></div>
+  </div>
+
+  <div class="two">
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">📈</div>
+      <h4>Chọn ra, giữ thứ tự</h4>
+      <p>Đề hỏi “dãy con” (không cần liền nhau) chứ không phải “đoạn con” (phải liền nhau).</p>
+    </div>
+    <div class="panel sign" style="margin:0">
+      <div class="ic" aria-hidden="true">🔗</div>
+      <h4>Mỗi số nối vào sau một số nhỏ hơn</h4>
+      <p>Dãy tăng dài nhất kết thúc ở một số được tạo bằng cách nối số đó vào sau một dãy tăng ngắn hơn.</p>
+    </div>
+  </div>
+  <div class="remember">Ghi nhớ: dãy con = chọn ra một số phần tử, giữ nguyên thứ tự. Dãy con tăng: số sau lớn hơn số trước.</div>
+</section>
+
+<!-- 2 -->
+<section id="vi-sao">
+  <h2><span class="num">2</span>Thử hết mọi cách chọn được không?</h2>
+  <p>Mỗi số có hai khả năng: được chọn hoặc không. Với n số có <b>2 × 2 × … × 2 = 2ⁿ</b> cách chọn. Kéo thanh trượt để xem con số này lớn nhanh thế nào:</p>
+  <div class="panel">
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600;flex-wrap:wrap">n = <span id="nVal"></span>
+      <input type="range" id="nSlider" min="10" max="60" step="5" value="30" aria-label="Chọn n">
+    </label>
+    <div class="stats">
+      <div class="stat bad"><div class="k">Thử mọi cách chọn</div><div class="v" id="opsAll"></div><div class="t" id="timeAll"></div></div>
+      <div class="stat good"><div class="k">Quy hoạch động</div><div class="v" id="opsDp"></div><div class="t" id="timeDp"></div></div>
+    </div>
+    <p class="code-cap" style="margin:12px 0 0">Ước lượng thô, giả sử Python làm khoảng 10 triệu phép tính mỗi giây.</p>
+  </div>
+  <p>Thử hết chỉ dùng được khi n rất nhỏ (khoảng 20). Quy hoạch động làm khoảng n × n phép so sánh, chạy tốt với n vài nghìn.</p>
+</section>
+
+<!-- 3 -->
+<section id="cong-thuc">
+  <h2><span class="num">3</span>Công thức 4 bước</h2>
+  <p>Vẫn là 4 câu hỏi quen thuộc của quy hoạch động. Điểm mấu chốt nằm ở bước 1.</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Đặt tên trạng thái</h4>
+      <p>Không hỏi “dài nhất trong i số đầu”, mà hỏi về dãy <b>kết thúc đúng tại</b> số thứ i.</p>
+      <div class="ex"><code>dp[i]</code> = độ dài dãy con tăng dài nhất <b>kết thúc tại a[i]</b>.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Tìm công thức truy hồi</h4>
+      <p>Nghĩ về <b>số đứng ngay trước a[i]</b> trong dãy. Đó là một a[j] với j &lt; i và a[j] &lt; a[i].</p>
+      <div class="ex"><code>dp[i] = 1 + max(dp[j])</code> với mọi j như vậy.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">3</span>Xác định cơ sở</h4>
+      <p>Nếu không có số nào nhỏ hơn đứng trước, a[i] tự đứng một mình.</p>
+      <div class="ex">Mọi <code>dp[i]</code> ít nhất bằng <code>1</code>.</div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">4</span>Thứ tự tính và đáp án</h4>
+      <p>Tính i từ trái sang phải. Dãy dài nhất có thể kết thúc ở <b>bất kỳ</b> số nào.</p>
+      <div class="ex">Đáp án là <code>max(dp)</code>, không phải ô cuối cùng.</div>
+    </div>
+  </div>
+  <div class="tip"><b>Vì sao phải “kết thúc tại i”?</b> Muốn nối a[i] vào sau một dãy, ta cần biết dãy đó <i>kết thúc bằng số nào</i> để so sánh với a[i]. Đặt trạng thái theo số cuối cùng thì điều đó luôn rõ ràng.</div>
+</section>
+
+<!-- 4 -->
+<section id="mo-phong">
+  <h2><span class="num">4</span>Mô phỏng: mỗi số tìm chỗ đứng</h2>
+  <p>Lần lượt từng số nhìn về phía trước, tìm các số <b>nhỏ hơn nó</b>, rồi nối vào sau số có <code>dp</code> lớn nhất. Mỗi cột là một bài kiểm tra, cột càng cao điểm càng cao. Nối vào sau ai thì vẽ một đường <b>leo lên</b> từ đỉnh cột đó. Chuỗi tăng dài nhất chính là <b>con đường leo nhiều bậc nhất</b>.</p>
+
+  <div class="sim" id="simLis">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <button class="btn" id="lisRandom">🎲 Dãy mới</button>
+      <button class="btn" id="lisReset">Dãy mẫu</button>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="arr-wrap climb" id="lisWrap">
+            <div class="arr bars" id="lisA"></div>
+            <svg class="links" id="lisArcs" aria-hidden="true"></svg>
+            <div class="arr" id="lisD"></div>
+          </div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Đang xét</span><span><i class="lg-src"></i>Cột thấp hơn đứng trước (viền đậm: được chọn)</span><span><i class="lg-done"></i>Đã tính</span><span><i class="lg-path"></i>Dãy dài nhất</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="truy-vet">
+  <h2><span class="num">5</span>Lần ngược để in ra dãy</h2>
+  <p>Bảng <code>dp</code> chỉ cho biết dãy <i>dài bao nhiêu</i>. Muốn biết <i>gồm những số nào</i>, mỗi lần tính <code>dp[i]</code> ta ghi thêm <code>truoc[i]</code>: vị trí của số đứng ngay trước nó (dòng chữ nhỏ “sau [j]” trong mô phỏng).</p>
+  <p>Bắt đầu từ ô có <code>dp</code> lớn nhất, đi theo <code>truoc</code> về phía trước cho tới khi gặp −1, rồi đảo ngược. Các bước cuối của mô phỏng ở mục 4 làm đúng việc này.</p>
+  <div class="code" id="codeTrace"></div>
+</section>
+
+<!-- 6 -->
+<section id="de-that">
+  <h2><span class="num">6</span>Đề thật: Dãy hình chữ nhật (KHTN 2025)</h2>
+  <div class="panel problem">
+    <h4>Tóm tắt đề</h4>
+    <p style="margin:0">Có N hình chữ nhật theo thứ tự. Hình A <b>lớn hơn</b> hình B nếu diện tích A lớn hơn, hoặc diện tích bằng nhau nhưng chiều dài A lớn hơn. Tìm độ dài dãy con <b>giảm</b> dài nhất (giữ thứ tự). N ≤ 10⁵, trong đó <b>70% số test có N ≤ 1000</b>.</p>
+  </div>
+  <p>Nhìn kỹ thì đây vẫn là bài dãy con tăng dài nhất, chỉ cần “dịch” đề qua hai bước:</p>
+  <div class="recipe">
+    <div class="panel">
+      <h4><span class="step-n">1</span>Đổi mỗi hình thành một cặp số</h4>
+      <p>Python so sánh cặp (tuple) đúng kiểu đề yêu cầu: so phần đầu trước, bằng nhau mới so phần sau.</p>
+      <div class="ex"><code>(dài × rộng, dài)</code></div>
+    </div>
+    <div class="panel">
+      <h4><span class="step-n">2</span>Đổi “giảm” thành “tăng”</h4>
+      <p>Đổi dấu cả hai số. Dãy giảm của các cặp gốc là dãy tăng của các cặp đã đổi dấu.</p>
+      <div class="ex"><code>(−dài × rộng, −dài)</code></div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Hình (dài, rộng)</th><th>(2, 3)</th><th>(3, 2)</th><th>(2, 2)</th><th>(1, 3)</th></tr></thead>
+      <tbody>
+        <tr><td>Cặp (diện tích, dài)</td><td>(6, 2)</td><td>(6, 3)</td><td>(4, 2)</td><td>(3, 1)</td></tr>
+        <tr><td>Đổi dấu</td><td>(−6, −2)</td><td>(−6, −3)</td><td>(−4, −2)</td><td>(−3, −1)</td></tr>
+        <tr><td><code>dp</code></td><td>1</td><td>1</td><td>2</td><td>3</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Đáp án là 3, khớp với ví dụ của đề: (3, 2) → (2, 2) → (1, 3) hoặc (2, 3) → (2, 2) → (1, 3).</p>
+  <div class="tip"><b>Chiến lược lấy điểm:</b> cách O(n²) ở mục 4 đã đủ cho 70% số test (N ≤ 1000). Muốn lấy trọn điểm với N = 10⁵ thì cần cách nhanh ở mục 7. Đi thi, hãy viết cách chắc chắn trước.</div>
+  <p><a href="../luyen-de/index.html#bai=khtn-2025-hcn">Mở đề đầy đủ trong ngân hàng đề ↗</a></p>
+</section>
+
+<!-- 7 -->
+<section id="nhanh">
+  <h2><span class="num">7</span>Cách nhanh: xếp bài thành chồng</h2>
+  <p>Hãy chơi một trò xếp bài. Lần lượt cầm từng số, đặt lên <b>chồng đầu tiên (từ trái) có lá trên cùng lớn hơn hoặc bằng nó</b>. Nếu không có chồng nào như vậy thì mở một chồng mới ở bên phải. Điều kỳ diệu: <b>số chồng bài chính là độ dài dãy con tăng dài nhất</b>.</p>
+  <p>Các lá trên cùng luôn tăng dần từ trái sang phải, nên việc tìm chồng có thể dùng <b>tìm kiếm nhị phân</b> (hàm <code>bisect_left</code> có sẵn trong Python). Mỗi số chỉ tốn khoảng 17 bước với n = 10⁵.</p>
+
+  <div class="sim" id="simPile">
+    <div class="sim-head">
+      <span class="title">Mô phỏng</span>
+      <span style="font-size:14px;color:var(--muted)">Dùng cùng dãy với mục 4</span>
+    </div>
+    <div class="sim-body">
+      <div>
+        <div class="viz">
+          <div class="incoming" id="pileIn"></div>
+          <div class="piles" id="piles"></div>
+          <div class="info" id="pileTails"></div>
+        </div>
+        <div class="explain"></div>
+        <div class="controls">
+          <button class="btn" data-a="first">« Đầu</button>
+          <button class="btn" data-a="prev">‹ Trước</button>
+          <button class="btn primary" data-a="play">Chạy tự động</button>
+          <button class="btn" data-a="next">Sau ›</button>
+          <button class="btn" data-a="last">Cuối »</button>
+          <span class="count"></span>
+        </div>
+        <div class="legend"><span><i class="lg-cur"></i>Lá vừa đặt</span><span><i class="lg-src"></i>Chồng được chọn</span><span><i class="lg-done"></i>Lá trên cùng (mảng tails)</span></div>
+      </div>
+      <div class="code"></div>
+    </div>
+  </div>
+  <div class="tip"><b>Cẩn thận:</b> các lá trên cùng (mảng <code>tails</code>) <b>không phải</b> là dãy con cần tìm, chỉ có <b>độ dài</b> của nó là đúng. Ví dụ ở cuối mô phỏng, tails có số 2 đứng trước số 4 dù trong dãy gốc số 2 đứng sau số 4.</div>
+</section>
+
+<!-- 8 -->
+<section id="tong-ket">
+  <h2><span class="num">8</span>Tổng kết</h2>
+  <h3>Khi nào nên nghĩ tới dãy con tăng dài nhất?</h3>
+  <ul>
+    <li>Đề hỏi chọn <b>nhiều phần tử nhất</b>, giữ thứ tự, mỗi phần tử sau “hơn” phần tử trước.</li>
+    <li>Quan hệ “hơn” có thể là so sánh số, so sánh cặp số, hoặc “lồng được vào nhau”.</li>
+    <li>Biến thể: dãy giảm (đổi dấu), dãy không giảm (đổi &lt; thành ≤), tổng lớn nhất thay vì dài nhất.</li>
+  </ul>
+  <h3>Hai cách, hai mức điểm</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Cách</th><th>Ý tưởng</th><th>Số phép tính</th><th>Dùng khi</th></tr></thead>
+      <tbody>
+        <tr><td>Quy hoạch động</td><td><code>dp[i] = 1 + max(dp[j])</code>, j &lt; i, a[j] &lt; a[i]</td><td>khoảng n × n</td><td>n ≤ vài nghìn; in được cả dãy</td></tr>
+        <tr><td>Xếp bài + nhị phân</td><td>Đặt lên chồng đầu tiên có lá trên ≥ x</td><td>khoảng n × 17</td><td>n đến 10⁵ hoặc hơn; chỉ cần độ dài</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Lỗi hay gặp</h3>
+  <ul>
+    <li><b>Lấy dp ô cuối làm đáp án</b>: dãy dài nhất có thể kết thúc ở giữa. Phải lấy <code>max(dp)</code>.</li>
+    <li><b>Nhầm tăng và không giảm</b>: “tăng” dùng <code>&lt;</code>, “không giảm” dùng <code>≤</code>. Với cách nhanh: tăng dùng <code>bisect_left</code>, không giảm dùng <code>bisect_right</code>.</li>
+    <li><b>Nhầm dãy con với đoạn con</b>: đoạn con phải liền nhau, là bài khác.</li>
+    <li><b>In mảng tails làm đáp án</b>: tails chỉ cho độ dài, không phải dãy thật.</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="bai-tap">
+  <h2><span class="num">9</span>Bài tập tự luyện</h2>
+  <p>Gợi ý chỉ mở hướng suy nghĩ. Hãy tự trả lời 4 bước ở mục 3, tính tay bảng dp với dãy ngắn, rồi mới viết code.</p>
+
+  <div class="ex-item">
+    <h4>Bài 1. Dãy con không giảm dài nhất <span class="level lv1">Dễ</span></h4>
+    <p>Giống bài học, nhưng hai số bằng nhau đứng cạnh nhau trong dãy con vẫn được chấp nhận. Ví dụ 3, 3, 5 hợp lệ.</p>
+    <details><summary>Gợi ý</summary><p>Chỉ cần sửa một dấu so sánh. Với cách xếp bài, đổi hàm tìm kiếm nào?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 2. In ra dãy con <span class="level lv1">Dễ</span></h4>
+    <p>In độ dài và một dãy con tăng dài nhất.</p>
+    <details><summary>Gợi ý</summary><p>Dùng mảng truoc ở mục 5. Nhớ đảo ngược dãy sau khi lần ngược.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 3. Dãy con tăng có tổng lớn nhất <span class="level lv2">Vừa</span></h4>
+    <p>Chọn dãy con tăng sao cho <b>tổng</b> các số lớn nhất (không cần dài nhất).</p>
+    <details><summary>Gợi ý</summary><p>Đổi ý nghĩa của dp[i]: tổng lớn nhất của dãy tăng kết thúc tại a[i]. Công thức truy hồi thay “1 +” bằng gì?</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 4. Xếp búp bê lồng nhau <span class="level lv2">Vừa</span></h4>
+    <p>Có n con búp bê, mỗi con có chiều cao và bề rộng. Con A lồng được vào con B nếu A thấp hơn và hẹp hơn hẳn B. Lồng được nhiều nhất bao nhiêu con thành một chuỗi? Được chọn thứ tự tuỳ ý.</p>
+    <details><summary>Gợi ý</summary><p>Vì được đổi thứ tự, hãy sắp xếp trước theo chiều cao. Sau đó bài toán còn lại là gì? Cẩn thận với các con cao bằng nhau.</p></details>
+  </div>
+  <div class="ex-item">
+    <h4>Bài 5. Dãy hình chữ nhật <span class="level lv4">Đề thật</span></h4>
+    <p>KHTN 2025, bài 4. Làm cách O(n²) trước để chắc 70% số điểm, sau đó thử cách xếp bài với cặp số đã đổi dấu.</p>
+    <details><summary>Gợi ý</summary><p>Mục 6 đã “dịch” đề. Với Python, <code>bisect_left</code> dùng được trực tiếp trên danh sách các tuple.</p></details>
+    <a class="real" href="../luyen-de/index.html#bai=khtn-2025-hcn">Mở đề trong ngân hàng đề ↗</a>
+  </div>
+</section>
+
+<footer>Bài giảng ôn thi chuyên Tin vào lớp 10 · Chương 5: Quy hoạch động. Mã nguồn ví dụ viết bằng Python 3.</footer>
+</div>
+
+<script>
+(function(){
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = v => v.toLocaleString('vi-VN');
+  const sgn = v => v > 0 ? '+' + v : String(v);
+  const par = v => v < 0 ? '(' + v + ')' : String(v);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // ---------- Python highlighter ----------
+  function hl(line){
+    const re = /(#.*$)|('[^']*')|\b(def|return|for|in|if|elif|else|and|or|not|while|import|from|break|continue|True|False|None)\b|\b(print|range|len|max|min|map|int|list|sum|str|sorted|enumerate|bisect_left|bisect_right|append|reversed|abs)\b|\b(\d+)\b/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'b' : 'n';
+      out += '<span class="t-' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(line.slice(last));
+    return out || ' ';
+  }
+  function renderCode(el, lines){
+    el.innerHTML = lines.map((l, i) => '<div class="cl" data-l="' + (i + 1) + '"><span class="no">' + (i + 1) + '</span><span class="tx">' + hl(l) + '</span></div>').join('');
+  }
+  function setLine(el, n){
+    el.querySelectorAll('.cl').forEach(d => d.classList.toggle('on', +d.dataset.l === n));
+  }
+
+  // ---------- Generic step simulator ----------
+  function makeSim(root, cfg){
+    const codeEl = root.querySelector('.sim-body > .code');
+    const exp = root.querySelector('.explain');
+    const cnt = root.querySelector('.count');
+    const b = a => root.querySelector('[data-a="' + a + '"]');
+    const bFirst = b('first'), bPrev = b('prev'), bPlay = b('play'), bNext = b('next'), bLast = b('last');
+    let steps = [], k = 0, timer = null;
+    function show(){
+      const s = steps[k];
+      cfg.render(s);
+      setLine(codeEl, s.line);
+      exp.innerHTML = s.msg;
+      cnt.textContent = 'Bước ' + (k + 1) + ' / ' + steps.length;
+      bFirst.disabled = bPrev.disabled = k === 0;
+      bNext.disabled = bLast.disabled = k === steps.length - 1;
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } bPlay.textContent = 'Chạy tự động'; }
+    function rebuild(){ stop(); steps = cfg.build(); renderCode(codeEl, cfg.code()); k = 0; show(); }
+    bFirst.onclick = () => { stop(); k = 0; show(); };
+    bPrev.onclick = () => { stop(); if (k > 0) k--; show(); };
+    bNext.onclick = () => { stop(); if (k < steps.length - 1) k++; show(); };
+    bLast.onclick = () => { stop(); k = steps.length - 1; show(); };
+    bPlay.onclick = () => {
+      if (timer){ stop(); return; }
+      if (k >= steps.length - 1) k = 0;
+      show();
+      bPlay.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (k < steps.length - 1){ k++; show(); } else stop(); }, 1300);
+    };
+    rebuild();
+    return { rebuild };
+  }
+
+  // Cuộn hàng ô số để ô đang xét luôn nằm trong màn hình (quan trọng trên điện thoại)
+  function follow(wrap){
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    const nm = 56;  // chừa chỗ cho nhãn ghim bên trái
+    const base = wrap.getBoundingClientRect().left - wrap.scrollLeft;
+    const span = els => { let lo = Infinity, hi = -Infinity; els.forEach(e => { const r = e.getBoundingClientRect(); lo = Math.min(lo, r.left - base); hi = Math.max(hi, r.right - base); }); return [lo, hi]; };
+    let hit = wrap.querySelectorAll('.cur, .src, .rng, .path');
+    if (!hit.length) return;
+    let [lo, hi] = span(hit);
+    const view = wrap.clientWidth - nm;
+    if (hi - lo > view){                       // quá rộng: ưu tiên ô đang xét, nằm sát mép phải
+      const cur = wrap.querySelectorAll('.cur');
+      if (cur.length){ [lo, hi] = span(cur); wrap.scrollLeft = Math.max(0, hi + 12 - wrap.clientWidth); }
+      return;
+    }
+    if (lo - nm < wrap.scrollLeft || hi > wrap.scrollLeft + wrap.clientWidth)
+      wrap.scrollLeft = Math.max(0, (lo + hi) / 2 - (wrap.clientWidth + nm) / 2);
+  }
+
+// Thanh điều hướng chung: "← Mục lục" ở đầu bài, bài trước/sau ở cuối bài.
+// Tự chèn CSS nên dùng được cả ở trang không build từ khung (file mẫu Quy hoạch động).
+(function(){
+  const ORDER = [
+    ['0.1', 'doc-de-do-phuc-tap', 'Đọc đề, subtask và độ phức tạp'],
+    ['0.2', 'vao-ra-so-lon', 'Vào/ra nhanh, số lớn, biên'],
+    ['0.3', 'viet-trau-doi-chieu', 'Viết trâu và đối chiếu'],
+    ['1.1', 'mang-dem', 'Mảng đếm, tần suất'],
+    ['1.2', 'tong-tien-to', 'Tổng tiền tố và mảng hiệu'],
+    ['1.3', 'sap-xep-tham-lam', 'Sắp xếp và tham lam đơn giản'],
+    ['1.4', 'hai-con-tro', 'Hai con trỏ, cửa sổ trượt'],
+    ['1.5', 'tim-kiem-nhi-phan', 'Tìm kiếm nhị phân'],
+    ['1.6', 'doan-con-tong', 'Đoạn con tổng lớn nhất / bằng k'],
+    ['2.1', 'uoc-boi', 'Ước, bội, duyệt đến √n'],
+    ['2.2', 'ucln-euclid', 'ƯCLN, BCNN, thuật toán Euclid'],
+    ['2.3', 'so-nguyen-to-sang', 'Số nguyên tố, sàng'],
+    ['2.4', 'mod-luy-thua', 'Phép mod, lũy thừa, chu kỳ'],
+    ['2.5', 'chu-so-chinh-phuong', 'Chữ số, số chính phương'],
+    ['3.1', 'thu-nho-tim-quy-luat', 'Thử nhỏ để tìm quy luật'],
+    ['3.2', 'mo-phong-gop-buoc', 'Mô phỏng và gộp bước'],
+    ['3.3', 'tham-lam', 'Tham lam: khi nào đúng'],
+    ['4.1', 'dem-ky-tu', 'Duyệt ký tự, đếm 26 chữ cái'],
+    ['4.2', 'doi-xung-chuan-hoa', 'Đối xứng, chuẩn hóa, nén'],
+    ['4.3', 'tien-to-chu-cai', 'Tiền tố chữ cái, số lớn dạng xâu'],
+    ['5.1–5.2', 'quy-hoach-dong', 'Quy hoạch động cho người mới bắt đầu'],
+    ['5.3', 'day-con-tang', 'Dãy con tăng dài nhất'],
+    ['5.4', 'cai-tui', 'Bài toán cái túi'],
+    ['6.1', 'phan-bo-thoi-gian', 'Phân bổ thời gian'],
+    ['6.2', 'de-thi-thu', 'Đề thi thử bấm giờ'],
+    ['7.1', 'quay-lui-tap-con', 'Quay lui, tập con'],
+    ['7.2', 'bfs-luoi', 'Loang trên lưới (BFS)'],
+    ['7.3', 'deque-don-dieu', 'Hàng đợi hai đầu']
+  ];
+  const name = p => p.split('/').pop().replace(/\.html$/, '');
+  const here = name(decodeURIComponent(location.pathname));
+  const i = ORDER.findIndex(l => name(l[1]) === here);
+  if (i < 0) return;                                   // mục lục hoặc trang ngoài bộ
+  const wrap = document.querySelector('.wrap') || document.body;
+  const href = l => encodeURI(l[1]) + '.html';
+  const t = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  const css = document.createElement('style');
+  css.textContent =
+    '.lnav-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:16px;font-size:14px;color:var(--muted)}' +
+    '.lnav-top a{color:var(--ink);text-decoration:none;font-weight:600;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px}' +
+    '.lnav-pn{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:44px}' +
+    '.lnav-pn a{display:block;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);text-decoration:none}' +
+    '.lnav-pn a:hover,.lnav-top a:hover{border-color:var(--accent)}' +
+    '.lnav-pn small{display:block;color:var(--muted);font-size:13px}' +
+    '.lnav-pn b{display:block;font-size:15px;line-height:1.35;margin-top:2px}' +
+    '.lnav-pn .next{grid-column:2;text-align:right}';
+  document.head.appendChild(css);
+  const top = document.createElement('nav');
+  top.className = 'lnav-top';
+  top.setAttribute('aria-label', 'Điều hướng bài giảng');
+  top.innerHTML = '<a href="index.html">← Mục lục</a><span>Bài ' + ORDER[i][0] + '</span>';
+  wrap.insertBefore(top, wrap.firstChild);
+  const pn = document.createElement('nav');
+  pn.className = 'lnav-pn';
+  pn.setAttribute('aria-label', 'Bài trước và bài sau');
+  const card = (l, cls, label) => '<a class="' + cls + '" href="' + href(l) + '"><small>' + label + '</small><b>' + t(l[2]) + '</b></a>';
+  pn.innerHTML = (i > 0 ? card(ORDER[i - 1], 'prev', '← Bài ' + ORDER[i - 1][0]) : '') +
+                 (i < ORDER.length - 1 ? card(ORDER[i + 1], 'next', 'Bài ' + ORDER[i + 1][0] + ' →') : '');
+  const foot = wrap.querySelector(':scope > footer');
+  wrap.insertBefore(pn, foot || null);
+})();
+
+
+  function lisDp(a){
+    const n = a.length, dp = Array(n).fill(1), prev = Array(n).fill(-1);
+    for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) if (a[j] < a[i] && dp[j] + 1 > dp[i]){ dp[i] = dp[j] + 1; prev[i] = j; }
+    return { dp, prev, best: Math.max(...dp) };
+  }
+
+  // ---------- Hero ----------
+  (function(){
+    const a = [3, 1, 4, 1, 5, 9, 2, 6], pick = [1, 2, 4, 7];
+    $('#nbRow').innerHTML = a.map((v, i) => '<div class="nb-cell ' + (pick.includes(i) ? 'nb-p last' : 'nb-a') + '" style="animation-delay:' + (i * 0.1) + 's">' + v + '</div>').join('');
+  })();
+
+  // ---------- 1. Picker ----------
+  const SCORES = [5, 3, 6, 4, 7, 2, 8, 6, 9, 7];
+  (function(){
+    const best = lisDp(SCORES).best;
+    let on = [];
+    function render(){
+      const sel = on.slice().sort((x, y) => x - y), badPos = new Set();
+      for (let t = 1; t < sel.length; t++) if (SCORES[sel[t]] <= SCORES[sel[t - 1]]){ badPos.add(sel[t]); badPos.add(sel[t - 1]); }
+      $('#picker').innerHTML = SCORES.map((v, i) => '<button class="pk' + (on.includes(i) ? (badPos.has(i) ? ' on bad' : ' on') : '') + '" data-i="' + i + '" aria-pressed="' + on.includes(i) + '" aria-label="Bài ' + (i + 1) + ', ' + v + ' điểm">' + v + '</button>').join('');
+      $('#chosen').textContent = sel.length ? 'Em chọn: ' + sel.map(i => SCORES[i]).join(' → ') : '';
+      const ok = badPos.size === 0;
+      $('#pickBadge').innerHTML = sel.length < 2 ? '' : ok
+        ? '<span class="badge ok">Tăng dần ✓ · dài ' + sel.length + '</span>'
+        : '<span class="badge no">Chưa tăng dần: hai ô đỏ phạm luật</span>';
+      $('#pickMsg').innerHTML = !sel.length
+        ? 'Chạm vào các điểm số để chọn hoặc bỏ chọn. Hãy tìm chuỗi tiến bộ <b>dài nhất</b> có thể.'
+        : !ok ? 'Bài sau phải có điểm <b>cao hơn hẳn</b> bài trước. Bỏ bớt một trong hai ô đỏ.'
+        : sel.length >= best ? '🎉 Tuyệt! Đây là chuỗi dài nhất có thể (' + best + ' bài). Nhưng làm sao chắc chắn không có chuỗi dài hơn? Thử hết mọi cách thì quá lâu, xem mục 2.'
+        : 'Chuỗi hợp lệ dài ' + sel.length + '. Còn dài hơn được không?';
+    }
+    $('#picker').addEventListener('click', e => {
+      const b = e.target.closest('.pk'); if (!b) return;
+      const i = +b.dataset.i;
+      on = on.includes(i) ? on.filter(x => x !== i) : on.concat(i);
+      render();
+    });
+    $('#pickClear').onclick = () => { on = []; render(); };
+    $('#pickHint').onclick = () => { $('#pickMsg').innerHTML = 'Dãy này có chuỗi tiến bộ dài nhất gồm <b>' + best + ' bài</b>. Em tìm ra chưa?'; };
+    render();
+  })();
+
+  // ---------- 2. Cost ----------
+  (function(){
+    const tm = ops => {
+      const s = ops / 1e7;
+      if (s < 0.01) return 'chưa tới 0,01 giây';
+      if (s < 120) return 'khoảng ' + s.toLocaleString('vi-VN', { maximumFractionDigits: s < 1 ? 2 : 0 }) + ' giây';
+      if (s < 7200) return 'khoảng ' + fmt(Math.round(s / 60)) + ' phút';
+      if (s < 86400 * 365) return 'khoảng ' + fmt(Math.round(s / 3600)) + ' giờ';
+      return 'khoảng ' + fmt(Math.round(s / 86400 / 365)) + ' năm';
+    };
+    function update(){
+      const n = +$('#nSlider').value, all = Math.pow(2, n), dp = n * n;
+      $('#nVal').textContent = n;
+      $('#opsAll').textContent = (all < 1e15 ? fmt(all) : '≈ ' + (all / 1e18).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' tỉ tỉ') + ' cách';
+      $('#timeAll').textContent = tm(all);
+      $('#opsDp').textContent = fmt(dp) + ' phép so sánh';
+      $('#timeDp').textContent = tm(dp);
+    }
+    $('#nSlider').addEventListener('input', update);
+    update();
+  })();
+
+  // ---------- 4. O(n^2) DP with arcs ----------
+  let LIS = SCORES.slice();
+  function buildLis(){
+    const a = LIS, n = a.length, S = [];
+    const dp = Array(n).fill(null), prev = Array(n).fill(-1);
+    const snap = o => S.push(Object.assign({ a, dp: dp.slice(), prev: prev.slice(), cur: -1, cands: [], pick: -1, path: [] }, o));
+    snap({ line: 1, msg: 'Dãy điểm của ' + n + ' bài kiểm tra, đánh số từ 0 như trong Python. Ta sẽ điền <code>dp[i]</code> = độ dài chuỗi tăng dài nhất <b>kết thúc tại bài i</b>.' });
+    snap({ line: 3, msg: 'Ban đầu mỗi số tự đứng một mình nên <code>dp[i] = 1</code>. Mảng <code>truoc</code> ghi số đứng ngay trước, −1 nghĩa là chưa có ai.' });
+    for (let i = 0; i < n; i++){
+      const cands = []; for (let j = 0; j < i; j++) if (a[j] < a[i]) cands.push(j);
+      let pick = -1; dp[i] = 1;
+      for (const j of cands) if (dp[j] + 1 > dp[i]){ dp[i] = dp[j] + 1; pick = j; }
+      prev[i] = pick;
+      let msg;
+      if (i === 0) msg = 'Số đầu tiên <b>' + a[0] + '</b>: phía trước không có ai, <code>dp[0] = 1</code>.';
+      else if (!cands.length) msg = 'Số <b>' + a[i] + '</b> (vị trí ' + i + '): không có số nào <b>nhỏ hơn</b> đứng trước, nên bắt đầu chuỗi mới. <code>dp[' + i + '] = 1</code>.';
+      else msg = 'Số <b>' + a[i] + '</b> (vị trí ' + i + '). Các số nhỏ hơn đứng trước: ' + cands.map(j => a[j] + ' (dp = ' + dp[j] + ')').join(', ') + '. Nối vào sau số có dp lớn nhất là <b>' + a[pick] + '</b> ở vị trí ' + pick + ': <code>dp[' + i + '] = ' + dp[pick] + ' + 1 = ' + dp[i] + '</code>.';
+      snap({ line: cands.length ? 8 : 5, cur: i, cands, pick, msg });
+    }
+    const best = Math.max(...dp), end = dp.indexOf(best);
+    snap({ line: 10, cur: end, msg: '🎉 Đáp án là <code>max(dp) = ' + best + '</code>, ở vị trí ' + end + '. Để ý: ô cuối cùng <code>dp[' + (n - 1) + '] = ' + dp[n - 1] + '</code>' + (dp[n - 1] === best ? ' cũng bằng ' + best + ', nhưng không phải lúc nào cũng vậy.' : ', <b>không phải</b> đáp án!') });
+    const path = [];
+    for (let x = end; x !== -1; x = prev[x]){
+      path.unshift(x);
+      snap({ path: path.slice(), msg: x === end
+        ? '<b>Lần ngược:</b> bắt đầu từ vị trí ' + x + ' (số ' + a[x] + '). Dòng chữ nhỏ “sau [j]” cho biết số đứng ngay trước nó.'
+        : 'Đi về vị trí ' + x + ' (số ' + a[x] + ').' + (prev[x] === -1 ? ' Ô này ghi “đầu”: đã về tới đầu chuỗi.' : '') });
+    }
+    snap({ path: path.slice(), msg: '✅ Chuỗi tiến bộ dài nhất: <b>' + path.map(x => a[x]).join(' → ') + '</b>, gồm ' + best + ' bài.' });
+    return S;
+  }
+  function renderLis(s){
+    const a = s.a, n = a.length, onPath = new Set(s.path), mx = Math.max(...a), mn = Math.min(0, ...a);
+    const state = (i, row) => {
+      if (onPath.has(i)) return ' path';
+      if (i === s.cur) return ' cur';
+      if (s.cands.includes(i)) return ' src' + (i === s.pick ? ' pick' : '');
+      if (row === 'a' && s.cur > 0 && i < s.cur && !s.path.length) return ' dim';
+      if (row === 'd' && s.dp[i] !== null) return ' done';
+      return '';
+    };
+    let h = '<span class="nm">a =</span>';
+    for (let i = 0; i < n; i++){
+      const ht = 30 + Math.round((a[i] - mn) / (mx - mn || 1) * 125);
+      const kid = (i === s.cur && !s.path.length) ? '🧒' : '';
+      h += '<div class="bcol"><span class="kid" aria-hidden="true">' + kid + '</span><div class="bblk' + state(i, 'a') + '" style="height:' + ht + 'px">' + a[i] + '</div></div>';
+    }
+    $('#lisA').innerHTML = h;
+    h = '<span class="nm">dp =</span>';
+    for (let i = 0; i < n; i++){
+      const sub = s.dp[i] === null ? '&nbsp;' : s.prev[i] === -1 ? 'đầu' : 'sau [' + s.prev[i] + ']';
+      h += '<div class="cellx' + state(i, 'd') + '"><small>[' + i + ']</small><b>' + (s.dp[i] === null ? '?' : s.dp[i]) + '</b><span class="sub">' + sub + '</span></div>';
+    }
+    $('#lisD').innerHTML = h;
+    drawLinks(s);
+    follow($('#lisWrap'));
+  }
+  // Vẽ đường "leo lên" từ đỉnh cột j (số đứng trước) tới đỉnh cột i
+  function drawLinks(s){
+    const wrap = $('#lisWrap'), svg = $('#lisArcs'), blks = $('#lisA').querySelectorAll('.bblk');
+    const wr = wrap.getBoundingClientRect(), bx = wr.left - wrap.scrollLeft, by = wr.top - wrap.scrollTop;
+    const top = i => { const r = blks[i].getBoundingClientRect(); return [r.left - bx + r.width / 2, r.top - by]; };
+    svg.setAttribute('width', wrap.scrollWidth); svg.setAttribute('height', $('#lisA').offsetHeight);
+    const onPath = new Set(s.path);
+    let h = '';
+    for (let i = 0; i < s.a.length; i++){
+      const j = s.prev[i];
+      if (s.dp[i] === null || j < 0) continue;
+      let cls = '';
+      if (s.path.length){ if (!(onPath.has(i) && onPath.has(j))) continue; cls = 'path'; }
+      else if (i === s.cur) cls = 'cur';
+      const [x1, y1] = top(j), [x2, y2] = top(i);
+      h += '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+    }
+    svg.innerHTML = h;
+  }
+  const simLis = makeSim($('#simLis'), {
+    build: buildLis, render: renderLis,
+    code: () => [
+      'a = [' + LIS.join(', ') + ']',
+      'n = len(a)',
+      'dp = [1] * n          # ít nhất là chính nó',
+      'truoc = [-1] * n      # số đứng ngay trước',
+      'for i in range(n):',
+      '    for j in range(i):',
+      '        if a[j] < a[i] and dp[j] + 1 > dp[i]:',
+      '            dp[i] = dp[j] + 1',
+      '            truoc[i] = j',
+      'print(max(dp))'
+    ]
+  });
+  $('#lisRandom').onclick = () => { LIS = Array.from({ length: rnd(8, 10) }, () => rnd(1, 9)); simLis.rebuild(); simPile.rebuild(); };
+  $('#lisReset').onclick = () => { LIS = SCORES.slice(); simLis.rebuild(); simPile.rebuild(); };
+
+  renderCode($('#codeTrace'), [
+    'k = dp.index(max(dp))    # nơi dãy dài nhất kết thúc',
+    'day = []',
+    'while k != -1:',
+    '    day.append(a[k])',
+    '    k = truoc[k]',
+    'day.reverse()            # đang ngược, đảo lại',
+    'print(*day)'
+  ]);
+
+  // ---------- 7. Patience piles ----------
+  function lowerBound(arr, x){ let lo = 0, hi = arr.length; while (lo < hi){ const m = (lo + hi) >> 1; if (arr[m] < x) lo = m + 1; else hi = m; } return lo; }
+  function buildPile(){
+    const a = LIS, S = [], piles = [];
+    const snap = o => S.push(Object.assign({ piles: piles.map(p => p.slice()), x: null, k: -1, curPile: -1 }, o));
+    snap({ line: 2, msg: 'Chưa có chồng bài nào. Lần lượt cầm từng số của dãy ' + a.join(', ') + '.' });
+    for (const x of a){
+      const tails = piles.map(p => p[p.length - 1]), k = lowerBound(tails, x);
+      const isNew = k === piles.length;
+      if (isNew) piles.push([x]); else piles[k].push(x);
+      const tops = 'Lá trên cùng trước đó: ' + (tails.length ? tails.join(', ') : 'chưa có') + '. ';
+      snap({ line: isNew ? 6 : 8, x, k, curPile: k, msg: tops + (isNew
+        ? 'Không có lá nào ≥ <b>' + x + '</b>, nên <b>mở chồng mới</b> số ' + (k + 1) + '. Số chồng tăng lên ' + piles.length + '.'
+        : 'Chồng đầu tiên có lá trên ≥ <b>' + x + '</b> là chồng ' + (k + 1) + ' (lá ' + tails[k] + '). Đặt ' + x + ' lên đó. Lá trên nhỏ hơn thì sau này dễ nối tiếp hơn.') });
+    }
+    snap({ line: 9, msg: '🎉 Có <b>' + piles.length + ' chồng</b>, nên dãy con tăng dài nhất dài <b>' + piles.length + '</b>, khớp với cách quy hoạch động. Mỗi lần đặt bài chỉ cần tìm kiếm nhị phân trên các lá trên cùng.' });
+    return S;
+  }
+  function renderPile(s){
+    $('#pileIn').innerHTML = s.x === null ? '<span style="color:var(--muted)">Số đang cầm: chưa có</span>' : 'Số đang cầm: <span class="card cur">' + s.x + '</span>';
+    $('#piles').innerHTML = s.piles.length ? s.piles.map((p, k) => '<div class="pile' + (k === s.curPile ? ' src' : '') + '">' +
+      p.map((v, t) => '<div class="card' + (t === p.length - 1 ? (k === s.curPile ? ' cur' : ' top') : '') + '">' + v + '</div>').join('') +
+      '<span class="lbl">chồng ' + (k + 1) + '</span></div>').join('') : '<span style="color:var(--muted);font-size:15px">Chưa có chồng nào</span>';
+    const tails = s.piles.map(p => p[p.length - 1]);
+    $('#pileTails').innerHTML = '<span class="mini">tails = [' + tails.join(', ') + ']</span><span>Số chồng: <b>' + s.piles.length + '</b></span>';
+  }
+  const simPile = makeSim($('#simPile'), {
+    build: buildPile, render: renderPile,
+    code: () => [
+      'from bisect import bisect_left',
+      'tails = []                 # lá trên cùng mỗi chồng',
+      'for x in a:',
+      '    k = bisect_left(tails, x)  # chồng đầu có lá >= x',
+      '    if k == len(tails):',
+      '        tails.append(x)        # mở chồng mới',
+      '    else:',
+      '        tails[k] = x           # đặt lên chồng k',
+      'print(len(tails))'
+    ]
+  });
+})();
+</script>
+</body>
+</html>
