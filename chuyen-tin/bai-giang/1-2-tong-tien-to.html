@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Bài 1.2: khám phá tổng tiền tố, xem từng bước và tự luyện Python.">
+  <title>1.2 Tổng tiền tố · Học kỹ thuật</title>
+  <script>try{const t=localStorage.getItem('dethi-practice-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch{}</script>
+  <link rel="stylesheet" href="assets/lesson.css">
+  <link rel="stylesheet" href="assets/visual.css">
+  <link rel="stylesheet" href="assets/mobile.css">
+  <script defer src="assets/common.js"></script>
+  <script defer src="assets/lesson-ux.js"></script>
+  <script defer src="lessons/prefix-data.js"></script>
+  <script defer src="assets/python-worker.js"></script>
+  <script defer src="assets/python-runner.js"></script>
+  <script defer src="assets/visual.js"></script>
+  <script defer src="assets/prefix.js"></script>
+  <script defer src="assets/prefix-visuals.js"></script>
+  <script defer src="assets/mobile.js"></script>
+  <script defer src="assets/offline.js"></script>
+</head>
+<body>
+  <a class="skip" href="#warmup">Đến nội dung bài học</a>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">&lt;/&gt;</span><span>Học kỹ thuật<small>LỚP 9 → CHUYÊN 10</small></span></a>
+    <nav aria-label="Chính"><a href="index.html">Bản đồ kỹ năng</a><button id="theme-toggle">◐ Đổi sáng / tối</button></nav>
+  </header>
+  <main>
+    <header class="lesson-hero">
+      <p class="breadcrumb"><a href="index.html">Bản đồ kỹ năng</a> / Chương 1 · Mảng một chiều</p>
+      <p class="eyebrow">Bài 1.2 · Chương 1 · Mảng một chiều</p>
+      <h1>Cộng một lần.<br><em>Hỏi bao nhiêu cũng nhanh.</em></h1>
+      <p class="lead">Tổng tiền tố: nhớ phần đã cộng.<br>Tổng một đoạn chỉ cần một phép trừ.</p>
+      <details class="secondary-details"><summary>Trước khi học · khoảng 45 phút</summary>
+        <p>Cần biết list (danh sách), vòng lặp <code>for</code>, <code>input</code> (đọc dữ liệu) và <code>print</code> (in kết quả).</p>
+        <p>Em có thể chia thành hai buổi; mảng hiệu học sau.</p>
+      </details>
+      <p id="lesson-progress" class="progress-line" role="status"></p>
+    </header>
+    <div class="lesson-layout">
+      <details class="toc-disclosure secondary-details">
+        <summary>Mục lục</summary>
+        <nav class="toc" aria-label="Mục lục bài học">
+        <a href="#warmup">00 · Khởi động</a><a href="#story">01 · Câu chuyện</a>
+        <a href="#brute">02 · Thử trâu</a><a href="#idea">03 · Ý tưởng</a>
+        <a href="#model">04 · Mẫu code</a><a href="#understand">05 · Kiểm tra hiểu</a>
+        <a href="#practice">06 · Sân tập</a><a href="#exams">07 · Đề thật</a>
+        <a href="#remember">08 · Ghi nhớ</a><a href="#next">09 · Nghĩ tiếp</a>
+        </nav>
+      </details>
+      <article class="lesson-body">
+        <section class="lesson-section" id="warmup">
+          <span class="section-number">00 / KHỞI ĐỘNG</span><h2>Hai câu nhỏ</h2>
+          <form class="question" data-answer="7" data-activity="warm-index" data-explanation="Đúng: chỉ số bắt đầu từ 0, nên a[1] là số thứ hai, bằng 7." data-hint="Ghi chỉ số 0, 1, 2 dưới ba số.">
+            <label for="warm-index">1. Với <code>a = [4, 7, 2]</code>, <code>a[1]</code> bằng bao nhiêu?</label>
+            <div class="inline-check"><input id="warm-index" inputmode="numeric" required><button>Kiểm tra</button></div><p class="feedback" role="status"></p>
+          </form>
+          <form class="question" data-answer="13" data-activity="warm-sum" data-explanation="Đúng: 0 + 4 + 7 + 2 = 13." data-hint="total đổi từ 0 → 4 → 11 → ?">
+            <label for="warm-sum">2. Từ <code>total = 0</code>, cộng lần lượt 4, 7, 2. Giá trị cuối?</label>
+            <div class="inline-check"><input id="warm-sum" inputmode="numeric" required><button>Kiểm tra</button></div><p class="feedback" role="status"></p>
+          </form>
+        </section>
+        <section class="lesson-section" id="story">
+          <span class="section-number">01 / CÂU CHUYỆN</span><h2>Một dãy, nhiều câu hỏi</h2>
+          <p>Năm cảm biến ghi <code>3, −1, 4, 2, 5</code>, ở vị trí 1 đến 5.</p>
+          <form class="question" data-answer="5" data-activity="story" data-explanation="Đúng: −1 + 4 + 2 = 5. Có thể nhớ tổng để khỏi cộng lại không?" data-hint="Đoạn [2,4] lấy cả hai đầu: −1, 4, 2.">
+            <label for="story-answer">Tổng đoạn [2,4], lấy cả hai đầu, bằng bao nhiêu?</label>
+            <div class="inline-check"><input id="story-answer" inputmode="numeric" required><button>Thử đáp án</button></div><p class="feedback" role="status"></p>
+          </form>
+          <div id="opening-experiment" class="question viz-experiment">
+            <h3>Bỏ phần thừa</h3><p>Tổng vị trí 1..4 là 8. Muốn lấy 2..4, em bỏ số nào?</p>
+            <div id="opening-cells" class="viz-cells"></div><button data-experiment-next>Bỏ vị trí 1</button>
+            <p id="opening-result" class="viz-explanation" role="status"></p>
+          </div>
+          <p>Nếu có 100.000 câu hỏi, em có muốn cộng lại từ đầu mỗi lần không?</p>
+          <p class="source-note">Bài này rút gọn từ đề Cảm biến (PTNK 2026).</p>
+          <details class="secondary-details source-details"><summary>ⓘ Nguồn bài</summary>
+            <p>SENSOR · Cảm biến, PTNK 2026, có thêm điều kiện trung bình.</p>
+            <a href="../luyen-de/index.html#bai=ptnk-2026-sensor">Xem đề SENSOR · PTNK 2026</a>
+          </details>
+        </section>
+        <section class="lesson-section" id="brute">
+          <span class="section-number">02 / THỬ TRÂU</span><h2>Đúng trước. Nhanh sau.</h2>
+          <p>“Trâu” là cách làm thẳng: hỏi đoạn nào thì cộng từng số trong đoạn đó.</p>
+          <p>Chậm nhưng đúng, và vẫn được điểm phần dữ liệu kiểm tra nhỏ (subtask).</p>
+          <pre><code id="brute-code"></code></pre>
+          <div class="question" id="cost-comparison">
+            <h3>n tăng, công việc tăng thế nào?</h3><p>Xét q = n câu hỏi, mỗi câu hỏi cả dãy.</p>
+            <label for="cost-n">Số phần tử n = <output id="cost-n-value">10</output><input id="cost-n" type="range" min="1" max="100000" value="10"></label>
+            <div class="actions" id="cost-buttons"><button data-n="10">n = 10</button><button data-n="1000">n = 1.000</button><button data-n="100000">n = 100.000</button></div>
+            <div class="viz-stats">
+              <div class="viz-stat"><h4>Trâu · n × q</h4><strong id="cost-naive"></strong></div>
+              <div class="viz-stat"><h4>Tiền tố · n + q</h4><strong id="cost-prefix"></strong></div>
+            </div>
+            <p id="cost-result" role="status"></p>
+            <p class="source-note">Giả sử máy làm khoảng 1 triệu phép tính mỗi giây.</p>
+          </div>
+          <p>Trâu: khoảng n × q phép tính. Tiền tố: khoảng n + q.</p>
+          <p>Với n = q = 100.000, đó là 10 tỉ so với 200 nghìn.</p>
+        </section>
+        <section class="lesson-section" id="idea">
+          <span class="section-number">03 / Ý TƯỞNG</span><h2>Nhớ tổng từ đầu dãy</h2>
+          <p>Thêm ô 0 ở đầu để vị trí 1 trong đề khớp <code>a[1]</code> trong code.</p>
+          <div class="padding-example" role="group" aria-label="Ô a[0] là ô đệm, dữ liệu bắt đầu ở a[1]">
+            <span class="padding-cell"><code>a[0]</code><strong>0</strong><small>Ô đệm</small></span>
+            <span><code>a[1]</code><strong>3</strong><small>Vị trí 1</small></span>
+            <span><code>a[2]</code><strong>−1</strong><small>Vị trí 2</small></span>
+            <span><code>a[3]</code><strong>4</strong><small>Vị trí 3</small></span>
+            <span><code>…</code><strong>…</strong><small>Còn tiếp</small></span>
+          </div>
+          <p>Ô đệm không thuộc dãy cần tính tổng.</p>
+          <p>“Tiền tố” là phần đầu dãy. <code>pre[i]</code> là tổng vị trí 1..i. <code>pre[0] = 0</code> vì chưa lấy số nào.</p>
+          <p class="formula">pre[i] = pre[i − 1] + a[i]</p>
+          <p>Lấy tổng cũ, cộng một số mới.</p>
+          <div class="question">
+            <h3>Đoán trước mỗi bước</h3><p id="predict-question"></p>
+            <div class="inline-check"><label for="predict-value">Em đoán</label><input id="predict-value" inputmode="numeric"><button id="check-predict">Kiểm tra</button></div>
+            <p id="predict-result" class="feedback" role="status"></p>
+          </div>
+          <div class="sim-frame" id="simulation" tabindex="0" aria-label="Mô phỏng tiền tố">
+            <h3>Tự điền bảng tiền tố</h3>
+            <div class="sim-controls"><label class="wide" for="sim-input">Dãy a (1–10 số nguyên, từ −99 đến 99)<input id="sim-input" type="text" value="3 -1 4 2 5"></label><button id="apply-input">Áp dụng dãy</button></div>
+            <p id="sim-error" class="feedback" role="status"></p>
+            <div class="sim-controls viz-controls">
+              <button id="sim-first" data-step="first">⇤ Đầu</button><button id="sim-back" data-step="back">← Lùi</button>
+              <button id="sim-play" data-step="play">Chạy</button><button id="sim-next" data-step="next">Tiếp →</button>
+              <button id="sim-last" data-step="last">Cuối ⇥</button><button id="sim-reset" data-step="reset">Đặt lại</button>
+              <label>Tốc độ<select id="sim-speed" data-step-speed><option value="1400">Chậm</option><option value="800" selected>Vừa</option><option value="350">Nhanh</option></select></label>
+              <span class="viz-count" data-step-count></span>
+            </div>
+            <p class="interaction-help">Bấm Tiếp để điền ô tiếp theo.</p>
+            <p class="viz-keyboard desktop-only">Khi chọn khung, dùng ← → để đổi bước.</p>
+            <div class="viz-layout"><div>
+              <div class="plot-scroll"><svg id="prefix-chart" class="prefix-chart" viewBox="0 0 660 290" role="group" aria-labelledby="chart-title chart-desc"><title id="chart-title">Các tổng tiền tố đã tính</title><desc id="chart-desc">Tổng tiền tố pre[i] theo vị trí i.</desc></svg></div>
+              <p id="sim-tooltip" class="sim-tooltip desktop-only" role="status"></p>
+              <p id="sim-state" class="sim-state" role="status"></p>
+              <div id="prefix-sources" class="viz-cells"></div>
+              <details class="secondary-details"><summary>Xem bảng giá trị</summary>
+                <div class="viz-legend" data-legend></div>
+                <div class="table-scroll"><table id="sim-table"><caption>Giá trị sau mỗi bước</caption><thead><tr><th>Vị trí i</th><th>a[i]</th><th>pre[i]</th></tr></thead><tbody></tbody></table></div>
+              </details>
+            </div><aside>
+              <h4>Python của bước này</h4>
+              <p>Đoán xem dòng code nào đang chạy, rồi mở ra kiểm tra.</p>
+              <button class="reveal-code" data-code="prefix-trace">Em đã đoán — mở code</button>
+              <div id="prefix-trace" hidden><div id="prefix-trace-code" class="viz-code"></div><button data-hide-code="prefix-trace">Đóng code</button></div>
+            </aside></div>
+            <div class="range-inputs">
+              <label for="range-l">Đầu trái l = <output id="l-value">2</output><input type="range" id="range-l" min="1" max="5" value="2"></label>
+              <label for="range-r">Đầu phải r = <output id="r-value">4</output><input type="range" id="range-r" min="1" max="5" value="4"></label>
+            </div>
+            <p id="range-result" class="formula" role="status"></p>
+            <p class="interaction-help">Kéo hai thanh để chọn đoạn [l, r].</p>
+          </div>
+          <div class="question" id="query-modes">
+            <h3>Một đoạn, hai cách</h3><p>Với pre đã dựng, trâu đọc từng ô; tiền tố chỉ đọc 2 ô.</p><p>Bấm để đổi cách làm.</p>
+            <div class="actions viz-modes"><button data-mode="naive">Trâu: cộng từng số</button><button data-mode="prefix">Tiền tố: tra hai ô</button></div>
+            <div class="prefix-strip-scroll" tabindex="0" aria-label="Dãy a và tiền tố cùng vị trí; cuộn ngang để xem đủ"><div id="query-strips" class="prefix-strips">
+              <div id="query-bands" class="prefix-bands"></div>
+              <h4>Dãy a</h4><div id="query-array" class="viz-cells prefix-row prefix-pad-start"></div>
+              <h4>Bảng pre</h4><div id="query-prefix" class="viz-cells prefix-row"></div>
+            </div></div>
+            <p id="query-explanation" class="viz-explanation" role="status"></p>
+            <details class="secondary-details"><summary>Ký hiệu trên hình</summary><div class="viz-legend" data-legend></div></details>
+          </div>
+          <h3>Vì sao trừ l − 1, không trừ l?</h3>
+          <p><code>pre[r]</code> chứa 1..r. Bỏ phần 1..l−1, còn đúng l..r; trừ <code>pre[l]</code> sẽ bỏ nhầm cả <code>a[l]</code>.</p>
+          <p class="formula">tổng(l, r) = pre[r] − pre[l − 1]</p>
+          <p>Đoạn [2,4]: <code>pre[4] − pre[1] = 8 − 3 = 5</code>. Nếu l = 1, trừ <code>pre[0] = 0</code>.</p>
+          <p>Dựng bảng: làm một lần, n phép cộng. Mỗi câu hỏi: chỉ 1 phép trừ.</p>
+          <p><strong>Dãy có số âm vẫn đúng</strong>; pre có thể giảm. Dãy phải giữ nguyên sau khi dựng bảng.</p>
+          <h3>Ba ví dụ cùng một cách nghĩ</h3>
+          <div class="table-scroll"><table><caption>Cùng dãy 3, −1, 4, 2, 5</caption>
+            <thead><tr><th>Bài</th><th>Cách lấy kết quả</th><th>Kết quả</th></tr></thead><tbody>
+              <tr><td>Mọi tổng từ đầu</td><td>Lấy pre[1..5]</td><td>3, 2, 6, 8, 13</td></tr>
+              <tr><td>Nhiều tổng đoạn</td><td>pre[r] − pre[l−1]</td><td>[2,4] → 5; [1,5] → 13</td></tr>
+              <tr><td>Tổng lớn nhất, độ dài k=3</td><td>Thử r=k..n; lấy pre[r] − pre[r−k]</td><td>6, 5, 11 → lớn nhất 11</td></tr>
+            </tbody></table></div>
+          <p>Ba ví dụ này chính là ba bài đầu của sân tập.</p>
+          <p>Biên là trường hợp dễ lệch, như l=1 hoặc l=r.</p>
+          <details class="secondary-details"><summary>Nhắc lại cách nghĩ</summary>
+            <ol class="viz-recipe">
+              <li><strong>Nhớ:</strong> tổng từ đầu tới i.</li><li><strong>Thêm:</strong> số mới a[i].</li>
+              <li><strong>Bỏ:</strong> phần trước l.</li><li><strong>Thử biên:</strong> l=1, l=r, r=n và số âm.</li>
+            </ol>
+          </details>
+          <details id="difference" class="secondary-details">
+            <summary><strong>Mở rộng (buổi 2): Mảng hiệu — cộng nhanh cho cả đoạn</strong></summary>
+            <p>Vẫn dùng ô đệm <code>a[0] = 0</code>.</p>
+            <p>d[i] ghi thay đổi so với ô trước: <code>d[i] = a[i] − a[i−1]</code>. Cộng dồn d từ đầu sẽ ra lại a.</p>
+            <p>Muốn cộng x cho cả đoạn [l,r], chỉ cần hai dấu mốc:</p>
+            <p class="formula">d[l] += x<br>d[r+1] -= x</p>
+            <p>Mốc l bắt đầu cộng; mốc r+1 dừng cộng. Cần n+2 ô để r=n vẫn có ô n+1.</p>
+            <div class="question" id="diff-simulation" tabindex="0" aria-label="Mô phỏng mảng hiệu">
+              <p id="diff-task">Thử: cộng 3 vào đoạn [2,4]. Đoán xem dãy a cuối cùng là gì?</p>
+              <p class="source-note">Mỗi lần Áp dụng dùng một dãy mới toàn 0.</p>
+              <div class="sim-controls">
+                <label>n (1–8)<input id="diff-n" type="number" min="1" max="8" value="5"></label>
+                <label>l<input id="diff-l" type="number" min="1" max="8" value="2"></label>
+                <label>r<input id="diff-r" type="number" min="1" max="8" value="4"></label>
+                <label>x (−99..99)<input id="diff-x" type="number" min="-99" max="99" value="3"></label>
+                <button id="diff-apply">Áp dụng cập nhật</button>
+              </div>
+              <p id="diff-error" class="feedback" role="status"></p>
+              <div class="sim-controls viz-controls">
+                <button id="diff-first" data-step="first">⇤ Đầu</button><button id="diff-back" data-step="back">← Lùi</button>
+                <button id="diff-play" data-step="play">Chạy</button><button id="diff-next" data-step="next">Tiếp →</button>
+                <button id="diff-last" data-step="last">Cuối ⇥</button><button id="diff-reset" data-step="reset">Đặt lại</button>
+                <label>Tốc độ<select id="diff-speed" data-step-speed><option value="1400">Chậm</option><option value="800" selected>Vừa</option><option value="350">Nhanh</option></select></label>
+                <span class="viz-count" data-step-count></span>
+              </div>
+              <p class="viz-keyboard desktop-only">Khi chọn khung, dùng ← → để đổi bước.</p>
+              <div class="viz-layout"><div>
+                <p id="diff-question" class="muted"></p>
+                <div class="prefix-strip-scroll" tabindex="0" aria-label="Hai mốc và vùng tác động; cuộn ngang để xem đủ"><div id="diff-strips" class="prefix-strips">
+                  <div id="diff-bands" class="prefix-bands"></div>
+                  <h4>Mảng d</h4><div id="diff-cells" class="viz-cells prefix-row"></div>
+                  <h4>Dãy a đang khôi phục</h4><div id="diff-output" class="viz-cells prefix-row"></div>
+                </div></div>
+                <p id="diff-state" class="sim-state" role="status"></p>
+              </div><aside>
+                <h4>Python của bước này</h4>
+                <button class="reveal-code" data-code="diff-trace">Em đã đoán — mở code</button>
+                <div id="diff-trace" hidden><div id="diff-trace-code" class="viz-code"></div><button data-hide-code="diff-trace">Đóng code</button></div>
+              </aside></div>
+              <p>Ô cuối (n+1) chỉ để đánh dấu điểm dừng.</p>
+              <details class="secondary-details"><summary>Ký hiệu trên hình</summary><div class="viz-legend" data-legend></div></details>
+            </div>
+            <details class="secondary-details"><summary>Ví dụ thêm: hai lần cộng</summary>
+              <p>Sau +3 ở [2,4], cộng thêm −1 ở [3,5]: <code>d[3] += −1</code>, <code>d[6] -= −1</code>.</p>
+              <p>Khi ấy <code>d[1..6] = [0,3,−1,0,−3,1]</code>. Cộng dồn được <code>a[1..5] = [0,3,2,2,−1]</code>.</p>
+              <p>−1 ở ô 3 bắt đầu giảm; +1 ở ô 6 kết thúc tác động.</p>
+            </details>
+            <p>Mảng hiệu dùng khi có nhiều lần cộng đoạn và chỉ cần in dãy ở cuối.</p>
+            <button class="reveal-code" data-code="difference">Em đã thử — xem code mảng hiệu</button>
+            <pre id="difference-code" hidden><code></code></pre><button data-hide-code="difference-code">Đóng code mảng hiệu</button>
+          </details>
+        </section>
+        <section class="lesson-section" id="model">
+          <span class="section-number">04 / MẪU CODE</span><h2>Từ hình sang Python</h2>
+          <p>Em thử viết ba việc: tạo pre, điền pre[i], tính tổng [l,r].</p>
+          <button class="reveal-code" data-code="model">Xem code mẫu</button>
+          <div id="model-content" hidden>
+            <button data-hide-code="model-content">Đóng code để tự viết lại</button>
+            <p>Chạm vào một dòng code để xem bước tương ứng trong hình.</p>
+            <div id="model-code" class="code-lines" aria-label="Code Python, các dòng tính toán liên kết mô phỏng"></div>
+            <p id="code-note" class="feedback" role="status"></p><a href="#simulation">↑ Xem mô phỏng</a>
+          </div>
+        </section>
+        <section class="lesson-section" id="understand">
+          <span class="section-number">05 / KIỂM TRA HIỂU</span><h2>Em đã tự làm được chưa?</h2>
+          <form class="question" data-answer="5" data-activity="output" data-explanation="Đúng: pre[3] − pre[1] = 7 − 2 = 5." data-hint="pre có ô 0 ở đầu; tìm pre[3] và pre[1] trước.">
+            <h3>A · Đoán kết quả</h3><pre><code>pre = [0, 2, 2, 7]
+print(pre[3] - pre[1])</code></pre>
+            <label for="output-answer">Chương trình in số nào?</label><div class="inline-check"><input id="output-answer" inputmode="numeric" required><button>Kiểm tra</button></div><p class="feedback" role="status"></p>
+          </form>
+          <div class="question">
+            <h3>B · Sắp dòng code</h3><p>Kéo hoặc dùng nút ↑ ↓ để xếp code in ra 6.</p>
+            <ol id="parsons-list" class="parsons-list"></ol><button id="check-parsons">Kiểm tra thứ tự</button><p id="parsons-result" class="feedback" role="status"></p>
+          </div>
+          <div class="question">
+            <h3>C · Điền chỗ trống</h3><p>Test là một bộ dữ liệu kiểm tra.</p><p>pre đã dựng theo chỉ số 1. Điền biểu thức tính tổng [l,r].</p><pre><code>answer = ___</code></pre>
+            <label for="blank-expression">Biểu thức Python</label><div class="inline-check"><input id="blank-expression" type="text" placeholder="pre[...] - pre[...]" spellcheck="false"><button id="check-blank" class="python-action">Kiểm tra</button></div><p id="blank-result" class="feedback" role="status"></p>
+          </div>
+          <div class="question">
+            <h3>D · Tìm lỗi sai biên</h3><p>Để tính tổng [l,r], em chọn và viết lại dòng sai.</p>
+            <pre><code>1  pre = [0, 3, 2, 6, 8, 13]
+2  l, r = 2, 4
+3  answer = pre[r] - pre[l]
+4  print(answer)</code></pre>
+            <div class="sim-controls"><label>Dòng sai<select id="bug-line"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label><label class="wide">Dòng sửa<input id="bug-fix" type="text" placeholder="answer = ..." spellcheck="false"></label><button id="check-bug" class="python-action">Kiểm tra bản sửa</button></div><p id="bug-result" class="feedback" role="status"></p>
+          </div>
+          <p class="source-note">Câu C, D cần tải Python lần đầu (cần mạng).</p>
+        </section>
+        <section class="lesson-section" id="practice">
+          <span class="section-number">06 / SÂN TẬP</span><h2>Tự viết. Tự chạy. Tự sửa.</h2>
+          <p class="touch-only source-note">Gõ code trên điện thoại hơi khó: dùng thanh phím bên dưới, hoặc học trên máy tính.</p>
+          <p>Bốn bài, khó dần. Làm bài 1–3 trước; bài 4 làm sau khi học <a href="#difference" id="go-difference">Mảng hiệu</a>.</p>
+          <div class="practice-head"><label for="problem-select">Chọn bài</label><select id="problem-select"></select><span id="problem-ac" class="pill"></span></div>
+          <h3 id="practice-title"></h3><div id="practice-statement" style="white-space:pre-wrap"></div><p id="practice-constraints" class="muted"></p>
+          <div class="io-grid"><div><h4>Dữ liệu vào</h4><pre id="sample-input"></pre></div><div><h4>Kết quả cần in</h4><pre id="sample-output"></pre></div></div><p id="sample-explanation"></p>
+          <div id="practice-hints"></div>
+          <div class="actions"><button id="next-hint">Mở gợi ý 1</button><button class="reveal-code" data-code="practice">Xem lời giải mẫu</button></div>
+          <pre id="practice-solution" hidden><code></code></pre><button data-hide-code="practice-solution">Đóng lời giải mẫu</button>
+          <label for="code-editor"><strong>Code của em</strong></label>
+          <div class="code-shortcuts" data-editor="code-editor" role="group" aria-label="Nút nhập nhanh Python">
+            <button type="button" data-code-key="tab" aria-label="Thêm bốn dấu cách">Tab</button>
+            <button type="button" data-code-key=":" aria-label="Chèn dấu hai chấm">:</button>
+            <button type="button" data-code-key="()" aria-label="Chèn cặp ngoặc tròn">()</button>
+            <button type="button" data-code-key="[]" aria-label="Chèn cặp ngoặc vuông">[]</button>
+            <button type="button" data-code-key="=" aria-label="Chèn dấu bằng">=</button>
+            <button type="button" data-code-key="+=" aria-label="Chèn cộng bằng">+=</button>
+          </div>
+          <textarea id="code-editor" class="editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="editor-help"></textarea>
+          <p id="editor-help" class="interaction-help">Enter tự thụt lề; nút Tab thêm 4 dấu cách.</p>
+          <p class="desktop-only interaction-help">Shift+Tab, hoặc Escape rồi Tab, để rời ô code.</p>
+          <div class="actions"><button id="run-sample" class="python-action">Chạy ví dụ</button><button id="submit-code" class="primary python-action">Nộp bài</button><button id="stop-python" disabled>Dừng Python</button></div>
+          <progress id="python-progress" hidden aria-label="Tiến trình chuẩn bị và chạy Python"></progress>
+          <p id="python-status" role="status">Bấm Chạy để bắt đầu. Lần đầu cần mạng để tải Python (vài giây).</p>
+          <div id="practice-result" class="practice-result" role="status" aria-live="polite">Kết quả sẽ hiện ở đây.</div>
+          <details class="secondary-details"><summary>Cách kiểm tra bài làm</summary>
+            <p>Bài dùng dữ liệu vào và <code>print</code> để in kết quả, không mở tệp.</p>
+            <p>Không dán code lạ mà em chưa hiểu.</p>
+          </details>
+        </section>
+        <section class="lesson-section" id="exams">
+          <span class="section-number">07 / ĐỀ THẬT</span><h2>Thử thêm một bước</h2>
+          <p>Hai bài thật có dùng tiền tố. Em chưa cần giải trọn, hãy tìm chỗ dùng được tiền tố.</p>
+          <div class="exam-card">
+            <h3><a href="../luyen-de/index.html#bai=csp-2023-cong-day">Cộng dãy · Chuyên Sư phạm 2023 ↗</a></h3>
+            <p class="source-note">Thi thử lần 3, không phải đề chính thức.</p>
+            <p>Tiền tố tính nhanh tổng từng nhóm; bài còn cần tìm kiếm nhị phân (bài 1.5).</p>
+            <details class="secondary-details"><summary>Gợi ý cách dùng tiền tố</summary>
+              <p>Dựng pre của dãy gốc đã sắp xếp. Gọi s là tổng các số đã cộng vào mỗi phần tử.</p>
+              <p>Tổng nhóm sau dịch = tổng gốc + số phần tử × s.</p>
+              <p>Cần thêm tìm kiếm nhị phân để chia nhóm âm và không âm sau dịch. Nội dung này ở bài 1.5, chưa mở.</p>
+            </details>
+            <label><input type="checkbox" data-exam="csp-2023-cong-day"> Em đã tự thử</label>
+          </div>
+          <div class="exam-card">
+            <h3><a href="../luyen-de/index.html#bai=ptnk-2026-sensor">SENSOR · Cảm biến · PTNK 2026 ↗</a></h3>
+            <p>Đề đếm số đoạn có trung bình bằng l+r. Em có thể kiểm tra từng đoạn bằng <code>pre[r] − pre[l−1]</code>.</p>
+            <p class="source-note">Phổ thông Năng khiếu · 2026.</p>
+            <details class="secondary-details"><summary>Gợi ý cách dùng tiền tố</summary>
+              <p>Thử từng đoạn và kiểm tra:</p><p class="formula">pre[r] − pre[l−1] == (r−l+1)*(l+r)</p>
+              <p>Thử mọi đoạn cần khoảng n × n phép kiểm tra, không cần chia số thực.</p>
+              <p>Tổng các 2*i trên [l,r] bằng (r−l+1)*(l+r). Ví dụ [2,4]: <code>4+6+8 = 3*(2+4)</code>.</p>
+              <p>Đặt <code>b[i] = a[i] − 2*i</code> để chuyển về đếm đoạn tổng 0. Hai tiền tố bằng nhau tạo một đoạn tổng 0.</p>
+              <p>Học cách đếm nhanh ở <a href="1-6-doan-con.html">bài 1.6</a>.</p>
+            </details>
+            <label><input type="checkbox" data-exam="ptnk-2026-sensor"> Em đã tự thử</label>
+          </div>
+        </section>
+        <section class="lesson-section" id="remember">
+          <span class="section-number">08 / GHI NHỚ</span><h2>Mang theo năm dòng</h2>
+          <p>Dãy không đổi và có nhiều câu hỏi tổng đoạn: nghĩ tới tiền tố. Nếu dãy bị sửa giữa chừng thì bảng pre cũ sẽ sai.</p>
+          <ol class="remember">
+            <li><strong>Ô 0:</strong> <code>pre[0] = 0</code>.</li>
+            <li><strong>Cộng tiếp:</strong> <code>pre[i] = pre[i−1] + a[i]</code>.</li>
+            <li><strong>Trừ đúng:</strong> <code>pre[r] − pre[l−1]</code>.</li>
+            <li><strong>Số âm:</strong> vẫn dùng được; pre có thể giảm.</li>
+            <li><strong>Thử biên:</strong> n=1, l=1, l=r, r=n, toàn âm.</li>
+          </ol>
+          <p><code>sum(a[l:r+1])</code> vẫn cộng từng số, không nhanh hơn.</p>
+          <p class="notice">Đừng dùng <code>pre[-1]</code> thay ô 0: trong Python, −1 là phần tử cuối. Với dãy toàn âm, đừng khởi tạo tổng lớn nhất bằng 0.</p>
+          <details class="secondary-details"><summary>So sánh số phép tính</summary>
+            <p>Người ta viết gọn n × q là O(n·q).</p>
+            <div class="table-scroll"><table><caption>n phần tử, q thao tác</caption><thead><tr><th>Cách</th><th>Công việc</th></tr></thead><tbody>
+              <tr><td>Trâu</td><td>O(n·q)</td></tr>
+              <tr><td>Tiền tố</td><td>O(n+q)</td></tr>
+              <tr><td>Mảng hiệu, in dãy cuối</td><td>O(n+q)</td></tr>
+            </tbody></table></div>
+          </details>
+          <button class="reveal-code" data-code="model">Ôn lại code mẫu</button>
+        </section>
+        <section class="lesson-section" id="next">
+          <span class="section-number">09 / NGHĨ TIẾP</span><h2>Nếu dãy thay đổi?</h2>
+          <p>Em đổi a[2]: những ô pre nào phải đổi theo?</p>
+          <details class="secondary-details"><summary>Câu hỏi cho bài sau</summary>
+            <p>Nếu chưa biết l,r mà cần tìm đoạn có tổng đúng k thì sao? Bài 1.4 Hai con trỏ sẽ trả lời khi các số không âm.</p>
+          </details>
+          <label><input id="learned" type="checkbox"> Em giải thích được l−1 và tự viết lại code.</label>
+          <div class="actions"><a class="button" href="index.html">← Về bản đồ kỹ năng</a></div>
+        </section>
+      </article>
+    </div>
+    <noscript><p class="notice">Tương tác đang tắt; em vẫn đọc được phần giải thích.</p></noscript>
+    <details class="technical-info secondary-details"><summary>ⓘ Thông tin kỹ thuật</summary>
+      <p id="offline-status" class="muted" role="status"></p>
+      <p>Ước lượng theo n đã chọn, với 1 triệu phép tính mỗi giây:</p>
+      <p>Trâu: <span id="time-naive"></span><br>Tiền tố: <span id="time-prefix"></span></p>
+      <p>Chưa tính đọc, in và vòng lặp. Đây không phải tốc độ đo trên máy hay bảo đảm qua đề thi.</p>
+      <p>“Đúng hết test” chỉ nói về bài luyện, không bảo đảm qua bộ chấm đề thi.</p>
+      <p>Pyodide 0.26.4 chạy Python trong Web Worker. Mã chạy cục bộ, không gửi đến máy chấm.</p>
+      <p>Thư viện tải từ CDN. Giới hạn: tải 90 giây; chạy 5 giây và in 200.000 ký tự mỗi test.</p>
+      <p>Đây là mức luyện tập, không mô phỏng thời gian máy chấm. Dữ liệu test có trong JavaScript, không phải hệ thống chống gian lận.</p>
+      <p>Chế độ stdin/stdout đọc dữ liệu vào và in kết quả, không mở tệp. AC/WA nghĩa là đúng hết test/sai kết quả.</p>
+      <p>Trên HTTPS, chạy một ví dụ khi có mạng để lưu Python. Cần lưu đủ bài học để mở lại ngoại tuyến.</p>
+      <p>Trạng thái phía trên cho biết phần nào đã lưu. Trình duyệt có thể xóa cache khi thiếu dung lượng.</p>
+      <p>Khi mở bằng file, lưu trữ tùy trình duyệt. Tiến độ xuất dạng JSON, không chứa mã bài làm.</p>
+    </details>
+  </main>
+  <dialog id="code-confirm" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+    <form method="dialog"><p class="eyebrow">THẦY NHẮC NHẸ</p><h2 id="confirm-title">Em đã thử kỹ chưa?</h2>
+      <p id="confirm-description">Hãy thử tính tay và mở gợi ý trước. Xem code xong, đóng lại rồi tự viết bằng cách hiểu của em.</p>
+      <div class="actions"><button value="cancel" autofocus>Em thử thêm</button><button value="show" class="primary">Có, xem code mẫu</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

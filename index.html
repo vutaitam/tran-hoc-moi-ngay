@@ -376,6 +376,7 @@ textarea#ed.ct{font-family:var(--ui); font-size:17px; white-space:pre-wrap}
 /* ===== 4 courses row + handbook ===== */
 .courses{display:flex; overflow-x:auto; gap:8px; padding-bottom:4px; scroll-snap-type:x mandatory}
 .crs{flex:0 0 104px; scroll-snap-align:start}
+a.crs-ext{color:inherit; text-decoration:none; border-style:dashed; border-bottom-style:solid}
 .hbcard{display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:2px solid var(--line); border-bottom-width:5px; border-radius:18px; padding:10px 14px; margin-bottom:14px; background:linear-gradient(135deg,color-mix(in srgb,#E0592F 14%,var(--surface)),var(--surface))}
 .hbcard .ci{width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:var(--surface); color:#E0592F; flex:none}
 .hbcard b{display:block; font-size:18px; line-height:1.2} .hbcard small{color:var(--muted); font-size:14px}
@@ -2922,7 +2923,7 @@ function learnView(){
     if(u.free&&!(ui>0&&C.units[ui-1].free)) units+=`<div class="cdhead"><b>${esc(C.cdh||'Luyện chuyên đề')}</b><small>${esc(C.cds||'Mở sẵn: học bất cứ lúc nào, không cần đi hết lộ trình chính.')}</small></div>`;
     units+=`<section class="unit${u.free?' free':''}" style="--uc:${u.c}"><div class="ub"><span class="gl" aria-hidden="true">${esc(u.gl||(C.gl&&C.gl[ui])||'')}</span><small>${u.free?'Chuyên đề':'Chặng '+(ui+1)}</small><h2>${esc(u.t)}</h2><p>${tx(u.s)}</p></div><div class="path">${nodes}</div></section>`;
   });
-  const sw=Object.values(COURSES).map(c=>`<button class="crs${c===C?' on':''}" data-c="${c.id}" title="${esc(c.n+' · '+c.s)}"><span class="ci">${I[c.ic](30)}</span><span><b>${c.n}</b><small>${lessonsDone(c)}/${lessonsTotal(c)} bài</small></span></button>`).join('');
+  const sw=Object.values(COURSES).map(c=>`<button class="crs${c===C?' on':''}" data-c="${c.id}" title="${esc(c.n+' · '+c.s)}"><span class="ci">${I[c.ic](30)}</span><span><b>${c.n}</b><small>${lessonsDone(c)}/${lessonsTotal(c)} bài</small></span></button>`).join('')+`<a class="crs crs-ext" href="chuyen-tin/" title="Ôn chuyên Tin vào 10 · bài giảng và đề thi"><span class="ci">${I.term(30)}</span><span><b>Chuyên Tin</b><small>Ôn vào 10</small></span></a>`;
   const hbc= C.mode==='van' ? `<button class="hbcard" id="openHB"><span class="ci">${I.book(30)}</span><span><b>Sổ tay lí thuyết Ngữ văn</b><small>${HANDBOOK.length} chuyên đề: sơ đồ, bảng, công thức trả lời</small></span></button>` : '';
   const lv=levelOf(S.total), nx=LV[lv+1], pct= nx ? Math.round(100*(S.total-LV[lv])/(nx-LV[lv])) : 100;
   const fb=lessonsDone()>=2 ? `<button class="flashcard" id="flash"><span class="fi">${I.bolt(30)}</span><span><b>Tia chớp 60 giây</b><small>Trả lời thật nhanh, sai bị trừ 3 giây · Kỷ lục ${S.flash[C.id]||0}</small></span></button>` : '';
@@ -2933,7 +2934,7 @@ function learnView(){
     ${C.id==='van'?hbc:''}${units}${kis}<p class="note">${esc(C.note)}</p>`;
 }
 function wireLearn(){
-  app.querySelectorAll('.crs').forEach(b=>b.onclick=()=>{ if(b.dataset.c===C.id) return; C=COURSES[b.dataset.c]; S.course=C.id; save(); tone('tap'); home('learn'); });
+  app.querySelectorAll('.crs[data-c]').forEach(b=>b.onclick=()=>{ if(b.dataset.c===C.id) return; C=COURSES[b.dataset.c]; S.course=C.id; save(); tone('tap'); home('learn'); });
   $('review')&&($('review').onclick=startReview);
   $('openHB')&&($('openHB').onclick=()=>{ tone('tap'); openHB(); });
   $('flash')&&($('flash').onclick=()=>{ tone('tap'); startFlash(); });

@@ -12,6 +12,7 @@
 | Python | Tin học 10 |
 | Hoá học 9 | KHTN 9 phần Hoá |
 | Ngữ văn 9, Ôn thi vào 10 | Ngữ văn |
+| Ôn chuyên Tin vào 10 | [`chuyen-tin/`](https://vutaitam.github.io/tran-hoc-moi-ngay/chuyen-tin/): bài giảng tương tác chương 0–3 (17 bài, sân tập Python chạy trong trình duyệt) và ngân hàng 56 đề thật có lời giải |
 
 Tiến độ lưu trong trình duyệt (localStorage). Gia sư AI chỉ chạy khi mở trong claude.ai.
 `nguon/` chứa đề cương ôn tập dùng để soạn khóa Lịch sử & Địa lí.

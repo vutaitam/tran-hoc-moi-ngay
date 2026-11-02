@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Học kỹ thuật · Ôn chuyên Tin vào 10</title>
+  <script>try{const t=localStorage.getItem('dethi-practice-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch{}</script>
+  <link rel="stylesheet" href="assets/lesson.css">
+  <link rel="stylesheet" href="assets/mobile.css">
+  <script defer src="assets/common.js"></script>
+  <script defer src="assets/lesson-ux.js"></script>
+  <script defer src="assets/lesson-catalog.js"></script>
+  <script defer src="assets/home.js"></script>
+  <script defer src="assets/offline.js"></script>
+</head>
+<body>
+  <a class="skip" href="#roadmap">Đến lộ trình học</a>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">&lt;/&gt;</span><span>Học kỹ thuật<small>LỚP 9 → CHUYÊN 10</small></span></a>
+    <nav aria-label="Chính"><a href="../luyen-de/index.html">Ngân hàng đề ↗</a><button id="theme-toggle" type="button">◐ Đổi sáng / tối</button></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow">THỬ TAY · NHÌN THẤY · TỰ VIẾT</p><h1>Hiểu từng bước.<br><em>Vững từng bài.</em></h1>
+        <p class="lead">Ôn Python để thi chuyên Tin vào 10.<br>Làm đúng trước, tìm cách nhanh hơn sau.</p>
+        <a class="button primary" href="0-1-doc-de.html">Bắt đầu từ cách đọc đề →</a>
+      </div>
+      <aside class="hero-note"><span class="eyebrow">MỤC TIÊU 7–8 ĐIỂM</span><h2>Làm chắc phần đầu.<br>Đừng quên trường hợp biên.</h2>
+        <p>Biên là các trường hợp đặc biệt, như dãy chỉ có một số.</p>
+        <p class="notice">Chương 0–3 có <strong>17 bài</strong>: nền tảng, mảng, số học và tham lam.</p>
+        <details class="secondary-details"><summary>Gợi ý chia sức khi ôn</summary>
+          <p>Làm chắc các bài đầu; bài cuối thử phần dữ liệu nhỏ để lấy điểm từng phần.</p>
+          <p>Đây là hướng ôn, không cam kết điểm. Các bài chưa mở chỉ là kế hoạch.</p>
+        </details>
+      </aside>
+    </section>
+    <section id="roadmap" aria-labelledby="map-title">
+      <div class="section-heading"><div><p class="eyebrow">BẢN ĐỒ KỸ NĂNG</p><h2 id="map-title">Học nền trước. Nối ý tưởng sau.</h2></div><p id="home-progress" role="status"></p></div>
+      <p class="muted">Đi theo chương 0 → 6; chương 7 để sau.</p><div id="chapter-map" class="chapter-map"></div>
+    </section>
+    <section class="panel"><h2>Một buổi, ba lượt thử</h2>
+      <div class="three-columns">
+        <div><h3>01 · Tự nghĩ</h3><p>Trả lời câu hỏi và tính tay.</p></div>
+        <div><h3>02 · Xem từng bước</h3><p>Đoán ô tiếp theo rồi chạy hình.</p></div>
+        <div><h3>03 · Viết lại</h3><p>Tự viết ở sân tập, rồi thử đề thật.</p></div>
+      </div>
+      <details class="secondary-details"><summary>Học trên điện thoại</summary><p>Thử câu hỏi chạm và sắp dòng trước. Code dài nên viết trên máy tính.</p></details>
+    </section>
+    <details class="panel secondary-details" id="progress-tools"><summary>Lưu tiến độ ra file</summary>
+      <p>Tiến độ lưu trên trình duyệt này. Lưu một bản để chuyển máy hoặc phòng mất dữ liệu.</p>
+      <div class="actions"><button id="export-progress">Lưu tiến độ</button><label class="button">Mở bản tiến độ<input class="file-input" id="import-progress" type="file" accept="application/json,.json"></label></div><p id="storage-status" role="status"></p>
+    </details>
+    <noscript><p class="notice">Tương tác đang tắt. <a href="1-2-tong-tien-to.html">Đọc bài Tổng tiền tố</a>.</p></noscript>
+    <details class="technical-info secondary-details"><summary>ⓘ Thông tin kỹ thuật</summary>
+      <p id="offline-status" class="muted" role="status"></p>
+      <p>Trang dùng JavaScript cho bản đồ và hoạt động. Khi mở bằng file, lưu trữ tùy trình duyệt.</p>
+      <p>Tiến độ xuất dạng JSON, không chứa mã bài làm.</p>
+    </details>
+  </main>
+  <footer><span>Python 3 · Học liệu tự luyện</span><a href="index.html#roadmap">Lộ trình học</a></footer>
+</body>
+</html>
