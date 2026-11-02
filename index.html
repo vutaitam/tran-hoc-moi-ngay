@@ -377,6 +377,11 @@ textarea#ed.ct{font-family:var(--ui); font-size:17px; white-space:pre-wrap}
 .courses{display:flex; overflow-x:auto; gap:8px; padding-bottom:4px; scroll-snap-type:x mandatory}
 .crs{flex:0 0 104px; scroll-snap-align:start}
 a.crs-ext{color:inherit; text-decoration:none; border-style:dashed; border-bottom-style:solid}
+.cgrp{margin-bottom:12px}
+.cgrp .courses{margin-bottom:0}
+.cgh{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:0 2px 6px}
+.cgrp.g10{border:2px solid color-mix(in srgb,#E0592F 35%,var(--line)); border-radius:18px; padding:8px 8px 6px; background:color-mix(in srgb,#E0592F 7%,var(--surface))}
+.cgrp.g10 .cgh{color:#C84B22}
 .hbcard{display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:2px solid var(--line); border-bottom-width:5px; border-radius:18px; padding:10px 14px; margin-bottom:14px; background:linear-gradient(135deg,color-mix(in srgb,#E0592F 14%,var(--surface)),var(--surface))}
 .hbcard .ci{width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:var(--surface); color:#E0592F; flex:none}
 .hbcard b{display:block; font-size:18px; line-height:1.2} .hbcard small{color:var(--muted); font-size:14px}
@@ -2755,7 +2760,7 @@ const COURSES={
   py:{id:'py',n:'Python',s:'Tin học 10',units:UNITS,chem:false,plain:false,mode:'py',pfx:'',ic:'term',gl:['>_','x = 5','input()','if :','for i','while','[ ]','def'],note:'Nội dung bám phần lập trình Python của Tin học 10.'},
   hoa:{id:'hoa',n:'Hoá học 9',s:'KHTN 9',units:HOA,chem:true,plain:true,mode:'chem',pfx:'hoa:',ic:'flask',note:'Nội dung bám phần Hoá học của Khoa học tự nhiên 9 (chương trình 2018).'},
   van:{id:'van',n:'Ngữ văn 9',s:'Kết nối tri thức',units:VAN,chem:false,plain:true,mode:'van',pfx:'van:',ic:'quill',note:'Bám các thể loại, tác phẩm và kiến thức tiếng Việt trọng tâm của Ngữ văn 9 cùng dạng bài thi vào lớp 10. Ngữ liệu trích dẫn là ca dao và văn học trung đại.'},
-  on10:{id:'on10',n:'Ôn thi vào 10',s:'Ngữ văn',units:ON10,chem:false,plain:true,mode:'van',pfx:'on10:',ic:'exam',note:'Hệ thống lí thuyết và dạng bài theo cấu trúc ôn thi vào 10 môn Ngữ văn. Ví dụ là ca dao, văn học trung đại hoặc ngữ liệu do app tự soạn.'}
+  on10:{id:'on10',g10:true,n:'Ôn thi vào 10',s:'Ngữ văn',units:ON10,chem:false,plain:true,mode:'van',pfx:'on10:',ic:'exam',note:'Hệ thống lí thuyết và dạng bài theo cấu trúc ôn thi vào 10 môn Ngữ văn. Ví dụ là ca dao, văn học trung đại hoặc ngữ liệu do app tự soạn.'}
 };
 let C=COURSES[S.course]||COURSES.py;
 const inCourse=(id,c=C)=> c.pfx ? id.startsWith(c.pfx) : !/^[a-z0-9]+:/.test(id);
@@ -2923,13 +2928,15 @@ function learnView(){
     if(u.free&&!(ui>0&&C.units[ui-1].free)) units+=`<div class="cdhead"><b>${esc(C.cdh||'Luyện chuyên đề')}</b><small>${esc(C.cds||'Mở sẵn: học bất cứ lúc nào, không cần đi hết lộ trình chính.')}</small></div>`;
     units+=`<section class="unit${u.free?' free':''}" style="--uc:${u.c}"><div class="ub"><span class="gl" aria-hidden="true">${esc(u.gl||(C.gl&&C.gl[ui])||'')}</span><small>${u.free?'Chuyên đề':'Chặng '+(ui+1)}</small><h2>${esc(u.t)}</h2><p>${tx(u.s)}</p></div><div class="path">${nodes}</div></section>`;
   });
-  const sw=Object.values(COURSES).map(c=>`<button class="crs${c===C?' on':''}" data-c="${c.id}" title="${esc(c.n+' · '+c.s)}"><span class="ci">${I[c.ic](30)}</span><span><b>${c.n}</b><small>${lessonsDone(c)}/${lessonsTotal(c)} bài</small></span></button>`).join('')+`<a class="crs crs-ext" href="chuyen-tin/" title="Ôn chuyên Tin vào 10 · bài giảng và đề thi"><span class="ci">${I.term(30)}</span><span><b>Chuyên Tin</b><small>Ôn vào 10</small></span></a>`;
+  const crd=(c,nm)=>`<button class="crs${c===C?' on':''}" data-c="${c.id}" title="${esc(c.n+' · '+c.s)}"><span class="ci">${I[c.ic](30)}</span><span><b>${nm}</b><small>${lessonsDone(c)}/${lessonsTotal(c)} bài</small></span></button>`;
+  const sw=`<div class="cgrp"><div class="cgh">Học trên lớp</div><div class="courses">${Object.values(COURSES).filter(c=>!c.g10).map(c=>crd(c,c.n)).join('')}</div></div>`
+    +`<div class="cgrp g10"><div class="cgh">${I.exam(18)} Ôn thi vào 10</div><div class="courses">${Object.values(COURSES).filter(c=>c.g10).map(c=>crd(c,c.s)).join('')}<a class="crs crs-ext" href="chuyen-tin/" title="Ôn chuyên Tin vào 10 · bài giảng và đề thi"><span class="ci">${I.term(30)}</span><span><b>Chuyên Tin</b><small>Bài giảng · đề</small></span></a></div></div>`;
   const hbc= C.mode==='van' ? `<button class="hbcard" id="openHB"><span class="ci">${I.book(30)}</span><span><b>Sổ tay lí thuyết Ngữ văn</b><small>${HANDBOOK.length} chuyên đề: sơ đồ, bảng, công thức trả lời</small></span></button>` : '';
   const lv=levelOf(S.total), nx=LV[lv+1], pct= nx ? Math.round(100*(S.total-LV[lv])/(nx-LV[lv])) : 100;
   const fb=lessonsDone()>=2 ? `<button class="flashcard" id="flash"><span class="fi">${I.bolt(30)}</span><span><b>Tia chớp 60 giây</b><small>Trả lời thật nhanh, sai bị trừ 3 giây · Kỷ lục ${S.flash[C.id]||0}</small></span></button>` : '';
   const dcb= (C.id==='hk'||C.id==='ls') ? `<button class="review dcbtn" id="openDC"><span class="ri">${I.book(26)}</span><span><b>Đề cương & đáp án lí thuyết</b><small>Trả lời đủ các câu hỏi lí thuyết trong hướng dẫn ôn tập giữa HK I</small></span></button>` : '';
   const kis= (C.id==='hk'||C.id==='ls') ? `<div class="kis"><b>Các kì ôn tập tiếp theo</b>${['Cuối học kì I','Giữa học kì II','Cuối học kì II'].map(k=>`<div class="ki">${I.lock(20)}<span>${k}<small>Gửi ảnh đề cương khi có để Trăn tạo phần ôn</small></span></div>`).join('')}</div>` : '';
-  return `<div class="courses">${sw}</div>${dcb}${C.id==='on10'?hbc:''}<div class="lvcard"><div class="lvm">${mascot(tc>=GOAL?'joy':'happy')}</div><div class="lvb"><div class="lvt"><span class="lvchip">Cấp ${lv+1}</span><b>${LVN[lv]}</b></div><div class="pbar lvbar"><i style="width:${pct}%"></i></div><small>${nx?`${S.total}/${nx} kinh nghiệm · còn ${nx-S.total} để lên cấp`:'Cấp tối đa: Rồng Trăn!'}</small><div class="lvg">${esc(greet)} <span>${esc(sub)}</span></div></div></div>${fb}
+  return `${sw}${dcb}${C.id==='on10'?hbc:''}<div class="lvcard"><div class="lvm">${mascot(tc>=GOAL?'joy':'happy')}</div><div class="lvb"><div class="lvt"><span class="lvchip">Cấp ${lv+1}</span><b>${LVN[lv]}</b></div><div class="pbar lvbar"><i style="width:${pct}%"></i></div><small>${nx?`${S.total}/${nx} kinh nghiệm · còn ${nx-S.total} để lên cấp`:'Cấp tối đa: Rồng Trăn!'}</small><div class="lvg">${esc(greet)} <span>${esc(sub)}</span></div></div></div>${fb}
     ${anyDone?`<button class="review${d?' due':''}" id="review"><span class="ri">${I.loop(26)}</span><span><b>${d?'Ôn tập':'Luyện trộn'}</b><small>${d?`${Math.min(d,8)} câu sắp quên, ôn ngay cho nhớ lâu`:'8 câu ngẫu nhiên từ các bài đã học'}</small></span></button>`:''}
     ${C.id==='van'?hbc:''}${units}${kis}<p class="note">${esc(C.note)}</p>`;
 }
