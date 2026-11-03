@@ -9,7 +9,21 @@
   const problems = data.problems;
   const byId = new Map(problems.map(p => [p.id, p]));
   const categories = data.categories;
-  const controls = ['school', 'year', 'category', 'difficulty', 'progress', 'search'];
+  const LINKS = window.LESSON_LINKS || {};              // id bài → bài giảng có nhắc tới bài đó
+  const DP = '../bai-giang/quy-hoach-dong';
+  // Tên ngắn cho từng dạng (theo thứ tự data.categories) và bài giảng nền tảng của dạng
+  const CAT = [
+    ['Rẽ nhánh', ['doc-de-do-phuc-tap', '0.1', 'Đọc đề, subtask và độ phức tạp']],
+    ['Số học', ['uoc-boi', '2.1', 'Ước, bội, duyệt đến √n']],
+    ['Xâu', ['dem-ky-tu', '4.1', 'Duyệt ký tự, đếm 26 chữ cái']],
+    ['Mảng', ['mang-dem', '1.1', 'Mảng đếm, tần suất']],
+    ['Lưới', ['bfs-luoi', '7.2', 'Loang trên lưới (BFS)']],
+    ['Quy hoạch động', [DP, '5.1', 'Quy hoạch động cho người mới bắt đầu']],
+    ['Quay lui', ['quay-lui-tap-con', '7.1', 'Quay lui, tập con']],
+    ['Ad-hoc', ['thu-nho-tim-quy-luat', '3.1', 'Thử nhỏ để tìm quy luật']]
+  ];
+  const DIFF = ['Cơ bản', 'Trung bình', 'Khó', 'Rất khó'];
+  const lessonHref = file => file.startsWith('../') ? encodeURI(file) + '.html' : '../bai-giang/' + file + '.html';
   const normalize = text => String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase();
   const node = (tag, text = '', cls = '') => { const el = document.createElement(tag); el.textContent = text; if (cls) el.className = cls; return el; };
   const present = value => value || 'Không thấy ghi trong bản đề; cần kiểm tra.';
@@ -17,92 +31,173 @@
     if (!path || /^(?:[a-z][a-z\d+.-]*:|[\/\\])/i.test(path) || path.split('/').includes('..')) return null;
     return path.split('/').map(segment => encodeURIComponent(segment)).join('/');
   };
-  const webUrl = value => { try { const u = new URL(value); return /^https?:$/.test(u.protocol) ? u.href : null; } catch { return null; } };
   const link = (label, url) => { const a = node('a', label); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; };
   const storage = {
     read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { $('storage-warning').hidden = false; return fallback; } },
     write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { $('storage-warning').hidden = false; } }
   };
   const loadedDone = storage.read('dethi-practice-done', []);
-  const done = new Set(Array.isArray(loadedDone) ? loadedDone.filter(x => typeof x === 'string') : []);
+  const done = new Set(Array.isArray(loadedDone) ? loadedDone.filter(x => byId.has(x)) : []);
+
+  // Giao diện sáng/tối
   const media = matchMedia('(prefers-color-scheme: dark)');
   const dark = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : media.matches;
-  function syncTheme() { $('theme-label').textContent = dark() ? 'Chế độ tối' : 'Chế độ sáng'; $('theme-toggle').setAttribute('aria-pressed', String(dark())); }
+  function syncTheme() { $('theme-toggle').setAttribute('aria-pressed', String(dark())); }
   $('theme-toggle').addEventListener('click', () => { const t = dark() ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try { localStorage.setItem('dethi-practice-theme', t); } catch {} syncTheme(); });
   media.addEventListener('change', syncTheme); syncTheme();
-  function option(select, value, label) { const o = node('option', label); o.value = String(value); select.append(o); }
-  const schools = new Map(problems.map(p => [p.school, p.schoolLabel]));
-  for (const [key, label] of schools) option($('school'), key, label);
-  [...new Set(problems.map(p => p.year))].sort((a, b) => b - a).forEach(y => option($('year'), y, y));
-  categories.forEach((c, i) => option($('category'), i + 1, `${i + 1}. ${c}`));
-  const searchable = new Map(problems.map(p => [p.id, normalize([p.title, p.schoolLabel, p.examTitle, p.year, p.statement, p.input, p.output, p.constraints, ...(p.categories || [p.category]).map(c => categories[c - 1])].join(' '))]));
+
+  // Đề = nhóm các bài cùng documentId, đề mới trước
+  const exams = [];
+  for (const p of problems) {
+    let e = exams.find(x => x.id === p.documentId);
+    if (!e) exams.push(e = { id: p.documentId, school: p.schoolLabel, year: p.year, note: p.publicNote ?? p.type, list: [] });
+    e.list.push(p);
+  }
+  exams.sort((a, b) => b.year - a.year);
+  const ordered = exams.flatMap(e => e.list);
+  const diffOf = p => Math.max(0, DIFF.indexOf(p.difficulty));
+  const catsOf = p => p.categories || [p.category];
+  const splitTitle = t => {
+    let m = /^([A-Z0-9_]+)\s*·\s*(.+)$/.exec(t); if (m) return [m[1], m[2]];
+    m = /^((?:Bài|Câu)\s*\d+)\.\s*(.+)$/.exec(t); return m ? [m[1], m[2]] : ['', t];
+  };
+  const searchable = new Map(problems.map(p => [p.id, normalize([p.title, p.schoolLabel, p.examTitle, p.year, p.statement, p.input, p.output, p.constraints, ...catsOf(p).map(c => categories[c - 1])].join(' '))]));
   const statusNames = { verified: 'Code đã kiểm thử · toàn bộ', conditional: 'Code có điều kiện', partial: 'Code chỉ subtask', unavailable: 'Chưa có code kiểm chứng' };
   function pythonStatus(p) { return p.solution?.pythonStatus || p.solution?.status || 'unavailable'; }
   function statusLabel(p) { return p.solution?.python ? (statusNames[pythonStatus(p)] || statusNames.unavailable) : 'Python đang bổ sung' + (p.solution?.cpp ? ' · có C++ phụ' : ''); }
   const isVerified = p => pythonStatus(p) === 'verified' && p.solution?.python && p.solution?.pythonTests?.status === 'passed';
+  const shortFlag = p => isVerified(p) ? '' : p.solution?.python ? { conditional: 'code có điều kiện', partial: 'code chỉ subtask' }[pythonStatus(p)] || 'chưa kiểm chứng' : 'chưa có Python';
   const verified = problems.filter(isVerified).length;
-  const tested = problems.filter(p => p.solution?.python && ['passed', 'conditional'].includes(p.solution?.pythonTests?.status)).length;
-  $('coverage').textContent = `${problems.length} bài · ${schools.size} trường/nhóm · ${verified} lời giải Python toàn bộ đã kiểm thử · ${tested} bài có Python đã chạy`;
-  let activeId = null;
-  let hintsShown = 0;
-  let savedFocus = null;
-  let applyingHash = false;
+  $('coverage').innerHTML = `<b>${problems.length} bài</b> từ <b>${exams.length} đề</b> của ${new Set(problems.map(p => p.school)).size} trường/nhóm. <b>${verified} bài</b> có lời giải Python trọn điểm đã chạy thử.`;
+
+  // Trạng thái bộ lọc (ghi vào URL hash để chia sẻ được)
+  const state = { q: '', category: '', difficulty: '', todo: false, view: 'de' };
+  let activeId = null, hintsShown = 0, savedFocus = null, applyingHash = false;
   const dialog = $('problem-dialog');
   function writeHash(replace = true) {
     if (applyingHash) return;
     const params = new URLSearchParams();
-    for (const id of controls) if ($(id).value) params.set(id === 'search' ? 'q' : id, $(id).value);
+    if (state.q) params.set('q', state.q);
+    if (state.category) params.set('category', state.category);
+    if (state.difficulty) params.set('difficulty', state.difficulty);
+    if (state.todo) params.set('todo', '1');
+    if (state.view !== 'de') params.set('view', state.view);
     if (activeId) params.set('bai', activeId);
     const hash = params.toString();
-    const next = location.pathname + location.search + (hash ? '#' + hash : '');
-    try { history[replace ? 'replaceState' : 'pushState'](null, '', next); } catch { location.hash = hash; }
+    try { history[replace ? 'replaceState' : 'pushState'](null, '', location.pathname + location.search + (hash ? '#' + hash : '')); } catch { location.hash = hash; }
   }
+
+  // Chip độ khó và dạng bài
+  function chip(label, count, value, key, cls = '') {
+    const b = node('button', label, 'chip ' + cls); b.type = 'button'; b.dataset.key = key; b.dataset.value = value;
+    if (cls) b.prepend(node('i', '', 'dot'));
+    if (count !== null) b.append(node('small', String(count)));
+    b.addEventListener('click', () => { state[key] = state[key] === value ? '' : value; render(); writeHash(); });
+    return b;
+  }
+  $('diff-chips').append(chip('Mọi độ khó', null, '', 'difficulty'), ...DIFF.map((d, i) => chip(d, problems.filter(p => p.difficulty === d).length, d, 'difficulty', 'd' + i)));
+  $('cat-chips').append(chip('Mọi dạng', null, '', 'category'), ...CAT.map((c, i) => chip(c[0], problems.filter(p => catsOf(p).includes(i + 1)).length, String(i + 1), 'category')));
+  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { state.view = b.dataset.view; render(); writeHash(); }));
+  $('search').addEventListener('input', () => { state.q = $('search').value; render(); writeHash(); });
+  $('todo').addEventListener('change', () => { state.todo = $('todo').checked; render(); writeHash(); });
+  function reset() { Object.assign(state, { q: '', category: '', difficulty: '', todo: false }); render(); writeHash(); }
+  $('reset').addEventListener('click', reset); $('empty-reset').addEventListener('click', reset);
+
   function markDone(id, checked) {
     if (checked) done.add(id); else done.delete(id);
     storage.write('dethi-practice-done', [...done]);
     if (activeId === id) $('problem-done').checked = checked;
-    renderList();
+    render();
   }
-  function renderList() {
-    const words = normalize($('search').value).trim().split(/\s+/).filter(Boolean);
-    const selected = problems.filter(p => {
-      if ($('school').value && p.school !== $('school').value) return false;
-      if ($('year').value && String(p.year) !== $('year').value) return false;
-      if ($('category').value && !(p.categories || [p.category]).includes(Number($('category').value))) return false;
-      if ($('difficulty').value && p.difficulty !== $('difficulty').value) return false;
-      if ($('progress').value === 'done' && !done.has(p.id)) return false;
-      if ($('progress').value === 'todo' && done.has(p.id)) return false;
-      if ($('progress').value === 'verified' && !isVerified(p)) return false;
-      return words.every(w => searchable.get(p.id).includes(w));
-    });
-    const fragment = document.createDocumentFragment();
-    for (const p of selected) {
-      const tr = node('tr'); tr.dataset.id = p.id;
-      const checkCell = node('td');
-      const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = done.has(p.id); checkbox.setAttribute('aria-label', `Đã làm: ${p.title}`);
-      checkbox.addEventListener('change', () => markDone(p.id, checkbox.checked)); checkCell.append(checkbox);
-      const schoolCell = node('td'); schoolCell.append(node('span', p.schoolLabel, 'school'), node('small', String(p.year)));
-      const titleCell = node('td'); const button = node('button', p.title, 'problem-link'); button.type = 'button'; button.dataset.problem = p.id; button.append(node('small', 'Đọc đề & luyện giải →')); button.addEventListener('click', () => openProblem(p.id));
-      const subline = node('small', p.publicNote); const badge = node('span', statusLabel(p), 'badge' + (isVerified(p) ? '' : ' warn'));
-      titleCell.append(button, subline, badge);
-      const categoryCell = node('td', (p.categories || [p.category]).map(c => categories[c - 1]).join(' · '), 'category-label');
-      tr.append(checkCell, schoolCell, titleCell, categoryCell, node('td', p.difficulty), node('td', present(p.points)));
-      fragment.append(tr);
+
+  // Bảng tiến độ: mỗi ô một bài, xếp theo đề
+  function renderBoard() {
+    const cells = $('board-cells'); cells.replaceChildren();
+    for (const e of exams) {
+      const g = node('span', '', 'cg');
+      for (const p of e.list) {
+        const c = node('button', done.has(p.id) ? '✓' : '', 'cell d' + diffOf(p) + (done.has(p.id) ? ' done' : ''));
+        c.type = 'button'; c.title = `${e.school} ${e.year} · ${p.title} · ${p.difficulty}`;
+        c.setAttribute('aria-label', c.title + (done.has(p.id) ? ' · đã làm' : ''));
+        c.addEventListener('click', () => openProblem(p.id));
+        g.append(c);
+      }
+      cells.append(g);
     }
-    $('problem-list').replaceChildren(fragment);
-    $('empty').hidden = selected.length > 0;
-    document.querySelector('.table-wrap').hidden = selected.length === 0;
-    $('result-status').textContent = `${selected.length} / ${problems.length} bài · ${done.size} đã đánh dấu`;
+    $('progress-text').textContent = `Đã làm ${done.size}/${problems.length}`;
+    $('progress-fill').style.width = (100 * done.size / problems.length) + '%';
+    // Gợi ý bài tiếp theo: bài chưa làm dễ nhất, đề mới trước
+    const next = [...ordered].sort((a, b) => diffOf(a) - diffOf(b)).find(p => !done.has(p.id));
+    const nu = $('next-up'); nu.hidden = false; nu.replaceChildren();
+    if (!next) { nu.append(node('span', 'Đã làm hết ' + problems.length + ' bài. Giỏi lắm! Thử làm lại các bài Khó mà không xem gợi ý.', 'nu-tx')); nu.onclick = null; return; }
+    const tx = node('span', '', 'nu-tx'); tx.append(node('small', 'Bài nên làm tiếp · ' + next.difficulty), node('b', next.title + ' (' + next.schoolLabel + ' ' + next.year + ')'));
+    nu.append(tx, node('span', '→', 'go')); nu.onclick = () => openProblem(next.id);
   }
-  function setFiltersExpanded(expanded) { $('filter-fields').hidden = !expanded; $('filter-toggle').setAttribute('aria-expanded', String(expanded)); }
-  const mobile = matchMedia('(max-width:650px)');
-  setFiltersExpanded(!mobile.matches);
-  mobile.addEventListener('change', () => setFiltersExpanded(!mobile.matches));
-  $('filter-toggle').addEventListener('click', () => setFiltersExpanded($('filter-fields').hidden));
-  $('filter-fields').addEventListener('submit', e => e.preventDefault());
-  controls.forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', () => { renderList(); writeHash(); }));
-  function reset() { controls.forEach(id => $(id).value = ''); renderList(); writeHash(); }
-  $('reset').addEventListener('click', reset); $('empty-reset').addEventListener('click', reset);
+
+  function row(p, sub) {
+    const r = node('div', '', 'row' + (done.has(p.id) ? ' done' : ''));
+    const tick = node('button', '✓', 'tick'); tick.type = 'button';
+    tick.setAttribute('aria-pressed', String(done.has(p.id))); tick.setAttribute('aria-label', 'Đã làm: ' + p.title);
+    tick.addEventListener('click', () => markDone(p.id, !done.has(p.id)));
+    const [code, name] = splitTitle(p.title);
+    const open = node('button', '', 'open'); open.type = 'button'; open.dataset.problem = p.id;
+    open.addEventListener('click', () => openProblem(p.id));
+    const nm = node('span', '', 'nm'); nm.append(node('b', name));
+    const s = node('span', '', 'sub');
+    const d = node('span', p.difficulty, 'd' + diffOf(p)); d.prepend(node('i', '', 'dot')); s.append(d);
+    const pts = String(p.points || '').trim();          // có bài ghi "2,5", có bài "3 điểm", có bài không ghi
+    if (/^\d/.test(pts)) s.append(node('span', /điểm/.test(pts) ? pts : pts + ' điểm'));
+    if (sub) s.append(node('span', sub));
+    const flag = shortFlag(p); if (flag) s.append(node('span', flag, 'flag'));
+    nm.append(s);
+    if (code) open.append(node('span', code, 'code-tag'));
+    open.append(nm, node('span', '›', 'go'));
+    r.append(tick, open);
+    return r;
+  }
+
+  function group(title, note, list, lesson, rowSub) {
+    const g = node('section', '', 'grp');
+    const head = node('div', '', 'grp-head'); const tx = node('div', '', 'gh-tx');
+    tx.append(node('h3', title)); if (note) tx.append(node('small', note));
+    if (lesson) { const a = node('a', `📘 Học trước: Bài ${lesson[1]} · ${lesson[2]}`, 'grp-lesson'); a.href = lessonHref(lesson[0]); tx.append(a); }
+    const n = list.filter(p => done.has(p.id)).length;
+    head.append(tx, node('span', `${n}/${list.length}`, 'count' + (n === list.length ? ' full' : '')));
+    const rows = node('div', '', 'rows'); list.forEach(p => rows.append(row(p, rowSub(p))));
+    g.append(head, rows);
+    return g;
+  }
+
+  function render() {
+    $('search').value = state.q; $('todo').checked = state.todo;
+    document.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(state[b.dataset.key] === b.dataset.value)));
+    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+    const words = normalize(state.q).trim().split(/\s+/).filter(Boolean);
+    const keep = p => (!state.category || catsOf(p).includes(Number(state.category)))
+      && (!state.difficulty || p.difficulty === state.difficulty)
+      && (!state.todo || !done.has(p.id))
+      && words.every(w => searchable.get(p.id).includes(w));
+    const out = $('groups'); out.replaceChildren();
+    let shown = 0;
+    if (state.view === 'dang') {
+      CAT.forEach((c, i) => {
+        const list = ordered.filter(p => keep(p) && (state.category ? catsOf(p).includes(i + 1) : p.category === i + 1));
+        if (!list.length) return; shown += list.length;
+        out.append(group(categories[i], '', list, c[1], p => p.schoolLabel + ' ' + p.year));
+      });
+    } else {
+      for (const e of exams) {
+        const list = e.list.filter(keep);
+        if (!list.length) continue; shown += list.length;
+        out.append(group(`${e.school} · ${e.year}`, e.note, list, null, p => CAT[p.category - 1]?.[0] || ''));
+      }
+    }
+    $('empty').hidden = shown > 0;
+    $('result-status').textContent = shown === problems.length ? `${shown} bài` : `${shown}/${problems.length} bài`;
+    renderBoard();
+  }
+
+  // ---- Hộp xem đề, gợi ý, lời giải ----
   function chooseTab(name) {
     ['statement', 'solution'].forEach(key => { const on = name === key; $('tab-' + key).setAttribute('aria-selected', String(on)); $('tab-' + key).tabIndex = on ? 0 : -1; $(key + '-panel').hidden = !on; });
     document.querySelector('.dialog-content').scrollTop = 0;
@@ -119,17 +214,22 @@
     $('problem-title').textContent = p.title;
     $('problem-done').checked = done.has(p.id);
     const urls = $('pdf-links'); urls.replaceChildren();
-    // Public release omits PDF/OCR and source-link requirements.
-    const source = $('problem-source'); source.replaceChildren(node('small', p.publicNote || ''));
-    // Public metadata uses school, year and a compact classification note.
+    const pdf = localUrl(p.pdf);                          // chỉ có ở bản cục bộ; bản công khai không kèm PDF
+    if (pdf) for (const page of p.pages || [1]) urls.append(link(`PDF · trang ${page}`, pdf + '#page=' + page));
+    const lessons = $('problem-lessons'); lessons.replaceChildren();
+    const ls = LINKS[p.id] || [];
+    if (ls.length) { const box = node('div', '', 'lessons-box'); box.append(node('b', '📘 Bài giảng có bài này:')); ls.forEach(l => { const a = node('a', `${l[1]} ${l[2]}`); a.href = lessonHref(l[0]); box.append(a); }); lessons.append(box); }
+    const source = $('problem-source'); source.replaceChildren(node('p', p.examTitle || ''));
+    const note = p.publicNote ?? p.sourceLabel; if (note) source.append(node('p', note));
     const warnings = $('problem-warnings'); warnings.replaceChildren();
-    if (p.publicWarnings?.length) { const box = node('div', '', 'warning'); box.append(node('strong', 'Lưu ý / cần kiểm tra')); const list = node('ul'); p.publicWarnings.forEach(w => list.append(node('li', w))); box.append(list); warnings.append(box); }
+    const ws = p.publicWarnings ?? p.warnings;
+    if (ws?.length) { const box = node('div', '', 'warning'); box.append(node('strong', 'Lưu ý')); const list = node('ul'); ws.forEach(w => list.append(node('li', w))); box.append(list); warnings.append(box); }
     const meta = $('problem-meta'); meta.replaceChildren();
-    [['Điểm', p.points], ['Độ khó', p.difficulty], ['Dạng bài', (p.categories || [p.category]).map(c => categories[c - 1]).join(' · ')], ['Thời gian chạy', p.timeLimit], ['Bộ nhớ', p.memoryLimit], ['Thời gian toàn đề', p.duration], ['File vào', p.inputFile], ['File ra', p.outputFile], ['Ngôn ngữ', p.languages]].forEach(([k, v]) => definition(meta, k, v));
+    [['Điểm', p.points], ['Độ khó', p.difficulty], ['Dạng bài', catsOf(p).map(c => categories[c - 1]).join(' · ')], ['Thời gian chạy', p.timeLimit], ['Bộ nhớ', p.memoryLimit], ['Thời gian toàn đề', p.duration], ['File vào', p.inputFile], ['File ra', p.outputFile], ['Ngôn ngữ', p.languages]].forEach(([k, v]) => definition(meta, k, v));
     for (const id of ['statement', 'input', 'output', 'constraints']) $(id).textContent = present(p[id]);
     $('subtasks').replaceChildren(...(p.subtasks?.length ? p.subtasks : ['Không thấy ghi trong bản này; cần kiểm tra.']).map(t => node('li', t)));
     const examples = $('examples'); examples.replaceChildren();
-    if (!p.examples?.length) examples.append(node('p', 'Chưa đọc chắc ví dụ; cần kiểm tra trên PDF gốc. Không tự tạo ví dụ rồi gọi là của đề.', 'warning'));
+    if (!p.examples?.length) examples.append(node('p', 'Chưa đọc chắc ví dụ của đề. Không tự tạo ví dụ rồi gọi là của đề.', 'warning'));
     (p.examples || []).forEach((example, index) => {
       const box = node('div', '', 'example'); box.append(node('div', `Ví dụ ${index + 1}`, 'example-heading'));
       const grid = node('div', '', 'example-grid');
@@ -144,7 +244,7 @@
     $('solution-scope').textContent = present(solution.scope);
     $('solution-explanation').textContent = solution.explanation || '';
     $('solution-complexity').textContent = solution.complexity ? 'Độ phức tạp: ' + solution.complexity : '';
-    const report = $('test-report'); report.replaceChildren(node('strong', 'Kiểm thử thực tế — Python 3'));
+    const report = $('test-report'); report.replaceChildren(node('strong', 'Kiểm thử thực tế'));
     for (const [label, tests] of [['Python 3', solution.pythonTests], ['C++17 (bản phụ)', solution.tests]]) {
       if (!tests) continue;
       report.append(node('p', label + ': ' + tests.summary));
@@ -153,7 +253,7 @@
     }
     if (solution.pythonScope) report.append(node('p', 'Phạm vi / tốc độ Python: ' + solution.pythonScope));
     $('show-code').hidden = !solution.python && !solution.cpp;
-    if (!solution.python) report.append(node('p', 'Chưa cung cấp Python đã chạy thử cho bài này; không lấy kết quả C++ thay cho Python.'));
+    if (!solution.python) report.append(node('p', 'Chưa có Python đã chạy thử cho bài này; không lấy kết quả C++ thay cho Python.'));
     if (!p.hints?.length) $('solution-review').hidden = false;
     chooseTab('statement');
   }
@@ -242,8 +342,12 @@
   function applyHash() {
     applyingHash = true;
     const hash = new URLSearchParams(location.hash.slice(1));
-    for (const id of controls) { const value = hash.get(id === 'search' ? 'q' : id) || ''; if (id === 'search') $(id).value = value; else $(id).value = [...$(id).options].some(o => o.value === value) ? value : ''; }
-    renderList();
+    state.q = hash.get('q') || '';
+    state.category = /^[1-8]$/.test(hash.get('category') || '') ? hash.get('category') : '';
+    state.difficulty = DIFF.includes(hash.get('difficulty')) ? hash.get('difficulty') : '';
+    state.todo = hash.get('todo') === '1';
+    state.view = hash.get('view') === 'dang' ? 'dang' : 'de';
+    render();
     const requested = hash.get('bai');
     if (requested && byId.has(requested)) { if (activeId !== requested || !dialog.open) openProblem(requested, false); }
     else if (dialog.open) closeProblem(false);
@@ -251,6 +355,6 @@
   }
   window.addEventListener('hashchange', applyHash);
   window.addEventListener('popstate', applyHash);
-  window.addEventListener('storage', event => { if (event.key === 'dethi-practice-done') { const values = storage.read(event.key, []); done.clear(); if (Array.isArray(values)) values.forEach(id => { if (byId.has(id)) done.add(id); }); renderList(); if (activeId) $('problem-done').checked = done.has(activeId); } });
+  window.addEventListener('storage', event => { if (event.key === 'dethi-practice-done') { const values = storage.read(event.key, []); done.clear(); if (Array.isArray(values)) values.forEach(id => { if (byId.has(id)) done.add(id); }); render(); if (activeId) $('problem-done').checked = done.has(activeId); } });
   applyHash();
 })();

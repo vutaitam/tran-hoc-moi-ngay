@@ -2,45 +2,86 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Luyện bài Tin học vào 10: đề đầy đủ, lọc theo trường, năm, dạng và độ khó, gợi ý từng bước và code được kiểm thử.">
-  <title>Luyện đề Tin · Từ đọc hiểu đến lời giải</title>
+  <meta name="description" content="Ngân hàng đề thi chuyên Tin vào 10: đề thật đầy đủ, gợi ý từng bước và lời giải Python đã chạy thử.">
+  <title>Luyện đề thật · Chuyên Tin vào 10</title>
   <script>try{const t=localStorage.getItem('dethi-practice-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch{}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="practice.css">
   <script defer src="practice-data.js"></script>
+  <script defer src="lien-ket-bai-giang.js"></script>
   <script defer src="practice.js"></script>
 </head>
 <body>
-  <a class="skip" href="#problems">Đến danh sách bài</a>
-  <header class="topbar"><a class="brand" href="#"><span class="brand-icon" aria-hidden="true">&lt;/&gt;</span><span>Luyện đề Tin<small>LỚP 9 → CHUYÊN 10</small></span></a><nav aria-label="Liên kết chính"><a href="../release-notes.html">Nguồn & ghi chú</a><button id="theme-toggle" type="button" aria-label="Đổi sáng tối">◐ <span id="theme-label">Giao diện</span></button></nav></header>
-  <main>
-    <section class="intro"><div><p class="eyebrow">ĐỌC ĐỀ · THỬ SỨC · MỞ GỢI Ý</p><h1>Luyện một bài.<br><em>Hiểu một dạng.</em></h1></div><div class="intro-copy"><p>Chọn bài theo trường, năm và kỹ thuật. Đọc đề đầy đủ, tự thử trước khi mở từng bước gợi ý. Đánh dấu bài đã làm để tiếp tục lần sau.</p><p class="notice">Đề thi thử, tham khảo và bản chưa rõ nguồn được ghi nhãn riêng. <strong>Code “có điều kiện” hoặc “chỉ subtask” không phải lời giải toàn bộ đề.</strong></p><p id="coverage" class="coverage"></p></div></section>
-    <section class="filters" aria-label="Bộ lọc bài tập">
-      <div class="search-row"><label class="search-label" for="search"><span class="sr-only">Tìm nội dung bài</span><input id="search" type="search" placeholder="Tìm tên bài, từ khóa trong đề…" autocomplete="off"></label><button id="filter-toggle" type="button" aria-expanded="true" aria-controls="filter-fields">Bộ lọc <span aria-hidden="true">⌄</span></button><button id="reset" type="button">Xóa lọc</button></div>
-      <form id="filter-fields" class="filter-fields">
-        <label>Trường / nhóm<select id="school"><option value="">Tất cả trường</option></select></label>
-        <label>Năm<select id="year"><option value="">Tất cả năm</option></select></label>
-        <label>Dạng bài<select id="category"><option value="">Cả 8 dạng bài</option></select></label>
-        <label>Độ khó<select id="difficulty"><option value="">Mọi độ khó</option><option>Cơ bản</option><option>Trung bình</option><option>Khó</option><option>Rất khó</option></select></label>
-        <label>Tiến độ<select id="progress"><option value="">Tất cả bài</option><option value="todo">Chưa làm</option><option value="done">Đã làm</option><option value="verified">Có code kiểm thử · toàn bộ</option></select></label>
-      </form>
-      <div class="filter-foot"><p id="result-status" role="status" aria-live="polite"></p><span>Lọc tức thì · Có thể chia sẻ URL</span></div>
-    </section>
-    <section id="problems" class="problem-section" tabindex="-1" aria-labelledby="list-title"><div class="section-heading"><h2 id="list-title">Danh sách bài tập</h2><p>Gợi ý và code luôn ẩn khi mở bài mới.</p></div><div class="table-wrap"><table><thead><tr><th scope="col">Đã làm</th><th scope="col">Trường / năm</th><th scope="col">Bài toán</th><th scope="col">Dạng bài</th><th scope="col">Độ khó</th><th scope="col">Điểm</th></tr></thead><tbody id="problem-list"></tbody></table></div><div id="empty" class="empty" hidden><h3>Chưa tìm thấy bài phù hợp</h3><p>Thử bớt một bộ lọc hoặc đổi từ khóa.</p><button id="empty-reset" type="button">Xem tất cả bài</button></div></section>
-    <section class="reading-notes"><h2>Dùng thư viện thế nào?</h2><ol><li><strong>Đọc bản đề.</strong> Kiểm tra dữ liệu vào/ra, subtask, ví dụ. Đọc toàn văn đề và lời giải ngay tại đây. Bản phát hành không kèm PDF.</li><li><strong>Thử sức trước.</strong> Gợi ý mở lần lượt; code Python chỉ hiện sau khi xác nhận, C++ ở tab phụ. Nhãn kiểm thử cho biết đã chạy gì, không thay thế full test chính thức.</li><li><strong>Giữ tiến độ.</strong> “Đã làm” lưu trên trình duyệt này. Bộ lọc và bài đang mở lưu trong URL hash, hoạt động cả khi mở file trực tiếp.</li></ol><p id="storage-warning" class="warning" hidden>Trình duyệt đang chặn lưu trữ; tiến độ chỉ giữ trong phiên mở này.</p></section>
-    <noscript><p class="warning">Cần bật JavaScript để lọc và mở bài. <a href="../release-notes.html">Đọc ghi chú học liệu</a>.</p></noscript>
-  </main>
-  <footer><span>Chỉ Tin học lập trình · Cập nhật 02/11/2026</span><a href="../release-notes.html">Ghi chú học liệu</a><a href="../release-notes.html#limitations">Bài còn thiếu / phạm vi lời giải</a></footer>
-  <dialog id="problem-dialog" aria-labelledby="problem-title"><div class="dialog-shell">
-    <header class="dialog-header"><div><p id="problem-kicker" class="eyebrow"></p><h2 id="problem-title"></h2></div><button id="close-problem" class="close" type="button" aria-label="Đóng bài, về danh sách">✕</button></header>
-    <div class="problem-actions"><label class="done-label"><input id="problem-done" type="checkbox"> Đánh dấu đã làm</label><div id="pdf-links" class="pdf-links"></div></div>
-    <div class="tabbar" role="tablist" aria-label="Nội dung luyện bài"><button id="tab-statement" role="tab" aria-selected="true" aria-controls="statement-panel" tabindex="0">01 · Đề bài</button><button id="tab-solution" role="tab" aria-selected="false" aria-controls="solution-panel" tabindex="-1">02 · Gợi ý & lời giải</button></div>
-    <div class="dialog-content">
-      <section id="statement-panel" role="tabpanel" aria-labelledby="tab-statement"><div id="problem-source" class="source"></div><div id="problem-warnings"></div><dl id="problem-meta" class="meta"></dl><section><h3>Đề bài</h3><div id="statement" class="prose"></div></section><section class="io-grid"><div><h3>Dữ liệu vào</h3><div id="input" class="prose"></div></div><div><h3>Kết quả ra</h3><div id="output" class="prose"></div></div></section><section><h3>Ràng buộc / giới hạn</h3><div id="constraints" class="prose"></div></section><section><h3>Subtask và thang điểm</h3><ul id="subtasks"></ul></section><section><h3>Ví dụ</h3><div id="examples"></div></section><p class="next-step">Đã tự thử? <button id="go-hints" type="button">Mở trang gợi ý →</button></p></section>
-      <section id="solution-panel" role="tabpanel" aria-labelledby="tab-solution" hidden><div class="solution-intro"><p class="eyebrow">TỰ LÀM TRƯỚC, ĐỌC GỢI Ý SAU</p><h3>Mỗi lần mở, một bước gần lời giải.</h3><p>Đọc gợi ý rồi quay lại thử. Bạn chưa cần xem code để tìm ra ý tưởng.</p></div><div id="hints"></div><button id="next-hint" class="primary" type="button">Mở gợi ý 1</button><section id="solution-review" hidden><h3>Phạm vi lời giải</h3><div id="solution-status"></div><p id="solution-scope" class="prose"></p><p id="solution-explanation" class="prose"></p><p id="solution-complexity"></p><div id="test-report" class="test-report"></div><button id="show-code" class="primary" type="button">Xem lời giải/code mẫu</button><div id="code-section" hidden><div class="code-toolbar"><div class="code-tabs" role="tablist" aria-label="Ngôn ngữ code mẫu"><button id="code-python" role="tab" aria-selected="true" aria-controls="code-content">Python 3</button><button id="code-cpp" role="tab" aria-selected="false" aria-controls="code-content" tabindex="-1">C++17 · phụ</button></div><div><a id="code-download">Tải mã nguồn</a><button id="copy-code" type="button">Copy code</button></div></div><p id="code-scope" class="prose"></p><pre class="code" id="code-content" role="tabpanel" aria-labelledby="code-python"><code id="source-code"></code></pre><p id="copy-status" role="status" aria-live="polite"></p></div></section></section>
+<a class="skip" href="#problems">Đến danh sách bài</a>
+<div class="wrap">
+  <nav class="topnav" aria-label="Liên kết chính">
+    <a class="pill" href="https://vutaitam.github.io/tran-hoc-moi-ngay/">← App Trăn</a>
+    <a class="pill" href="../bai-giang/index.html">📘 Bài giảng</a>
+    <button id="theme-toggle" class="pill icon" type="button" aria-label="Đổi giao diện sáng/tối">◐</button>
+  </nav>
+
+  <header class="hero">
+    <span class="kicker">Ôn thi chuyên Tin vào 10 · Ngân hàng đề</span>
+    <h1>Luyện đề thật</h1>
+    <p class="slogan">Đọc đề, tự thử, mở gợi ý từng bước, rồi mới xem lời giải.</p>
+    <p id="coverage" class="lead"></p>
+    <div class="board" aria-label="Bảng tiến độ: mỗi ô là một bài">
+      <div class="board-head"><b>Bảng tiến độ</b><span id="progress-text"></span></div>
+      <div class="track"><div class="fill" id="progress-fill"></div></div>
+      <div id="board-cells" class="cells"></div>
+      <div class="legend"><span><i class="dot d0"></i>Cơ bản</span><span><i class="dot d1"></i>Trung bình</span><span><i class="dot d2"></i>Khó</span><span><i class="dot d3"></i>Rất khó</span><span><i class="cell-mini">✓</i>Đã làm</span></div>
     </div>
-  </div></dialog>
-  <dialog id="code-confirm" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description"><form method="dialog"><p class="eyebrow">THẦY NHẮC NHẸ</p><h2 id="confirm-title">Em đã thử nghĩ kỹ chưa? Xem code mẫu?</h2><p id="confirm-description">Em hãy thử viết ý tưởng, chạy tay ví dụ và xem từng gợi ý trước. Nếu vẫn mắc, đọc code rồi đóng lại và tự viết lại bằng cách hiểu của mình.</p><div class="confirm-actions"><button id="cancel-code" value="cancel" autofocus>Em thử thêm</button><button id="confirm-code" class="primary" value="show">Có, xem code mẫu</button></div></form></dialog>
+    <button id="next-up" class="next-up" type="button" hidden></button>
+  </header>
+
+  <section class="filters" aria-label="Chọn bài">
+    <label class="search"><span class="sr-only">Tìm bài</span><input id="search" type="search" placeholder="Tìm tên bài, từ khóa trong đề…" autocomplete="off"></label>
+    <div class="seg" role="group" aria-label="Cách xếp danh sách">
+      <button type="button" data-view="de" aria-pressed="true">Theo đề</button>
+      <button type="button" data-view="dang" aria-pressed="false">Theo dạng</button>
+    </div>
+    <div class="chips" id="diff-chips" role="group" aria-label="Độ khó"></div>
+    <div class="chips scroll" id="cat-chips" role="group" aria-label="Dạng bài"></div>
+    <div class="filter-foot">
+      <label class="switch"><input id="todo" type="checkbox"> Ẩn bài đã làm</label>
+      <p id="result-status" role="status" aria-live="polite"></p>
+      <button id="reset" class="linkish" type="button">Xóa lọc</button>
+    </div>
+  </section>
+
+  <section id="problems" tabindex="-1" aria-label="Danh sách bài">
+    <div id="groups"></div>
+    <div id="empty" class="empty" hidden><b>Chưa có bài phù hợp</b><p>Thử bớt một bộ lọc hoặc đổi từ khóa.</p><button id="empty-reset" class="pill" type="button">Xem tất cả bài</button></div>
+  </section>
+
+  <section class="howto">
+    <h2>Luyện một bài thế nào cho hiệu quả?</h2>
+    <ol class="steps">
+      <li><b>Đọc kỹ đề.</b> Ghi lại dữ liệu vào/ra, giới hạn n và các subtask. Chạy tay ví dụ trên giấy.</li>
+      <li><b>Tự viết trước.</b> Chưa ra lời giải đầy đủ thì lấy điểm subtask nhỏ trước. Mắc chỗ nào mới mở gợi ý tiếp theo.</li>
+      <li><b>Xem lời giải, rồi tự viết lại.</b> Đọc hiểu, đóng lại và viết lại theo cách của mình. Bấm ✓ để đánh dấu đã làm.</li>
+    </ol>
+    <p class="note">Nhãn <b>“có điều kiện”</b> hoặc <b>“chỉ subtask”</b> nghĩa là code mẫu chưa lấy trọn điểm cả bài. Tiến độ chỉ lưu trên trình duyệt này.</p>
+    <p id="storage-warning" class="warning" hidden>Trình duyệt đang chặn lưu trữ; tiến độ chỉ giữ trong lần mở này.</p>
+  </section>
+  <noscript><p class="warning">Cần bật JavaScript để mở bài.</p></noscript>
+
+  <footer><span>Ngân hàng đề chuyên Tin vào 10 · lời giải Python 3</span><a href="https://vutaitam.github.io/tran-hoc-moi-ngay/">App Trăn</a><a href="../bai-giang/index.html">Bài giảng</a><a href="../release-notes.html">Ghi chú học liệu</a></footer>
+</div>
+
+<dialog id="problem-dialog" aria-labelledby="problem-title"><div class="dialog-shell">
+  <header class="dialog-header"><div><p id="problem-kicker" class="eyebrow"></p><h2 id="problem-title"></h2></div><button id="close-problem" class="close" type="button" aria-label="Đóng bài, về danh sách">✕</button></header>
+  <div class="problem-actions"><label class="done-label"><input id="problem-done" type="checkbox"> Đánh dấu đã làm</label><div id="pdf-links" class="pdf-links"></div></div>
+  <div class="tabbar" role="tablist" aria-label="Nội dung luyện bài"><button id="tab-statement" role="tab" aria-selected="true" aria-controls="statement-panel" tabindex="0">1 · Đề bài</button><button id="tab-solution" role="tab" aria-selected="false" aria-controls="solution-panel" tabindex="-1">2 · Gợi ý & lời giải</button></div>
+  <div class="dialog-content">
+    <section id="statement-panel" role="tabpanel" aria-labelledby="tab-statement"><div id="problem-lessons"></div><div id="problem-source" class="source"></div><div id="problem-warnings"></div><dl id="problem-meta" class="meta"></dl><section><h3>Đề bài</h3><div id="statement" class="prose"></div></section><section class="io-grid"><div><h3>Dữ liệu vào</h3><div id="input" class="prose"></div></div><div><h3>Kết quả ra</h3><div id="output" class="prose"></div></div></section><section><h3>Ràng buộc / giới hạn</h3><div id="constraints" class="prose"></div></section><section><h3>Subtask và thang điểm</h3><ul id="subtasks"></ul></section><section><h3>Ví dụ</h3><div id="examples"></div></section><p class="next-step">Đã tự thử? <button id="go-hints" class="pill" type="button">Mở trang gợi ý →</button></p></section>
+    <section id="solution-panel" role="tabpanel" aria-labelledby="tab-solution" hidden><div class="solution-intro"><p class="eyebrow">TỰ LÀM TRƯỚC, ĐỌC GỢI Ý SAU</p><h3>Mỗi lần mở, một bước gần lời giải.</h3><p>Đọc gợi ý rồi quay lại thử. Chưa cần xem code để tìm ra ý tưởng.</p></div><div id="hints"></div><button id="next-hint" class="primary" type="button">Mở gợi ý 1</button><section id="solution-review" hidden><h3>Phạm vi lời giải</h3><div id="solution-status"></div><p id="solution-scope" class="prose"></p><p id="solution-explanation" class="prose"></p><p id="solution-complexity"></p><div id="test-report" class="test-report"></div><button id="show-code" class="primary" type="button">Xem lời giải/code mẫu</button><div id="code-section" hidden><div class="code-toolbar"><div class="code-tabs" role="tablist" aria-label="Ngôn ngữ code mẫu"><button id="code-python" role="tab" aria-selected="true" aria-controls="code-content">Python 3</button><button id="code-cpp" role="tab" aria-selected="false" aria-controls="code-content" tabindex="-1">C++17 · phụ</button></div><div><a id="code-download">Tải mã nguồn</a><button id="copy-code" type="button">Copy code</button></div></div><p id="code-scope" class="prose"></p><pre class="code" id="code-content" role="tabpanel" aria-labelledby="code-python"><code id="source-code"></code></pre><p id="copy-status" role="status" aria-live="polite"></p></div></section></section>
+  </div>
+</div></dialog>
+<dialog id="code-confirm" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description"><form method="dialog"><p class="eyebrow">THẦY NHẮC NHẸ</p><h2 id="confirm-title">Em đã thử nghĩ kỹ chưa? Xem code mẫu?</h2><p id="confirm-description">Em hãy thử viết ý tưởng, chạy tay ví dụ và xem từng gợi ý trước. Nếu vẫn mắc, đọc code rồi đóng lại và tự viết lại bằng cách hiểu của mình.</p><div class="confirm-actions"><button id="cancel-code" value="cancel" autofocus>Em thử thêm</button><button id="confirm-code" class="primary" value="show">Có, xem code mẫu</button></div></form></dialog>
 </body>
 </html>
